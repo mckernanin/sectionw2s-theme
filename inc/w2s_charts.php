@@ -11,10 +11,10 @@ function itemmeta_query($value) {
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
 	// Live Data
-	// $sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE meta_key IN ('".$value."')";
+	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE meta_key IN ('".$value."')";
 	
 	// Test Data
-	$sql = "SELECT meta_value FROM wp_kevin_test_data WHERE meta_key IN ('".$value."')";
+	// $sql = "SELECT meta_value FROM wp_kevin_test_data WHERE meta_key IN ('".$value."')";
 
 	// Run the query via $wpdb
 	$query = $wpdb->get_results($sql, ARRAY_N);
@@ -93,7 +93,7 @@ function w2s_donut_chart( $atts ) {
 	$count = itemmeta_query($query);
 
 ?>
-<canvas id="<?php echo $id; ?>" width="400" height="400"></canvas>
+<canvas id="<?php echo $id; ?>" class="doughnut-chart" width="400" height="400"></canvas>
 <div id="<?php echo $id; ?>-legend"></div>
 <script type="text/javascript">
 jQuery(document).ready( function() {

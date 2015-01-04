@@ -11,6 +11,7 @@
 		font-size: 14px;
 		cursor: default;
 		transition: background-color 200ms ease-in-out;	
+		text-align: left;
 
 		span {
 			display: block;
@@ -22,4 +23,9 @@
 			border-radius: 5px;
 		}	
 	}
+}
+
+.doughnut-chart {
+	max-width: 100%;
+	height: auto !important;
 }
