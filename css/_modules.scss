@@ -1,0 +1,25 @@
+.doughnut-legend {
+	list-style: none;
+
+	li {
+		display: block;
+		padding-left: 30px;
+		position: relative;
+		margin-bottom: 4px;
+		border-radius: 5px;
+		padding: 2px 8px 2px 35px;
+		font-size: 14px;
+		cursor: default;
+		transition: background-color 200ms ease-in-out;	
+
+		span {
+			display: block;
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 30px;
+			height: 100%;
+			border-radius: 5px;
+		}	
+	}
+}
