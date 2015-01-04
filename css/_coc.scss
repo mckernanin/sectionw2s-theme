@@ -1,0 +1,255 @@
+/* ==================================================
+Team profiles
+================================================== */
+
+.page-council-of-chiefs {
+    #main-content{
+        .container {
+            text-align: center;
+
+            &:before {
+                display:none;
+            }
+        }
+    }
+
+    #left-area {
+        width:100%;
+    }
+
+    .profile {
+        display:none;
+    }
+}
+
+.filter-buttons {
+    display:inline-block;
+    padding: 5px 30px;
+    text-align: center;
+    background:#e5e5e5; 
+    margin-bottom: 25px;
+    width:100%;
+    box-sizing: border-box;
+    label {
+        margin: 0 5px 0 15px;
+        display: inline-block;
+        vertical-align: middle;
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .group {
+        display:inline-block;
+    }
+    .filter, .sort {
+        font-size: 10px;
+        line-height: 1;
+        padding: 1em 1em;
+        margin: 0;
+        min-width: 40px;
+        cursor: pointer;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        border: 0 none;
+        display: inline-block;
+        border-radius: 2px;
+        -webkit-appearance: none;
+        display: inline-block;
+        vertical-align: middle;
+        margin: 5px;
+        background: #FFF;
+        color: #555;
+        border-top: 1px solid rgba(0, 0, 0, 0);
+        border-bottom: 1px solid #F2F2F2;    
+        &.active {
+            background: $blue;
+            color: #FFF !important;
+            font-weight: 700;
+            border-top: 1px solid $blue;
+            border-bottom: 0 none;
+        }
+    }
+}
+
+.profiles {
+    margin-bottom: -20px;
+    text-align:center;
+    display:inline-block;
+    max-width: 1080px;
+    width:100%;
+
+    .button_shortcode {
+        font-size: 16px;
+        padding:3px 15px;
+        border-radius: 5px;
+        border:none;
+        &:hover {
+          padding: 3px 34px 3px 14px !important;
+          color:white !important;
+          border:none;
+      }
+      &:after {
+          font-size: 24px;
+          color:white;
+      }
+  }
+}
+
+.intro {
+    display:inline-block;
+    text-align: left;
+    max-width: 1080px;
+    h2 {
+        margin: 0 0 7px;
+    }
+    .lead {
+        line-height: 140%;
+        font-size: 1.1em;
+        font-style: italic;
+        margin: 0 0 35px;
+    }
+}
+
+.profile {
+    position: relative;
+    margin: 0 0 20px;
+    min-height: 145px;
+    display:inline-block;  
+    text-align: left;
+    &:only-of-type {
+        width: 100%;
+        margin-top: 20px;
+    }
+}
+
+
+
+.profile-header {
+    position: absolute;
+    top: 0;
+    left:10px;
+    img {
+        float: left;
+        width: 100px;
+        height: 100px;
+    }
+}
+
+.profile-content {
+    font-size: 14px;
+    padding: 20px 20px 0 0;
+    line-height: 1.4em;
+    margin: 0 0 0 125px;
+    h3 {
+        margin: 0;
+        font-size: 16px;
+        padding-bottom: 6px;
+    }
+    .lead {
+        font-size: 16px;
+        line-height: 100%;
+        font-style: normal;
+        margin: 3px 0 25px;
+        padding: 0;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: #B7B7B7;
+    }
+    .levelandchapter {
+        margin: 0 0 10px;
+        padding: 0;
+        line-height: 14px;
+    }
+    .teamlink {
+        font-size: 16px;
+        line-height: 100%;
+        font-style: italic;
+        margin: 3px 0 20px;
+        padding: 0;
+        display: none;
+    }
+    .edit-icon {
+        font-size: 12px;
+        color: #C81F21;
+        margin-left: 5px;
+        a {
+          color: #C81F21 !important;
+      }
+  }
+  .phonenumber {
+    padding: 0;
+    line-height: 14px;
+}
+.icon_phone:before {
+    margin-right: 3px;
+    color: #C81F21 !important;
+}
+}
+
+body.page-lodge-executive-committee .profile-content .teamlink {
+    display: block;
+}
+
+.profile-content {
+    &:before {
+        content: '';
+        width: 36px;
+        height: 3px;
+        background: $blue;
+        position: absolute;
+        top: 0;
+    }
+    p {
+        margin: 0 0 10px;
+    }
+}
+
+.profile-footer {
+    position: absolute;
+    top: 110px;
+    width: 120px;
+    text-align: center;
+    color: #C81F21;
+    height: 35px;
+    a {
+        line-height: 18px;
+        font-size: 30px;
+        margin: 0 3px;
+        display: inline-block;
+        float: left;
+        color: $blue;
+        &:hover {
+          color: #a0191a;
+      }
+  }
+}
+
+.eleganticon {
+    height: 30px;
+}
+
+.profile-footer span {
+    width: 35px;
+    height: 35px;
+    display: inline-block;
+    float: left;
+}
+
+.img-circle {
+    border-radius: 0%;
+}
+
+@media (min-width: 768px) {
+    .col-sm-6 {
+        width: 50%;
+        float: left;
+    }
+}
+
+@media screen and (max-width: 770px) {
+    .profile {
+        min-height: 215px;
+    }
+}

@@ -1,0 +1,66 @@
+.woocommerce-cart,
+.woocommerce-checkout {
+
+	.variation {
+
+		dd {
+			display: none !important;
+		}
+
+		dt {
+			display: none !important;
+		}
+
+		.variation-Name {
+			display: inline-block !important;
+		}
+	}
+}
+
+.product-conclave-2015 {
+
+	div.product {
+
+		.images {
+			display: none;
+		}
+
+		div.summary {
+			width: 100%;
+			float:left;
+		}
+
+		#gform_browse_button_1_4 {
+			float: none;
+			padding: 5px 10px !important;
+			font-size: 14px !important;			
+		}
+
+		.product_totals {
+			display: none !important;
+		}
+	}
+}
+
+.single-product {
+
+	#sidebar {
+		display: none;
+	}
+
+	#main-content .container:before {
+		display: none;
+	}
+
+	#left-area {
+		margin: 0 auto;
+		float: none;
+	}
+}
+
+#order_review {
+
+	.product-total {
+		display: none;
+	}
+}

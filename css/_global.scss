@@ -1,0 +1,20 @@
+input[type=text], 
+input.text, 
+input.title, 
+textarea, 
+select {
+	border-radius: 2px;
+}
+
+input[type=text]:focus, 
+input.text:focus, 
+input.title:focus, 
+textarea:focus, 
+select:focus {
+	border-color: $blue;
+	color: $blue;
+}
+
+input:focus + label {
+	color:$blue;
+}
