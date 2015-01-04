@@ -33,7 +33,7 @@ if ( ! is_page_template( 'page-template-blank.php' ) ) : ?>
 				?>
 
 						<p id="footer-info">
-							&copy; <?php echo date('Y'); ?> | A fine Divi child theme by <a href="http://digsublime.com">Sublime Digital</a>
+							&copy; <?php echo date('Y'); ?> Section W2S | Powered by <a href="http://digsublime.com">Sublime Digital</a>
 						</p>
 					</div>	<!-- .container -->
 				</div>
