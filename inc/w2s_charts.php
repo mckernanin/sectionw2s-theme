@@ -63,9 +63,9 @@ function w2s_counter_value_return($key, $counter) {
 	return $value;
 }
 
-function rand_color() {
-	$rand = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f');
-    $color = '#'.$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)];
+function w2s_rand_color() {
+	$rand = array('EEF4D4', 'DAEFB3', 'EA9E8D', 'D64550', '1C2826', '546A76', 'F8F272', '9E2B25', '51355A', '3E6259', '3A7D44', '13505B', 'CF5C36', 'FFF9A5', '7BDFF2', 'D3E298');
+    $color = '#'.$rand[rand(0,15)];
     return $color;
 }
 
