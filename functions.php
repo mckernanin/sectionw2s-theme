@@ -25,14 +25,15 @@ function remove_parent_theme_features() {
 // For simplicity's sake, create a file for each shortcode, and place it in the /inc directory. 
 // Then include it here, like this: require_once('inc/sublime_child_filterable_portfolio.php');
 require_once 'inc/w2s_charts.php';
+require_once 'inc/w2s_registration_table.php';
 
 // Enqueue scripts & styles here
 function sublime_child_scripts() {
 	wp_enqueue_script( 'mix-it-up', '//cdn.jsdelivr.net/jquery.mixitup/latest/jquery.mixitup.min.js', array(), 'v1.5.6', true);	
+	wp_register_script( 'tablesorter', '//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.18.4/js/jquery.tablesorter.min.js', true);	
 	wp_enqueue_script( 'main-js', get_stylesheet_directory_uri() . '/js/main.js', array(), '20120206', true );
 	wp_enqueue_style('dashicons');
 	wp_enqueue_script( 'chart-js', get_stylesheet_directory_uri().'/js/chart.js', true);
-	wp_register_script( 'chart-settings', get_stylesheet_directory_uri().'/js/chart-settings.js');
 }
 add_action( 'wp_enqueue_scripts', 'sublime_child_scripts' );
 
