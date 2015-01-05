@@ -1,12 +1,12 @@
 <?php
-function percent($num_amount, $num_total) {
+function w2s_percent($num_amount, $num_total) {
 	$count1 = $num_amount / $num_total;
 	$count2 = $count1 * 100;
 	$count = number_format($count2, 0);
 	echo $count;
 }
 
-function itemmeta_query($value) {
+function w2s_itemmeta_query_counts($value) {
 	global $wpdb;
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
@@ -54,7 +54,7 @@ function itemmeta_query($value) {
 
 }
 
-function counter_value_return($key, $counter) {
+function w2s_counter_value_return($key, $counter) {
 	$value = 0;
 	if($counter[$key]) {
 		$value = $counter[$key];
@@ -74,7 +74,7 @@ function w2s_donut_data($source) {
 	foreach ($source as $key => $value) {
 		$json = array();
 		$json['value'] = $value;
-		$json['color'] = rand_color();
+		$json['color'] = w2s_rand_color();
 		$json['label'] = $key;
 		$final_json[] = $json;
 	}
@@ -90,7 +90,7 @@ function w2s_donut_chart( $atts ) {
 		'query' => ''
 	), $atts ) );	
 	wp_enqueue_script('chart-settings');
-	$count = itemmeta_query($query);
+	$count = w2s_itemmeta_query_counts($query);
 
 ?>
 <canvas id="<?php echo $id; ?>" class="doughnut-chart" width="400" height="400"></canvas>
