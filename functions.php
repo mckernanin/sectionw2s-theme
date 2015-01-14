@@ -58,4 +58,33 @@ if( function_exists('acf_add_options_page') ) {
 };
 
 require_once 'inc/woocommerce-custom.php';
+
+if ( ! class_exists( 'BlockSemalt' ) ) :
+
+	class BlockSemalt {
+
+		static function enable () {
+			include_once ( ABSPATH . '/wp-admin/includes/misc.php' );
+			$htaccess_file =  ABSPATH . '.htaccess';
+
+			$rules = "RewriteEngine on\n";
+			$rules .= "RewriteCond %{HTTP_REFERER} ^http://([^.]+\.)*semalt\.com [NC]\n";
+			$rules .= "RewriteRule (.*) http://www.semalt.com [R=301,L]\n";
+			
+			$rules = explode ( "\n", $rules );
+			insert_with_markers( $htaccess_file, 'Block Semalt', $rules );
+		}
+
+		static function disable () {
+			include_once ( ABSPATH . '/wp-admin/includes/misc.php' );
+			$htaccess_file =  ABSPATH . '.htaccess';
+
+			insert_with_markers ( $htaccess_file, 'Block Semalt', '' );
+		}
+	}
+
+	register_activation_hook ( __FILE__, array( 'BlockSemalt', 'enable' ) );
+	register_deactivation_hook ( __FILE__, array( 'BlockSemalt', 'disable' ) );
+
+endif;
 ?>
