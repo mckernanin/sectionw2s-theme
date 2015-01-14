@@ -7,6 +7,10 @@ jQuery(function($) {
 			sort: 'default:asc'
 		}
 	});	
-    $(document).ready(function() {});
+    $(document).ready(function() {
+    	if ($('.tablesorter').length ) {
+    		$('.tablesorter').tablesorter();
+    	}
+    });
 });
 

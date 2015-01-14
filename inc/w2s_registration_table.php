@@ -42,6 +42,7 @@ function w2s_registration_table( $atts ) {
 		'id' => '',
 		'query' => ''
 	), $atts ) );
+	wp_enqueue_script('tablesorter');
 
 ?>
 <table id="<?php echo $id; ?>" class="tablesorter">
