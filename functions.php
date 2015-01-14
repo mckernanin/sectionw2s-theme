@@ -53,6 +53,14 @@ if( function_exists('acf_add_options_page') ) {
 		'page_title' 	=> 'Website Settings',
 		'menu_title'	=> 'Website Settings',
 		'menu_slug' 	=> 'website-settings',
+		'capability'	=> 'manage_options',
+		'redirect'		=> false
+	));
+
+	acf_add_options_page(array(
+		'page_title' 	=> 'Conclave 2015',
+		'menu_title'	=> 'Conclave 2015',
+		'menu_slug' 	=> 'conclave-2015',
 		'capability'	=> 'edit_posts',
 		'redirect'		=> false
 	));
