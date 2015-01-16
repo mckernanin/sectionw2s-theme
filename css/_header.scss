@@ -11,12 +11,14 @@
 }
 
 /* ----- Navigation ----- */
+#top-menu a {
+    color:white !important;
+}
 
-#top-menu li.current-menu-ancestor > a, 
-#top-menu li.current-menu-item > a, 
+#top-menu > li.current-menu-ancestor > a, 
+#top-menu > li.current-menu-item > a, 
 .bottom-nav li.current-menu-item > a,
 #top-menu > li:hover > a{
-    color:white !important;
     border-top:5px solid white;
     padding-top:20px !important;
 }
