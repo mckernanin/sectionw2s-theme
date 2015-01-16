@@ -25,6 +25,7 @@ function remove_parent_theme_features() {
 // For simplicity's sake, create a file for each shortcode, and place it in the /inc directory. 
 // Then include it here, like this: require_once('inc/sublime_child_filterable_portfolio.php');
 require_once 'inc/w2s_post_types.php';
+require_once 'inc/w2s_chart_support_functions.php';
 require_once 'inc/w2s_charts.php';
 require_once 'inc/w2s_registration_table.php';
 

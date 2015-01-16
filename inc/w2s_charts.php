@@ -1,98 +1,18 @@
 <?php
-function w2s_percent($num_amount, $num_total) {
-	$count1 = $num_amount / $num_total;
-	$count2 = $count1 * 100;
-	$count = number_format($count2, 0);
-	echo $count;
-}
-
-function w2s_itemmeta_query_counts($value) {
-	global $wpdb;
-	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
-
-	// Live Data
-	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE meta_key IN ('".$value."')";
-	
-	// Test Data
-	// $sql = "SELECT meta_value FROM wp_kevin_test_data WHERE meta_key IN ('".$value."')";
-
-	// Run the query via $wpdb
-	$query = $wpdb->get_results($sql, ARRAY_N);
-
-	// Create empty array $counter, which will contain the count of meta values. This will help build the graph data.
-	$counter = array();
-
-	// Check each query result for a new value, and add them to $counter
-	foreach ($query as $row) {
-		$meta_value =  $row[0];
-		if (!in_array($row, $counter)) {
-			$counter[$meta_value] = 0;
-		}
-	}
-
-	/*
-	At this point, the value of $counter is something like this:
-
-	Array
-	(
-	    [Tahosa] => 0
-	    [Tupwee] => 0
-	)
-
-	These nested foreach loops will run through $query, looking for matches between the $row and $key
-	*/
-
-	foreach ($counter as $key => $value) {
-		foreach ($query as $row) {
-			if (in_array($key, $row)) {
-				$counter[$key]++;
-			}
-		}
-	}
-
-	return $counter;
-
-}
-
-function w2s_counter_value_return($key, $counter) {
-	$value = 0;
-	if($counter[$key]) {
-		$value = $counter[$key];
-	}
-
-	return $value;
-}
-
-function w2s_rand_color() {
-	$rand = array('EEF4D4', 'DAEFB3', 'EA9E8D', 'D64550', '1C2826', '546A76', 'F8F272', '9E2B25', '51355A', '3E6259', '3A7D44', '13505B', 'CF5C36', 'FFF9A5', '7BDFF2', 'D3E298');
-    $color = '#'.$rand[rand(0,15)];
-    return $color;
-}
-
-function w2s_donut_data($source) {
-	$final_json = array();
-	foreach ($source as $key => $value) {
-		$json = array();
-		$json['value'] = $value;
-		$json['color'] = w2s_rand_color();
-		$json['label'] = $key;
-		$final_json[] = $json;
-	}
-	echo json_encode($final_json);
-}
-
 add_shortcode('chart-donut', 'w2s_donut_chart');
 
 function w2s_donut_chart( $atts ) {
 	ob_start();
 	extract( shortcode_atts( array (
 		'id' => '',
-		'query' => ''
+		'query' => '',
+		'heading' => 'Registration Chart'
 	), $atts ) );	
 	wp_enqueue_script('chart-settings');
 	$count = w2s_itemmeta_query_counts($query);
 
 ?>
+<h3><?php echo $heading; ?></h3>
 <canvas id="<?php echo $id; ?>" class="doughnut-chart" width="400" height="400"></canvas>
 <div id="<?php echo $id; ?>-legend"></div>
 <script type="text/javascript">
@@ -118,5 +38,151 @@ document.getElementById('<?php echo $id; ?>-legend').innerHTML = myDoughnutChart
 
 <?php
 	$myvariable = ob_get_clean();
+	$user_ID = 'user_'.get_current_user_id();
+	$lodge_data_access = get_field('lodge_data_access', $user_ID);
+	if ($lodge_data_access) {
+		return $myvariable;
+	} else {
+		return 'You are not authorized to view this page.';
+	}
+}
+
+add_shortcode('membership-percentage', 'w2s_membership_percentage');
+
+function w2s_membership_percentage( $atts ) {
+	ob_start();
+	extract( shortcode_atts( array (
+		'id' => '',
+		'heading' => 'Registration Chart',
+		'lodge' => '',
+		'lodge_slug' => ''
+	), $atts ) );	
+	wp_enqueue_script('chart-settings');
+	if ($lodge_slug == '') {
+		$lodge_slug = $lodge;
+	}
+	$counts = w2s_itemmeta_query_counts('lodge');
+	$lodge_registered = $counts[$lodge];
+	$lodge_goal_field_name = $lodge_slug.'_arrowman_goal';
+	$lodge_goal = get_field($lodge_goal_field_name, 'option');
+	$goal_remaining = $lodge_goal - $lodge_registered;
+	$lodge_membership_field_name = $lodge_slug.'_registered_arrowmen';
+	$lodge_membership = get_field($lodge_membership_field_name, 'option');
+
+?>
+<h3><?php echo $heading; ?></h3>
+<h4>Membership Registered: <?php echo $lodge_registered; ?> / <?php echo $lodge_membership; ?> (<?php echo w2s_percent($lodge_registered, $lodge_membership); ?>) </h4>
+<canvas id="<?php echo $id; ?>" class="doughnut-chart" width="400" height="400"></canvas>
+<div id="<?php echo $id; ?>-legend"></div>
+<script type="text/javascript">
+jQuery(document).ready( function() {
+
+// Chart Options
+var options = {
+<?php echo get_field('chart-options', 'option'); ?>
+}
+
+// Doughnut Chart Data
+var doughnutData = 
+[
+  {
+    "value": <?php echo $lodge_registered; ?>,
+    "color": "#1C2826",
+    "label": "Registered Arrowmen"
+  },
+  {
+    "value": <?php echo $goal_remaining; ?>,
+    "color": "#9E2B25",
+    "label": "Remaining to reach Lodge Goal"
+  }
+]
+
+
+//Get the context of the Doughnut Chart canvas element we want to select
+var ctx = document.getElementById("<?php echo $id; ?>").getContext("2d");
+
+// Create the Doughnut Chart
+var myDoughnutChart = new Chart(ctx).Doughnut(doughnutData, options);
+document.getElementById('<?php echo $id; ?>-legend').innerHTML = myDoughnutChart.generateLegend();
+});
+</script>
+
+<?php
+	$myvariable = ob_get_clean();
+	$user_ID = 'user_'.get_current_user_id();
+	$lodge_data_access = get_field('lodge_data_access', $user_ID);
+	if ($lodge_data_access) {
+		return $myvariable;
+	} else {
+		return 'You are not authorized to view this page.';
+	}
+}
+
+add_shortcode('age-chart', 'w2s_age_chart');
+function w2s_age_chart( $atts ) {
+	ob_start();
+	extract( shortcode_atts( array (
+		'id' => '',
+		'heading' => 'Registration Chart',
+		'lodge' => '',
+		'lodge_slug' => ''
+	), $atts ) );	
+	wp_enqueue_script('chart-settings');
+	if ($lodge_slug == '') {
+		$lodge_slug = $lodge;
+	}
+
+
+?>
+<h3><?php echo $heading; ?></h3>
+<canvas id="<?php echo $id; ?>" class="doughnut-chart" width="400" height="400"></canvas>
+<div id="<?php echo $id; ?>-legend"></div>
+<script type="text/javascript">
+jQuery(document).ready( function() {
+
+// Chart Options
+var options = {
+<?php echo get_field('chart-options', 'option'); ?>
+}
+
+// Doughnut Chart Data
+var doughnutData = 
+[
+  {
+    "value": <?php  ?>,
+    "color": "#1C2826",
+    "label": "Registered Arrowmen"
+  },
+  {
+    "value": <?php  ?>,
+    "color": "#9E2B25",
+    "label": "Remaining to reach Lodge Goal"
+  }
+]
+
+
+//Get the context of the Doughnut Chart canvas element we want to select
+var ctx = document.getElementById("<?php echo $id; ?>").getContext("2d");
+
+// Create the Doughnut Chart
+var myDoughnutChart = new Chart(ctx).Doughnut(doughnutData, options);
+document.getElementById('<?php echo $id; ?>-legend').innerHTML = myDoughnutChart.generateLegend();
+});
+</script>
+
+<?php
+	$myvariable = ob_get_clean();
+	$user_ID = 'user_'.get_current_user_id();
+	$lodge_data_access = get_field('lodge_data_access', $user_ID);
+	if ($lodge_data_access) {
+		return $myvariable;
+	} else {
+		return 'You are not authorized to view this page.';
+	}
+}
+
+add_shortcode('test-dob', 'w2s_test_dob');
+function w2s_test_dob( $atts ) {
+	$myvariable = print_r(w2s_itemmeta_age('adult'));
 	return $myvariable;
 }

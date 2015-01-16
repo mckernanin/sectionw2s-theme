@@ -43,9 +43,13 @@ function w2s_registration_table( $atts ) {
 		'query' => ''
 	), $atts ) );
 	wp_enqueue_script('tablesorter');
+	$user_ID = 'user_'.get_current_user_id();
+	$lodge_data_access = get_field('lodge_data_access', $user_ID);
 
 ?>
 <table id="<?php echo $id; ?>" class="tablesorter">
+	<?php if ($lodge_data_access == 'all') { ?>
+
 	<thead>
 		<th>Name</th>
 		<th>Email</th>
@@ -54,19 +58,46 @@ function w2s_registration_table( $atts ) {
 		<th>Membership Level</th>
 	</thead>
 
+	<?php } else { ?>
+
+	<thead>
+		<th>Name</th>
+		<th>Email</th>
+		<th>Phone</th>
+		<th>Membership Level</th>
+	</thead>
+
+	<?php } ?>
+
+
 	<tbody>
 		<?php 
 			$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() ); 
-			foreach ($registrations as $registration) {
-				$item_id = $registration['_product_id'];
-				if ($item_id = 656) {
-					echo '<tr>';
-					echo '<td class="name">'.$registration['name'].'</td>';
-					echo '<td class="email">'.$registration['email'].'</td>';
-					echo '<td class="phone">'.$registration['phone'].'</td>';
-					echo '<td class="lodge">'.$registration['lodge'].'</td>';
-					echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
-					echo '</tr>';
+			if ($lodge_data_access == 'all') {
+				foreach ($registrations as $registration) {
+					$item_id = $registration['_product_id'];
+					if ($item_id = 656) {
+						echo '<tr>';
+						echo '<td class="name">'.$registration['name'].'</td>';
+						echo '<td class="email">'.$registration['email'].'</td>';
+						echo '<td class="phone">'.$registration['phone'].'</td>';
+						echo '<td class="lodge">'.$registration['lodge'].'</td>';
+						echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
+						echo '</tr>';
+					}
+				}
+			} else {
+				foreach ($registrations as $registration) {
+					$item_id = $registration['_product_id'];
+					$lodge = $registration['lodge'];
+					if ( ($item_id = 656) && ($lodge == $lodge_data_access) ) {
+						echo '<tr>';
+						echo '<td class="name">'.$registration['name'].'</td>';
+						echo '<td class="email">'.$registration['email'].'</td>';
+						echo '<td class="phone">'.$registration['phone'].'</td>';
+						echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
+						echo '</tr>';
+					}
 				}
 			}
 
@@ -76,5 +107,11 @@ function w2s_registration_table( $atts ) {
 
 <?php
 	$myvariable = ob_get_clean();
-	return $myvariable;
+	if ($lodge_data_access) {
+		return $myvariable;
+	} else {
+		return 'You are not authorized to view this page.';
+	}
+	
+	
 }
