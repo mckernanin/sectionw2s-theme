@@ -48,7 +48,7 @@ function w2s_registration_table( $atts ) {
 
 ?>
 <table id="<?php echo $id; ?>" class="tablesorter">
-	<?php if ($lodge_data_access == 'all') { ?>
+	<?php if ($lodge_data_access == 'All') { ?>
 
 	<thead>
 		<th>Name</th>
@@ -73,7 +73,7 @@ function w2s_registration_table( $atts ) {
 	<tbody>
 		<?php 
 			$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() ); 
-			if ($lodge_data_access == 'all') {
+			if ($lodge_data_access == 'All') {
 				foreach ($registrations as $registration) {
 					$item_id = $registration['_product_id'];
 					if ($item_id = 656) {

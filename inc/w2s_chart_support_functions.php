@@ -35,7 +35,7 @@ function w2s_itemmeta_query_counts($value) {
 
 	Array
 	(
-	    [Tahosa] => 0
+	    [Tahosa] => 0,
 	    [Tupwee] => 0
 	)
 
@@ -50,11 +50,20 @@ function w2s_itemmeta_query_counts($value) {
 		}
 	}
 
+	/* 
+		Now, $counter is an array that looks like this:
+			Array
+			(
+			    [Tahosa] => 2,
+			    [Tupwee] => 1
+			)
+	*/
+
 	return $counter;
 
 }
 
-function w2s_itemmeta_age($agegroup) {
+function w2s_itemmeta_age() {
 	global $wpdb;
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
@@ -63,10 +72,10 @@ function w2s_itemmeta_age($agegroup) {
 
 	// Run the query via $wpdb
 	$query = $wpdb->get_results($sql, ARRAY_N);
+	// print_r($query);
 
 	// Create empty array $counter, which will contain the count of meta values. This will help build the graph data.
-	$counter = array('Youth', 'Youth+', 'Adult');
-	print_r($query);
+	$counter = array('Youth' => 0, 'Youth+' => 0, 'Adult' => 0);
 
 	/*
 	These nested foreach loops will run through $query, looking for matches between the $row and $key
@@ -74,7 +83,7 @@ function w2s_itemmeta_age($agegroup) {
 
 	foreach ($query as $row) {
 		//date in mm/dd/yyyy format; or it can be in other formats as well
-		$birthDate = "12/17/1983";
+		$birthDate = $row['0'];
 		//explode the date to get month, day and year
 		$birthDate = explode("/", $birthDate);
 		//get age from date or birthdate
@@ -105,7 +114,24 @@ function w2s_counter_value_return($key, $counter) {
 }
 
 function w2s_rand_color() {
-	$rand = array('EEF4D4', 'DAEFB3', 'EA9E8D', 'D64550', '1C2826', '546A76', 'F8F272', '9E2B25', '51355A', '3E6259', '3A7D44', '13505B', 'CF5C36', 'FFF9A5', '7BDFF2', 'D3E298');
+	$rand = array(
+		'EEF4D4',
+		'DAEFB3',
+		'EA9E8D',
+		'D64550',
+		'1C2826',
+		'546A76',
+		'F8F272',
+		'9E2B25',
+		'51355A',
+		'3E6259',
+		'3A7D44',
+		'13505B',
+		'CF5C36',
+		'FFF9A5',
+		'7BDFF2',
+		'D3E298'
+	);
     $color = '#'.$rand[rand(0,15)];
     return $color;
 }

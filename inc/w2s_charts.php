@@ -71,7 +71,7 @@ function w2s_membership_percentage( $atts ) {
 
 ?>
 <h3><?php echo $heading; ?></h3>
-<h4>Membership Registered: <?php echo $lodge_registered; ?> / <?php echo $lodge_membership; ?> (<?php echo w2s_percent($lodge_registered, $lodge_membership); ?>) </h4>
+<h4>Members Registered: <?php echo $lodge_registered; ?> / <?php echo $lodge_membership; ?> (<?php echo w2s_percent($lodge_registered, $lodge_membership); ?>) </h4>
 <canvas id="<?php echo $id; ?>" class="doughnut-chart" width="400" height="400"></canvas>
 <div id="<?php echo $id; ?>-legend"></div>
 <script type="text/javascript">
@@ -87,13 +87,13 @@ var doughnutData =
 [
   {
     "value": <?php echo $lodge_registered; ?>,
-    "color": "#1C2826",
+    "color": "#3A7D44",
     "label": "Registered Arrowmen"
   },
   {
     "value": <?php echo $goal_remaining; ?>,
-    "color": "#9E2B25",
-    "label": "Remaining to reach Lodge Goal"
+    "color": "#ccc",
+    "label": "To Reach Goal"
   }
 ]
 
@@ -131,6 +131,7 @@ function w2s_age_chart( $atts ) {
 	if ($lodge_slug == '') {
 		$lodge_slug = $lodge;
 	}
+	$count = w2s_itemmeta_age();
 
 
 ?>
@@ -146,19 +147,7 @@ var options = {
 }
 
 // Doughnut Chart Data
-var doughnutData = 
-[
-  {
-    "value": <?php  ?>,
-    "color": "#1C2826",
-    "label": "Registered Arrowmen"
-  },
-  {
-    "value": <?php  ?>,
-    "color": "#9E2B25",
-    "label": "Remaining to reach Lodge Goal"
-  }
-]
+var doughnutData = <?php echo w2s_donut_data($count); ?>
 
 
 //Get the context of the Doughnut Chart canvas element we want to select
