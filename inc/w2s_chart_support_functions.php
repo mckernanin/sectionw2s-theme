@@ -30,6 +30,18 @@ function w2s_itemmeta_query_counts($value) {
 		}
 	}
 
+	/* Working on making this query all happen at the same time
+	
+		foreach ($query as $row) {
+			$meta_value =  $row[0];
+			if ( !in_array($row, $counter) ) {
+				$counter[$meta_value] = 1;
+			} else {
+				$counter[$meta_value]++;
+			}
+		}
+	*/
+
 	/*
 	At this point, the value of $counter is something like this:
 
@@ -102,6 +114,22 @@ function w2s_itemmeta_age() {
 
 	return $counter;
 
+}
+
+function w2s_age_from_date($birthDate) {
+		$birthDate = explode("/", $birthDate);
+		$age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
+		? ((date("Y") - $birthDate[2]) - 1)
+		: (date("Y") - $birthDate[2]));
+		if ($age < '18') {
+			$age_group = 'Youth';
+		} elseif ( ($age < '21') && ($age > '18')) {
+			$age_group = 'Youth+';
+		} elseif ($age > '20') {
+			$age_group = 'Adult';
+		}
+
+		return $age_group;
 }
 
 function w2s_counter_value_return($key, $counter) {

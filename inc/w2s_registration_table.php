@@ -56,6 +56,7 @@ function w2s_registration_table( $atts ) {
 		<th>Phone</th>
 		<th>Lodge</th>
 		<th>Membership Level</th>
+		<th>Age Group</th>
 	</thead>
 
 	<?php } else { ?>
@@ -65,6 +66,7 @@ function w2s_registration_table( $atts ) {
 		<th>Email</th>
 		<th>Phone</th>
 		<th>Membership Level</th>
+		<th>Age Group</th>
 	</thead>
 
 	<?php } ?>
@@ -83,6 +85,7 @@ function w2s_registration_table( $atts ) {
 						echo '<td class="phone">'.$registration['phone'].'</td>';
 						echo '<td class="lodge">'.$registration['lodge'].'</td>';
 						echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
+						echo '<td class="age-group">'.w2s_age_from_date($registration['birthdate']).'</td>';
 						echo '</tr>';
 					}
 				}
@@ -96,6 +99,7 @@ function w2s_registration_table( $atts ) {
 						echo '<td class="email">'.$registration['email'].'</td>';
 						echo '<td class="phone">'.$registration['phone'].'</td>';
 						echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
+						echo '<td class="age-group">'.w2s_age_from_date($registration['birthdate']).'</td>';
 						echo '</tr>';
 					}
 				}
