@@ -97,4 +97,27 @@ if ( ! class_exists( 'BlockSemalt' ) ) :
 	register_deactivation_hook ( __FILE__, array( 'BlockSemalt', 'disable' ) );
 
 endif;
+
+remove_action('woocommerce_before_shop_loop_item_title', 'woocommerce_template_loop_product_thumbnail');
+add_action('woocommerce_before_shop_loop_item_title', 'w2s_template_loop_product_thumbnail');
+
+function w2s_template_loop_product_thumbnail() {
+	global $product;
+	echo '<span class="et_shop_image">';
+	echo woocommerce_get_product_thumbnail();
+	echo '<span class="et_overlay">'; 
+	if (!wp_is_mobile()) {
+		echo '<button type="submit" data-quantity="1" data-product_id="'.$product->id.'" class="button alt add_to_cart_button product_type_simple">Add to cart</button>';
+		echo '<a href='.get_permalink($product->id).'" class="button alt add_to_cart_button">Product Details</a>';
+	}
+	echo '</span>';
+	echo '</span>';
+	if (wp_is_mobile()) {
+		echo '<span class="mobile-buttons"><button type="submit" data-quantity="1" data-product_id="'.$product->id.'" class="button alt add_to_cart_button product_type_simple">Add to cart</button>';
+		echo '<a href='.get_permalink($product->id).'" class="button alt add_to_cart_button">Product Details</a></span>';
+	}
+	// printf( '<span class="et_shop_image">%1$s<span class="et_overlay"></span></span>',
+	// 	woocommerce_get_product_thumbnail()
+	// );
+}
 ?>

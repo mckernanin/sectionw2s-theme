@@ -64,3 +64,51 @@
 		display: none;
 	}
 }
+
+.page-trading-post {
+
+	.product {
+
+		.et_shop_image {
+			min-height: 203px;
+		}
+
+		.et_overlay {
+			text-align:center;
+
+			&:before {
+				display: none;
+			}
+
+			.button {
+				display: inline-block;
+			}
+
+			button {
+				margin: 50px 0 25px;
+			}
+
+			.added_to_cart {
+				display: none !important;
+			}
+		}
+
+		.mobile-buttons {
+			text-align: center;
+
+			.button {
+				margin: 0 auto 8px;
+				display: block;
+				width: 100%;
+				box-sizing: border-box;
+			}
+		}
+	}
+
+	.et_pb_widget_area {
+		@include min(800px) {
+			position: fixed;
+			max-width: 225px;
+		}
+	}
+}
