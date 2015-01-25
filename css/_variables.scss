@@ -1,3 +1,37 @@
 $blue: #00216a;
 $gold: #ffdb00;
 $red: #bf002c;
+
+@mixin min($pixels) {
+    @media screen and (min-width: $pixels) { @content; }
+}
+
+@mixin max($pixels) {
+    @media screen and (max-width: $pixels) { @content; }
+}
+
+@mixin minh($pixels) {
+    @media screen and (min-height: $pixels) { @content; }
+}
+
+@mixin maxh($pixels) {
+    @media screen and (max-height: $pixels) { @content; }
+}
+
+@mixin mobile($breakpoint:all) {
+	@if $breakpoint == all {
+    	@media screen and (max-width: 980px) { @content; }
+    }
+
+    @else if $breakpoint == tablet {
+    	@media screen and (max-width: 980px) and (min-width: 681px) { @content; }
+    }
+
+    @else if $breakpoint == phone {
+    	@media screen and (max-width: 680px) { @content; }
+    }
+}
+
+@mixin not-mobile() {
+    @media screen and (min-width: 981px) { @content; }
+}
