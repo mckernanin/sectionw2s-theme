@@ -88,7 +88,7 @@ var doughnutData =
   {
     "value": <?php echo $lodge_registered; ?>,
     "color": "#3A7D44",
-    "label": "Registered Arrowmen"
+    "label": "Registered"
   },
   {
     "value": <?php echo $goal_remaining; ?>,

@@ -47,6 +47,7 @@ function w2s_registration_table( $atts ) {
 	$lodge_data_access = get_field('lodge_data_access', $user_ID);
 
 ?>
+<span>You can sort this table by clicking on the header of the column you want to sort by.</span>
 <table id="<?php echo $id; ?>" class="tablesorter">
 	<?php if ($lodge_data_access == 'All') { ?>
 
@@ -75,10 +76,15 @@ function w2s_registration_table( $atts ) {
 	<tbody>
 		<?php 
 			$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() ); 
+			$registration_count = 0;
 			if ($lodge_data_access == 'All') {
 				foreach ($registrations as $registration) {
 					$item_id = $registration['_product_id'];
 					if ($item_id = 656) {
+						$registration_count++;
+						if ($registration['lodge'] == 'My lodge is not listed ($35.00)') {
+							$registration['lodge'] = $registration['lodge_other'];
+						}
 						echo '<tr>';
 						echo '<td class="name">'.$registration['name'].'</td>';
 						echo '<td class="email">'.$registration['email'].'</td>';
@@ -94,6 +100,7 @@ function w2s_registration_table( $atts ) {
 					$item_id = $registration['_product_id'];
 					$lodge = $registration['lodge'];
 					if ( ($item_id = 656) && ($lodge == $lodge_data_access) ) {
+						$registration_count++;
 						echo '<tr>';
 						echo '<td class="name">'.$registration['name'].'</td>';
 						echo '<td class="email">'.$registration['email'].'</td>';
@@ -108,6 +115,8 @@ function w2s_registration_table( $atts ) {
 		?>
 	</tbody>
 </table>
+<span class="registrationCount">Total Registered: <?php echo $registration_count; ?></span><br /><br /><br />
+<a id="conclaveCSV" class="et_pb_promo_button">Download CSV</a>
 
 <?php
 	$myvariable = ob_get_clean();
