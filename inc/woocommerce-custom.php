@@ -1,8 +1,11 @@
 <?php
 
-// apply_filters( 'wc_add_to_cart_message', 'w2s_conclave_add_to_cart_message');
-// function w2s_conclave_add_to_cart_message($message, $product_id) {
-//     return "Thank you for adding product" . $product_id;
-// }
-
-?>
+add_filter( 'wc_add_to_cart_message', 'custom_add_to_cart_message' );
+ 
+function custom_add_to_cart_message() {
+ 
+global $woocommerce;
+$return_to  = get_permalink(woocommerce_get_page_id('shop'));
+$message    = '<a href="/trading-post/" class="button wc-forwards">Continue Shopping</a> <a class="button wc-forwards or"> or </a> <a href="/cart/" class="button wc-forwards">View Cart</a> Product successfully added to your cart';
+return $message;
+}
