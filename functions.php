@@ -107,14 +107,18 @@ function w2s_template_loop_product_thumbnail() {
 	echo woocommerce_get_product_thumbnail();
 	echo '<span class="et_overlay">'; 
 	if (!wp_is_mobile()) {
-		echo '<button type="submit" data-quantity="1" data-product_id="'.$product->id.'" class="button alt add_to_cart_button product_type_simple">Add to cart</button>';
-		echo '<a href='.get_permalink($product->id).'" class="button alt add_to_cart_button">Product Details</a>';
+		if( $product->has_child() ) { 
+			echo '<a href='.get_permalink($product->id).' class="button alt add_to_cart_button">Select A Size</a>';
+		} else {
+			echo '<button type="submit" data-quantity="1" data-product_id="'.$product->id.'" class="button alt add_to_cart_button product_type_simple">Add to cart</button>';
+		}
+		echo '<a href='.get_permalink($product->id).' class="button alt add_to_cart_button">Product Details</a>';
 	}
 	echo '</span>';
 	echo '</span>';
 	if (wp_is_mobile()) {
 		echo '<span class="mobile-buttons"><button type="submit" data-quantity="1" data-product_id="'.$product->id.'" class="button alt add_to_cart_button product_type_simple">Add to cart</button>';
-		echo '<a href='.get_permalink($product->id).'" class="button alt add_to_cart_button">Product Details</a></span>';
+		echo '<a href='.get_permalink($product->id).' class="button alt add_to_cart_button">Product Details</a></span>';
 	}
 	// printf( '<span class="et_shop_image">%1$s<span class="et_overlay"></span></span>',
 	// 	woocommerce_get_product_thumbnail()
