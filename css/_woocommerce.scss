@@ -1,5 +1,6 @@
 .woocommerce-cart,
-.woocommerce-checkout {
+.woocommerce-checkout,
+.widget_shopping_cart_content {
 
 	.variation {
 
@@ -14,7 +15,53 @@
 		.variation-Name {
 			display: inline-block !important;
 		}
+
+		.variation-Size {
+			display: inline-block !important;
+		}
 	}
+}
+
+.woocommerce {
+	.widget_shopping_cart_content {
+
+		li {
+			font-weight: bold;
+		}
+
+		img {
+			display: none;
+		}
+
+		.variation {
+			padding: 0 !important;
+			border: none !important;
+		}
+
+		dt.variation-Name {
+			display: none !important;
+		}
+
+		dd.variation-Name {
+			margin-left: 0 !important;
+			margin-bottom: 0 !important;
+			font-weight: normal;
+		}
+
+		.quantity {
+			font-weight: normal;
+		}
+	}
+}
+
+.woocommerce .outofstock span.onsale, 
+.woocommerce-page .outofstock span.onsale {
+	background: #e93838 !important;
+}
+
+.woocommerce .outofstock .et_overlay, 
+.woocommerce-page .outofstock .et_overlay {
+	display: none !important;
 }
 
 .product-conclave-2015 {
@@ -82,6 +129,10 @@
 
 			.button {
 				display: inline-block;
+
+				&:first-of-type {
+					margin-top: 1.5em;
+				}
 			}
 
 			button {
@@ -109,6 +160,57 @@
 		@include min(800px) {
 			position: fixed;
 			max-width: 225px;
+			overflow: scroll;
+			max-height: 65vh;
 		}
+	}
+}
+
+#left-area .woocommerce-message {
+	line-height: 2em;
+
+	a {
+		&.or {
+			border: none !important;
+			padding: 5px 15px !important;
+		}
+	}
+
+	.button {
+		padding: 5px !important;
+		border: 2px solid white !important;
+	}
+}
+
+.continue-shopping {
+	position: relative;
+	z-index: 999;
+	margin-top: 20px;
+}
+
+.page-id-376 {
+	.main_title {
+		float: left;
+	}
+
+	.continue-shopping {
+		float: right;
+	}
+}
+
+.woocommerce-breadcrumb {
+	display: none !important;
+}
+
+.single-product {
+
+	.continue-shopping {
+		margin-bottom: 25px !important;
+	}
+}
+
+.product-conclave-2015 {
+	.continue-shopping {
+		display: none !important;
 	}
 }
