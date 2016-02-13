@@ -8,6 +8,7 @@
 
 #logo {
     padding-top:10px;
+	max-height: 75px;
 }
 
 .et-fixed-header {
@@ -18,13 +19,13 @@
             }
         }
     }
-    
+
     .nav li ul {
       top: 63px;
     }
 }
 
-.et-fixed-header #top-menu .menu-item-has-children>a:first-child:after, 
+.et-fixed-header #top-menu .menu-item-has-children>a:first-child:after,
 .et-fixed-header #et-secondary-nav .menu-item-has-children>a:first-child:after {
     top: 13px;
 }
@@ -34,15 +35,15 @@
     color:white !important;
 }
 
-#top-menu > li.current-menu-ancestor > a, 
-#top-menu > li.current-menu-item > a, 
+#top-menu > li.current-menu-ancestor > a,
+#top-menu > li.current-menu-item > a,
 .bottom-nav li.current-menu-item > a,
 #top-menu > li:hover > a{
     border-top:5px solid white;
     padding-top:20px !important;
 }
 
-#top-menu .menu-item-has-children > a:first-child:after, 
+#top-menu .menu-item-has-children > a:first-child:after,
 #et-secondary-nav .menu-item-has-children > a:first-child:after {
     top:27px;
 }
@@ -53,7 +54,7 @@
     }
 
     li {
-        
+
         > a {
             padding:25px 15px;
         }
@@ -69,9 +70,9 @@
 
             &:hover {
                 padding-right:15px;
-                border-right:5px solid $gold;                
+                border-right:5px solid $gold;
             }
-        }            
+        }
     }
 
     a:hover {
