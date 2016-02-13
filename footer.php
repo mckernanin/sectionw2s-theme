@@ -33,7 +33,7 @@ if ( ! is_page_template( 'page-template-blank.php' ) ) : ?>
 				?>
 
 						<p id="footer-info">
-							&copy; <?php echo date('Y'); ?> Section W2S | Need anything? <a href="mailto:help@sectionw2s.org">Send us an Email</a> | Powered by <a href="http://digsublime.com">Sublime Digital</a>
+							&copy; <?php echo date('Y'); ?> Section W2S | Need anything? <a href="mailto:help@sectionw2s.org">Send us an Email</a>
 						</p>
 					</div>	<!-- .container -->
 				</div>
