@@ -1,4 +1,4 @@
-jQuery(function($) { 
+jQuery(function($) {
 	$('section.profiles').mixItUp({
 		selectors: {
 			target: '.profile'
@@ -6,21 +6,21 @@ jQuery(function($) {
 		load: {
 			sort: 'default:asc'
 		}
-	});	
+	});
     $(document).ready(function() {
     	if ($('.tablesorter').length ) {
     		$('.tablesorter').tablesorter();
     	}
     });
-    
+
     /* when product quantity changes, update quantity attribute on add-to-cart button */
     $("form.cart").on("change", "input.qty", function() {
         if (this.value === "0")
             this.value = "1";
- 
+
         $(this.form).find("button[data-quantity]").attr("data-quantity", this.value);
     });
- 
+
     /* remove old "view cart" text, only need latest one thanks! */
     $(document.body).on("adding_to_cart", function() {
         $("a.added_to_cart").remove();
@@ -28,21 +28,21 @@ jQuery(function($) {
 
     $('.product').each( function() {
         if ( $(this).hasClass('outofstock') ) {
-            $('.onsale', this).text('Sold Out!')
+            $('.onsale', this).text('Sold Out!');
         }
     });
 
     if ( $('body').hasClass('page-id-376') ) {
         $('.main_title').after('<a href="/trading-post/" class="button continue-shopping">Continue Shopping</a>');
-    };
+    }
 
     if ( $('body').hasClass('single-product') ) {
         $('.woocommerce-breadcrumb').before('<a href="/trading-post/" class="button continue-shopping">< Return to Trading Post</a>');
-    };
+    }
 
     if ( $('body').hasClass('post-type-archive-product') ) {
         window.location.href = 'https://sectionw2s.org/trading-post/';
-    };
+    }
 
     function exportTableToCSV($table, filename) {
 
@@ -86,8 +86,25 @@ jQuery(function($) {
     }
 
     $('#conclaveCSV').click(
-    function() { 
+    function() {
         exportTableToCSV.apply(this, [$('#conclaveRegistrationTable'), 'w2sconclave.csv']);
     });
-});
 
+    $('.amount-paid').each( function() {
+      var text = $(this).text();
+      if (text == '$') {
+        $(this).text('');
+      }
+
+      if ((text == '$50')) {
+        $(this).parent().prev().find('.amount-paid').text('$25');
+        $(this).text('$25');
+      }
+
+      if ((text == '$75')) {
+        $(this).parent().prev().find('.amount-paid').text('$25');
+        $(this).parent().prev().prev().find('.amount-paid').text('$25');
+        $(this).text('$25');
+      }
+    });
+});

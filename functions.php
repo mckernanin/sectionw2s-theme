@@ -124,4 +124,10 @@ function w2s_template_loop_product_thumbnail() {
 	// 	woocommerce_get_product_thumbnail()
 	// );
 }
+
+add_filter('query_vars', 'add_my_var');
+function add_my_var($public_query_vars) {
+	$public_query_vars[] = 'show_dietary';
+	return $public_query_vars;
+}
 ?>

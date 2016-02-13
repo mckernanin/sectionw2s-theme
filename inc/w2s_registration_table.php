@@ -19,7 +19,8 @@ function w2s_itemmeta_query_order_items() {
 function w2s_itemmeta_query_order_item_data($values) {
 	global $wpdb;
 
-	$sql = 'SELECT order_item_id,meta_key,meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id IN ("' . implode('", "', $values) . '")';
+	// $sql = 'SELECT order_item_id,meta_key,meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id IN ("' . implode('", "', $values) . '")';
+	$sql = 'SELECT order_item_id,meta_key,meta_value FROM wp_woocommerce_order_itemmeta';
 
 	// Run the query via $wpdb
 	$query = $wpdb->get_results($sql, ARRAY_A);
@@ -45,19 +46,26 @@ function w2s_registration_table( $atts ) {
 	wp_enqueue_script('tablesorter');
 	$user_ID = 'user_'.get_current_user_id();
 	$lodge_data_access = get_field('lodge_data_access', $user_ID);
+	$show_dietary = get_query_var('show_dietary');
 
 ?>
 <span>You can sort this table by clicking on the header of the column you want to sort by.</span>
 <table id="<?php echo $id; ?>" class="tablesorter">
-	<?php if ($lodge_data_access == 'All') { ?>
+	<?php if ( ($lodge_data_access == 'All') || ($show_dietary == true) ) { ?>
 
 	<thead>
 		<th>Name</th>
 		<th>Email</th>
+		<th>Opt In</th>
 		<th>Phone</th>
 		<th>Lodge</th>
 		<th>Membership Level</th>
 		<th>Age Group</th>
+		<?php if ($show_dietary == true) { ?>
+			<th>Dietary Needs</th>
+		<?php } ?>
+		<th>Sunday Breakfast</th>
+		<th>Discount</th>
 	</thead>
 
 	<?php } else { ?>
@@ -77,21 +85,30 @@ function w2s_registration_table( $atts ) {
 		<?php 
 			$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() ); 
 			$registration_count = 0;
-			if ($lodge_data_access == 'All') {
+			if ( ($lodge_data_access == 'All') || ($show_dietary == true) ) {
 				foreach ($registrations as $registration) {
 					$item_id = $registration['_product_id'];
-					if ($item_id = 656) {
+					if ($item_id == 656) {
 						$registration_count++;
 						if ($registration['lodge'] == 'My lodge is not listed ($35.00)') {
 							$registration['lodge'] = $registration['lodge_other'];
 						}
-						echo '<tr>';
+						$registrationDiscountID = $registration['order_item_id'] + 1;
+						$registrationDiscountAmount = $registrations[$registrationDiscountID]['discount_amount'];
+						$registrationFinalCost = '$'.$registrationDiscountAmount;
+						echo '<tr class="row-'.$registration['order_item_id'].'">';
 						echo '<td class="name">'.$registration['name'].'</td>';
 						echo '<td class="email">'.$registration['email'].'</td>';
+						echo '<td class="email">'.$registration['email_list'].'</td>';
 						echo '<td class="phone">'.$registration['phone'].'</td>';
 						echo '<td class="lodge">'.$registration['lodge'].'</td>';
 						echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
 						echo '<td class="age-group">'.w2s_age_from_date($registration['birthdate']).'</td>';
+						if ($show_dietary == true) {
+							echo '<td class="dietary">'.$registration['dietary_restrictions'].'</td>';
+						}
+						echo '<td class="sunday-breakfast">'.$registration['sunday_breakfast'].'</td>';
+						echo '<td class="amount-paid">'.$registrationFinalCost.'</td>';
 						echo '</tr>';
 					}
 				}
