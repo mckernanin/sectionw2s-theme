@@ -1,10 +1,3 @@
-# Divi Child Theme by Sublime Digital
-
-Here's our base child theme for Divi sites. 
-Features include:
-
-* SASS structure for styles
-* Enqueued main.js file
-* Function to add a page slug body class
-* Groundwork for replacing Divi functions
-
+# Section W2S Theme
+[![Deployment status from DeployBot](https://mckernanin.deploybot.com/badge/13023224040688/64523.svg)](http://deploybot.com)
+Theme for sectionw2s.org based on Divi by Elegant Themes.
