@@ -8,7 +8,7 @@
 
 #logo {
     padding-top:10px;
-	max-height: 75px;
+	max-height: 65px;
 }
 
 .et-fixed-header {
@@ -84,7 +84,8 @@
     display: none;
 }
 
-div#et-top-navigation {
+div#et-top-navigation,
+.et_header_style_left #et-top-navigation {
     padding-left: 0 !important;
     padding-top: 10px;
 }
