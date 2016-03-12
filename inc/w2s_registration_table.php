@@ -4,7 +4,7 @@ function w2s_itemmeta_query_order_items() {
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
 	// Live Data
-	$sql = "SELECT order_item_id FROM wp_woocommerce_order_items WHERE order_item_name IN ('Conclave 2015')";
+	$sql = "SELECT order_item_id FROM wp_woocommerce_order_items WHERE order_item_name IN ('Conclave 2016')";
 
 	// Run the query via $wpdb
 	$query = $wpdb->get_results($sql);
@@ -33,7 +33,7 @@ function w2s_itemmeta_query_order_item_data($values) {
 		$order_meta[$order_item_id][$meta_key] = $meta_value;
 	}
 
-	return $order_meta;	
+	return $order_meta;
 }
 
 add_shortcode('registration-table', 'w2s_registration_table');
@@ -82,13 +82,13 @@ function w2s_registration_table( $atts ) {
 
 
 	<tbody>
-		<?php 
-			$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() ); 
+		<?php
+			$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() );
 			$registration_count = 0;
 			if ( ($lodge_data_access == 'All') || ($show_dietary == true) ) {
 				foreach ($registrations as $registration) {
 					$item_id = $registration['_product_id'];
-					if ($item_id == 656) {
+					if ($item_id == 1096) {
 						$registration_count++;
 						if ($registration['lodge'] == 'My lodge is not listed ($35.00)') {
 							$registration['lodge'] = $registration['lodge_other'];
@@ -116,7 +116,7 @@ function w2s_registration_table( $atts ) {
 				foreach ($registrations as $registration) {
 					$item_id = $registration['_product_id'];
 					$lodge = $registration['lodge'];
-					if ( ($item_id = 656) && ($lodge == $lodge_data_access) ) {
+					if ( ($item_id = 1096) && ($lodge == $lodge_data_access) ) {
 						$registration_count++;
 						echo '<tr>';
 						echo '<td class="name">'.$registration['name'].'</td>';
@@ -142,6 +142,4 @@ function w2s_registration_table( $atts ) {
 	} else {
 		return 'You are not authorized to view this page.';
 	}
-	
-	
 }
