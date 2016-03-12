@@ -12,7 +12,7 @@ function w2s_itemmeta_query_counts($value) {
 
 	// Live Data
 	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE meta_key IN ('".$value."')";
-	
+
 	// Test Data
 	// $sql = "SELECT meta_value FROM wp_kevin_test_data WHERE meta_key IN ('".$value."')";
 
@@ -31,7 +31,7 @@ function w2s_itemmeta_query_counts($value) {
 	}
 
 	/* Working on making this query all happen at the same time
-	
+
 		foreach ($query as $row) {
 			$meta_value =  $row[0];
 			if ( !in_array($row, $counter) ) {
@@ -62,7 +62,7 @@ function w2s_itemmeta_query_counts($value) {
 		}
 	}
 
-	/* 
+	/*
 		Now, $counter is an array that looks like this:
 			Array
 			(
@@ -118,6 +118,9 @@ function w2s_itemmeta_age() {
 
 function w2s_age_from_date($birthDate) {
 		$birthDate = explode("/", $birthDate);
+		$birthDate[0] = abs( $birthDate[0] );
+		$birthDate[1] = abs( $birthDate[1] );
+		$birthDate[2] = abs( $birthDate[2] );
 		$age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
 		? ((date("Y") - $birthDate[2]) - 1)
 		: (date("Y") - $birthDate[2]));
