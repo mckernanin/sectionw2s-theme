@@ -97,17 +97,17 @@ function w2s_registration_table( $atts ) {
 						$registrationDiscountAmount = $registrations[$registrationDiscountID]['discount_amount'];
 						$registrationFinalCost = '$'.$registrationDiscountAmount;
 						echo '<tr class="row-'.$registration['order_item_id'].'">';
-						echo '<td class="name">'.$registration['name'].'</td>';
-						echo '<td class="email">'.$registration['email'].'</td>';
-						echo '<td class="email">'.$registration['email_list'].'</td>';
-						echo '<td class="phone">'.$registration['phone'].'</td>';
-						echo '<td class="lodge">'.$registration['lodge'].'</td>';
-						echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
-						echo '<td class="age-group">'.w2s_age_from_date($registration['birthdate']).'</td>';
+						echo '<td class="name">'.$registration['Name'].'</td>';
+						echo '<td class="email">'.$registration['Email'].'</td>';
+						echo '<td class="email">'.$registration['Would you like to receive email updates from Section W2S?'].'</td>';
+						echo '<td class="phone">'.$registration['Phone'].'</td>';
+						echo '<td class="lodge">'.$registration['Lodge'].'</td>';
+						echo '<td class="membership-level">'.$registration['Membership Level'].'</td>';
+						echo '<td class="age-group">'.w2s_age_from_date($registration['Birth Date']).'</td>';
 						if ($show_dietary == true) {
-							echo '<td class="dietary">'.$registration['dietary_restrictions'].'</td>';
+							echo '<td class="dietary">'.$registration['Dietary Restrictions'].'</td>';
 						}
-						echo '<td class="sunday-breakfast">'.$registration['sunday_breakfast'].'</td>';
+						echo '<td class="sunday-breakfast">'.$registration['Are you staying for breakfast on Sunday?'].'</td>';
 						echo '<td class="amount-paid">'.$registrationFinalCost.'</td>';
 						echo '</tr>';
 					}
@@ -119,11 +119,11 @@ function w2s_registration_table( $atts ) {
 					if ( ($item_id = 1096) && ($lodge == $lodge_data_access) ) {
 						$registration_count++;
 						echo '<tr>';
-						echo '<td class="name">'.$registration['name'].'</td>';
-						echo '<td class="email">'.$registration['email'].'</td>';
-						echo '<td class="phone">'.$registration['phone'].'</td>';
-						echo '<td class="membership-level">'.$registration['membership_level'].'</td>';
-						echo '<td class="age-group">'.w2s_age_from_date($registration['birthdate']).'</td>';
+						echo '<td class="name">'.$registration['Name'].'</td>';
+						echo '<td class="email">'.$registration['Email'].'</td>';
+						echo '<td class="phone">'.$registration['Phone'].'</td>';
+						echo '<td class="membership-level">'.$registration['Membership Level'].'</td>';
+						echo '<td class="age-group">'.w2s_age_from_date($registration['Birth Date']).'</td>';
 						echo '</tr>';
 					}
 				}
