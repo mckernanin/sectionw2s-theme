@@ -86,12 +86,14 @@ function w2s_registration_table( $atts ) {
 		<?php
 		$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() );
 		$registration_count = 0;
-		if ( ( 'All' === $lodge_data_access ) || ( true == $show_dietary ) ) {
+		if ( 'true' == $tahosa_party_var ) {
+			echo 'These guys like to party!';
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
-				if ( 1096 == $item_id ) {
+				$tahosa_party = $registration['Tahosa Lodge Party Pack'];
+				if ( 1096 == $item_id && 'Yes ( $5.00)' === $tahosa_party ) {
 					$registration_count++;
-					if ( 'My lodge is not listed ( $35.00)' == $registration['lodge'] ) {
+					if ( 'My lodge is not listed ( $36.00)' == $registration['lodge'] ) {
 						$registration['lodge'] = $registration['lodge_other'];
 					}
 					$$registration_discount_id = $registration['order_item_id'] + 1;
@@ -113,14 +115,12 @@ function w2s_registration_table( $atts ) {
 					echo '</tr>';
 				}
 			}
-		} else if ( 'true' == $tahosa_party_var ) {
-			echo 'These guys like to party!';
+		} else if ( ( 'All' === $lodge_data_access ) || ( true == $show_dietary ) ) {
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
-				$tahosa_party = $registration['Tahosa Lodge Party Pack'];
-				if ( 1096 == $item_id && 'Yes ( $5.00)' === $tahosa_party ) {
+				if ( 1096 == $item_id ) {
 					$registration_count++;
-					if ( 'My lodge is not listed ( $36.00)' == $registration['lodge'] ) {
+					if ( 'My lodge is not listed ( $35.00)' == $registration['lodge'] ) {
 						$registration['lodge'] = $registration['lodge_other'];
 					}
 					$$registration_discount_id = $registration['order_item_id'] + 1;
