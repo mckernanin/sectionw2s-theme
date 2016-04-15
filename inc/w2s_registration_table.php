@@ -113,7 +113,7 @@ function w2s_registration_table( $atts ) {
 					echo '</tr>';
 				}
 			}
-		} else if ( 'true' === $tahosa_party_var ) {
+		} else if ( 'true' == $tahosa_party_var ) {
 			echo 'These guys like to party!';
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
