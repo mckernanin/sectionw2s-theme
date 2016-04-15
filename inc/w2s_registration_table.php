@@ -47,6 +47,7 @@ function w2s_registration_table( $atts ) {
 	$user_ID = 'user_'.get_current_user_id();
 	$lodge_data_access = get_field('lodge_data_access', $user_ID);
 	$show_dietary = get_query_var('show_dietary');
+	$tahosa_party_var = get_query_var( 'tahosa_party' );
 
 ?>
 <span>You can sort this table by clicking on the header of the column you want to sort by.</span>
@@ -105,6 +106,37 @@ function w2s_registration_table( $atts ) {
 						echo '<td class="membership-level">'.$registration['Membership Level'].'</td>';
 						echo '<td class="age-group">'.w2s_age_from_date($registration['Birth Date']).'</td>';
 						if ($show_dietary == true) {
+						echo '<td class="age-group">'.w2s_age_from_date( $registration['Birth Date']).'</td>';
+						if ( $show_dietary == true) {
+							echo '<td class="dietary">'.$registration['Dietary Restrictions'].'</td>';
+						}
+						echo '<td class="sunday-breakfast">'.$registration['Are you staying for breakfast on Sunday?'].'</td>';
+						echo '<td class="amount-paid">'.$registrationFinalCost.'</td>';
+						echo '</tr>';
+					}
+				}
+			} elseif ( 'true' === $tahosa_party_var ) {
+				echo 'These guys like to party!';
+				foreach ( $registrations as $registration) {
+					$item_id = $registration['_product_id'];
+					$tahosa_party = $registration['Tahosa Lodge Party Pack'];
+					if ( $item_id == 1096 && 'Yes ( $5.00)' === $tahosa_party ) {
+						$registration_count++;
+						if ( $registration['lodge'] == 'My lodge is not listed ( $35.00)') {
+							$registration['lodge'] = $registration['lodge_other'];
+						}
+						$registrationDiscountID = $registration['order_item_id'] + 1;
+						$registrationDiscountAmount = $registrations[ $registrationDiscountID]['discount_amount'];
+						$registrationFinalCost = '$'.$registrationDiscountAmount;
+						echo '<tr class="row-'.$registration['order_item_id'].'">';
+						echo '<td class="name">'.$registration['Name'].'</td>';
+						echo '<td class="email">'.$registration['Email'].'</td>';
+						echo '<td class="email">'.$registration['Would you like to receive email updates from Section W2S?'].'</td>';
+						echo '<td class="phone">'.$registration['Phone'].'</td>';
+						echo '<td class="lodge">'.$registration['Lodge'].'</td>';
+						echo '<td class="membership-level">'.$registration['Membership Level'].'</td>';
+						echo '<td class="age-group">'.w2s_age_from_date( $registration['Birth Date']).'</td>';
+						if ( $show_dietary == true) {
 							echo '<td class="dietary">'.$registration['Dietary Restrictions'].'</td>';
 						}
 						echo '<td class="sunday-breakfast">'.$registration['Are you staying for breakfast on Sunday?'].'</td>';
