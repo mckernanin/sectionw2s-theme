@@ -123,7 +123,7 @@ function w2s_registration_table( $atts ) {
 					if ( 'My lodge is not listed ($35.00)' == $registration['lodge'] ) {
 						$registration['lodge'] = $registration['lodge_other'];
 					}
-					$$registration_discount_id = $registration['order_item_id'] + 1;
+					$registration_discount_id = $registration['order_item_id'] + 1;
 					$registration_discount_amount = $registrations[ $registration_discount_id ]['discount_amount'];
 					$registration_final_cost = '$' . $registration_discount_amount;
 					echo '<tr class="row-' . $registration['order_item_id'].'">';
@@ -163,7 +163,7 @@ function w2s_registration_table( $atts ) {
 	</tbody>
 </table>
 <span class="registrationCount">Total Registered: <?php echo $registration_count; ?></span><br /><br /><br />
-<a id="conclaveCSV" class="et_pb_promo_button">Download CSV</a>
+<a id="conclaveCSV" class="et_pb_promo_button" href="#!">Download CSV</a>
 
 <?php
 	$myvariable = ob_get_clean();
