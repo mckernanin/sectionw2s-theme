@@ -130,3 +130,21 @@ function add_my_var( $public_query_vars ) {
 	$public_query_vars[] = 'show_dietary';
 	return $public_query_vars;
 }
+
+function vigil_position_notes_field( $input, $input_info, $field, $text, $value, $form_id ) {
+	//build field name, must match List field syntax to be processed correctly
+	$input_field_name = 'input_' . $field->id . '[]';
+	$tabindex         = GFCommon::get_tabindex();
+	$new_input        = '<textarea name="' . $input_field_name . '" ' . $tabindex . ' class="textarea medium" cols="50" rows="10">' . $value . '</textarea>';
+	return $new_input;
+}
+
+function vigil_position_type( $input_info, $field, $column, $value, $form_id ) {
+	$data = array(
+		'type'    => 'select',
+		'choices' => 'Unit,Chapter,Lodge,Section,District,Council,Other',
+	);
+	return $data;
+}
+add_filter( 'gform_column_input_content_6_3_4', 'vigil_position_notes_field', 10, 6 );
+add_filter( 'gform_column_input_6_3_1', 'vigil_position_type', 10, 6 );
