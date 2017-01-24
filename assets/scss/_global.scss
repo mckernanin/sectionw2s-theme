@@ -1,15 +1,15 @@
-input[type=text], 
-input.text, 
-input.title, 
-textarea, 
+input[type=text],
+input.text,
+input.title,
+textarea,
 select {
 	border-radius: 2px;
 }
 
-input[type=text]:focus, 
-input.text:focus, 
-input.title:focus, 
-textarea:focus, 
+input[type=text]:focus,
+input.text:focus,
+input.title:focus,
+textarea:focus,
 select:focus {
 	border-color: $blue;
 	color: $blue;
@@ -21,4 +21,15 @@ input:focus + label {
 
 .et_pb_fullwidth_section {
 	background-color: $blue;
+}
+
+.gform_wrapper table.gfield_list,
+.gform_wrapper table.gfield_list caption,
+.gform_wrapper table.gfield_list tbody,
+.gform_wrapper table.gfield_list td,
+.gform_wrapper table.gfield_list tfoot,
+.gform_wrapper table.gfield_list th,
+.gform_wrapper table.gfield_list thead,
+.gform_wrapper table.gfield_list tr {
+	vertical-align: top !important;
 }
