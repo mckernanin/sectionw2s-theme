@@ -33,6 +33,7 @@ $monarch_sections = array(
 	),
 	'header'  => array(
 		'contents' => array(
+			'updates'      => esc_html__( 'Monarch Updates', 'Monarch' ),
 			'importexport' => esc_html__( 'Import & Export', 'Monarch' ),
 			'stats'        => esc_html__( 'Social Sharing Stats', 'Monarch' ),
 		),
@@ -746,6 +747,7 @@ $monarch_options_all = array(
 			'default'   => false,
 		),
 	),
+
 	'custom_css' => array(
 		'section_start' => array(
 			'type'  => 'section_start',
@@ -990,6 +992,10 @@ $monarch_options_all = array(
 	'stats' => array(
 		'type'  => 'stats',
 		'title' => esc_html__( 'Social Sharing Stats', 'Monarch' ),
+	),
+	'updates' => array(
+		'type'  => 'updates',
+		'title' => esc_html__( 'Monarch Updates', 'Monarch' ),
 	),
 );
 
@@ -1283,6 +1289,10 @@ $general_main_options = array(
 	$monarch_options_all[ 'custom_css' ][ 'section_start' ],
 			$monarch_options_all[ 'custom_css' ][ 'option' ],
 			$monarch_options_all[ 'end_of_section' ],
+);
+
+$header_updates_options = array(
+	$monarch_options_all[ 'updates' ]
 );
 
 $header_importexport_options = array(

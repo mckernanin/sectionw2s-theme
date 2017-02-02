@@ -5,8 +5,8 @@ Contributors: mordauk
 Donate link: http://pippinsplugins.com/support-the-site
 Tags: Restrict content, member only, registered, logged in, restricted access, restrict access, limiit access, read-only, read only
 Requires at least 3.9
-Tested up to 4.4
-Stable tag: 2.1.2
+Tested up to 4.7
+Stable tag: 2.1.3
 
 Restrict Content to registered users only. This is a simple plugin that will allow you to easily restrict complete posts / pages to logged in users only. Levels of restriction may also be set. For example, you can restrict content to only Administrators, Editors, Authors, and Subscribers.
 
@@ -15,20 +15,21 @@ Restrict Content to registered users only. This is a simple plugin that will all
 Restrict Content to registered users only. This is a simple plugin that will allow you to easily restrict complete posts / pages to logged in users only. Levels of restriction may also be set. 
 For example, you can restrict content to only Administrators, Editors, Authors, and Subscribers.
 
-Content restriction works both with shortcodes and drop-down menu of access levels for complete posts / pages.
+Content restriction works both with shortcodes and drop-down menu of access levels for post, pages, and most custom post types.
 
-v2.0 is also now completely compatible with custom post types.
+= Pro version available! =
 
-Want to offer premium content to paid subscribers? Restrict Content Pro offers everything you need:
+The Pro version of Restrict Content provides a significant additional feature set, including:
 
-* Unlimited subscription levels
-* Comlete member management
+* Account registration
+* Log in and password reset forms
+* Complete member management
 * Discount codes
 * Payment tracking
-* PayPal integration
-* Top notch tech support
+* Integration with popular payment systems, including Stripe, PayPal, 2Checkout, and more.
+* And much more. See the [Features](https://restrictcontentpro.com) page for additional details.
 
-Check out Restrict Content Pro: http://pippinsplugins.com/restrict-content-pro-premium-content-plugin/
+Check out [Restrict Content Pro](https://restrictcontentpro.com).
 
 == Installation ==
 
@@ -54,6 +55,16 @@ There is also a short code for showing content only to users that are not logged
 
 [not_logged_in]This content is only shown to non-logged-in users.[/not_logged_in]
 
+== Frequently Asked Questions ==
+
+= Does this plugin include frontend log in or registration forms? =
+
+No, this free plugin simply provides options to restrict content to existing user accounts. The [Pro](https://restrictcontentpro.com) version does, however, include frontend registration and log in forms, along with much, much more. See the [Features](https://restrictcontentpro.com) page for details.
+
+= Does this plugin support custom user roles? =
+
+Not at this time.
+
  == Screenshots ==
  
  Go to the demo page to see examples:
@@ -61,6 +72,14 @@ There is also a short code for showing content only to users that are not logged
 http://pippinsplugins.com/restricted-content-plugin-free/
 
 == Changelog ==
+
+= 2.1.3 =
+
+* Fix: Undefined nonce index when saving some post types
+* Fix: Removed restrict metabox from post types that it does not apply to
+* Fix: Made restricted message shown in feeds translatable
+* Fix: Some text strings not translatable
+* Tweak: Added new rcp_metabox_excluded_post_types filter
 
 = 2.1.2 =
 

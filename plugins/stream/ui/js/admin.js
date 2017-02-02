@@ -15,43 +15,48 @@ jQuery( function( $ ) {
 
 	$( '.toplevel_page_wp_stream :input.chosen-select' ).each( function( i, el ) {
 		var args = {},
-			formatResult = function( record, container ) {
-				var result = '',
-					$elem  = $( record.element ),
-					icon   = '';
+			templateResult = function( record ) {
+		    	var $result = $( '<span>' ),
+		    		$elem  = $( record.element ),
+		    		icon   = '';
 
-				if ( '- ' === record.text.substring( 0, 2 ) ) {
-					record.text = record.text.substring( 2 );
+		    	if ( '- ' === record.text.substring( 0, 2 ) ) {
+		    		record.text = record.text.substring( 2 );
+		    	}
+
+				if ( 'undefined' !== typeof record.id ) {
+					if ( record.id.indexOf( 'group-' ) === 0 ) {
+						$result.addClass( 'parent' );
+					} else if ( $elem.hasClass( 'level-2' ) ) {
+						$result.addClass( 'child' );
+					}
 				}
 
-				if ( undefined !== record.icon ) {
-					icon = record.icon;
-				} else if ( undefined !== $elem.attr( 'data-icon' ) ) {
-					icon = $elem.data( 'icon' );
-				}
+		    	if ( undefined !== record.icon ) {
+		    		icon = record.icon;
+		    	} else if ( undefined !== $elem && '' !== $elem.data( 'icon' ) ) {
+		    		icon = $elem.data( 'icon' );
+		    	}
+
 				if ( icon ) {
-					result += '<img src="' + icon + '" class="wp-stream-select2-icon">';
+					$result.html( '<img src="' + icon + '" class="wp-stream-select2-icon">' );
 				}
+				$result.append( record.text );
 
-				result += record.text;
+		    	return $result;
+		    },
+			templateSelection = function( record ) {
+		    	if ( '- ' === record.text.substring( 0, 2 ) ) {
+		    		record.text = record.text.substring( 2 );
+		    	}
+		    	return record.text;
+		    };
 
-				// Add more info to the container
-				container.attr( 'title', $elem.attr( 'title' ) );
-
-				return result;
-			},
-			formatSelection = function( record ) {
-				if ( '- ' === record.text.substring( 0, 2 ) ) {
-					record.text = record.text.substring( 2 );
-				}
-				return record.text;
-			};
-
-		if ( $( el ).find( 'option' ).length > 0 ) {
+		if ( $( el ).find( 'option' ).not( ':selected' ).not( ':empty' ).length > 0 ) {
 			args = {
 				minimumResultsForSearch: 10,
-				formatResult: formatResult,
-				formatSelection: formatSelection,
+				templateResult: templateResult,
+				templateSelection: templateSelection,
 				allowClear: true,
 				width: '165px'
 			};
@@ -62,40 +67,31 @@ jQuery( function( $ ) {
 				width: '165px',
 				ajax: {
 					url: ajaxurl,
-					datatype: 'json',
+					dataType: 'json',
+					quietMillis: 100,
 					data: function( term ) {
 						return {
 							action: 'wp_stream_filters',
+							nonce: $( '#stream_filters_user_search_nonce' ).val(),
 							filter: $( el ).attr( 'name' ),
-							q: term
+							q: term.term
 						};
 					},
-					results: function( data ) {
-						return { results: data };
+					processResults: function( data ) {
+						var results = [];
+						$.each( data, function( index, item ){
+							results.push({
+								id: item.id,
+								text: item.label
+							});
+						});
+						return {
+							results: results
+						};
 					}
 				},
-				formatResult: formatResult,
-				formatSelection: formatSelection,
-				initSelection: function( element, callback ) {
-					var id = $( element ).val();
-					if ( '' !== id ) {
-						$.post(
-							ajaxurl,
-							{
-								action: 'wp_stream_get_filter_value_by_id',
-								filter: $( element ).attr( 'name' ),
-								id: id
-							},
-							function( response ) {
-								callback({
-									id: id,
-									text: response
-								});
-							},
-							'json'
-						);
-					}
-				}
+				templateResult: templateResult,
+				templateSelection: templateSelection
 			};
 		}
 
@@ -103,18 +99,29 @@ jQuery( function( $ ) {
 	});
 
 	var $queryVars    = $.streamGetQueryVars();
-	var $contextInput = $( '.toplevel_page_wp_stream :input.chosen-select[name="context"]' );
+	var $contextInput = $( '.toplevel_page_wp_stream select.chosen-select[name="context"]' );
 
 	if ( ( 'undefined' === typeof $queryVars.context || '' === $queryVars.context ) && 'undefined' !== typeof $queryVars.connector ) {
-		$contextInput.select2( 'val', 'group-' + $queryVars.connector );
+		$contextInput.val( 'group-' + $queryVars.connector );
+		$contextInput.trigger( 'change' );
 	}
+
+	$( 'input[type=submit]', '#record-filter-form' ).click( function() {
+		$( 'input[type=submit]', $( this ).parents( 'form' ) ).removeAttr( 'clicked' );
+		$( this ).attr( 'clicked', 'true' );
+	});
 
 	$( '#record-filter-form' ).submit( function() {
 		var	$context        = $( '.toplevel_page_wp_stream :input.chosen-select[name="context"]' ),
 			$option         = $context.find( 'option:selected' ),
 			$connector      = $context.parent().find( '.record-filter-connector' ),
 			optionConnector = $option.data( 'group' ),
-			optionClass     = $option.prop( 'class' );
+			optionClass     = $option.prop( 'class' ),
+			$recordAction   = $( '.recordactions select' );
+
+		if ( $( '#record-actions-submit' ).attr( 'clicked' ) !== 'true' ) {
+			$recordAction.val( '' );
+		}
 
 		$connector.val( optionConnector );
 

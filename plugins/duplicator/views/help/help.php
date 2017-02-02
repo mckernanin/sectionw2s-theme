@@ -38,7 +38,6 @@ require_once(DUPLICATOR_PLUGIN_PATH . '/views/inc.header.php');
                     _e("Migrating WordPress is a complex process and the logic to make all the magic happen smoothly may not work quickly with every site.  With over 30,000 plugins and a very complex server eco-system some migrations may run into issues.  This is why the Duplicator includes a detailed knowledgebase that can help with many common issues.  Resources to additional support, approved hosting, and alternatives to fit your needs can be found below.", 'duplicator');
                     ?>
                 </td>
-
             </tr>
         </table>
         <br/><br/>
@@ -53,11 +52,10 @@ require_once(DUPLICATOR_PLUGIN_PATH . '/views/inc.header.php');
                 <?php _e('Complete Online Documentation', 'duplicator'); ?><br/>
                 <select id="dup-support-kb-lnks" style="margin-top:18px; font-size:16px; min-width: 170px">
                     <option> <?php _e('Choose A Section', 'duplicator') ?> </option>
-                    <option value="http://lifeinthegrid.com/duplicator-quick"><?php _e('Quick Start', 'duplicator') ?></option>
-                    <option value="http://lifeinthegrid.com/duplicator-guide"><?php _e('User Guide', 'duplicator') ?></option>
-                    <option value="http://lifeinthegrid.com/duplicator-faq"><?php _e('FAQs', 'duplicator') ?></option>
-                    <option value="http://lifeinthegrid.com/duplicator-log"><?php _e('Change Log', 'duplicator') ?></option>
-                    <option value="http://lifeinthegrid.com/labs/duplicator"><?php _e('Product Page', 'duplicator') ?></option>
+                    <option value="https://snapcreek.com/duplicator/docs/quick-start/"><?php _e('Quick Start', 'duplicator') ?></option>
+                    <option value="https://snapcreek.com/duplicator/docs/guide/"><?php _e('User Guide', 'duplicator') ?></option>
+                    <option value="https://snapcreek.com/duplicator/docs/faqs-tech/"><?php _e('FAQs', 'duplicator') ?></option>
+                    <option value="https://snapcreek.com/duplicator/docs/changelog/?lite"><?php _e('Change Log', 'duplicator') ?></option>
                 </select>
             </div>
         </div>
@@ -70,11 +68,13 @@ require_once(DUPLICATOR_PLUGIN_PATH . '/views/inc.header.php');
             </div>
             <div class="dup-support-hlp-txt">
                 <?php _e("Get Help From IT Professionals", 'duplicator'); ?> 
-                <br/><br/>
-                <div class="dup-support-txts-links">
-                    <button class="button  button-primary button-large" onclick="Duplicator.OpenSupportWindow();
-                                                return false;"><?php _e('Get Support!', 'duplicator') ?></button> &nbsp; 
+                <br/>
+                <div class="dup-support-txts-links" style="margin:10px 0 10px 0">
+                    <button class="button  button-primary button-large" onclick="Duplicator.OpenSupportWindow();return false;">
+						<?php _e('Get Support!', 'duplicator') ?>
+					</button> <br/>
                 </div>	
+				<small>Pro Users <a href="https://snapcreek.com/ticket" target="_blank">Support Here</a></small>
             </div>
         </div> 
         <br style="clear:both" /><br/><br/>
@@ -91,7 +91,7 @@ require_once(DUPLICATOR_PLUGIN_PATH . '/views/inc.header.php');
                 <?php _e('Servers That Work With Duplicator', 'duplicator'); ?>
                 <br/><br/>
                 <div class="dup-support-txts-links">
-                    <button class="button button-primary button-large" onclick="window.open('http://lifeinthegrid.com/duplicator-hosts', 'litg');"><?php _e('Trusted Providers!', 'duplicator') ?></button> &nbsp; 
+                    <button class="button button-primary button-large" onclick="window.open('https://snapcreek.com/duplicator/docs/faqs-tech/#faq-resource-040-q', 'litg');"><?php _e('Trusted Providers!', 'duplicator') ?></button> &nbsp; 
                 </div>
             </div>
         </div>
@@ -107,13 +107,10 @@ require_once(DUPLICATOR_PLUGIN_PATH . '/views/inc.header.php');
                 <?php _e('Other Commercial Resources', 'duplicator'); ?>
                 <br/><br/>
                 <div class="dup-support-txts-links">
-                    <button class="button button-primary button-large" onclick="window.open('http://lifeinthegrid.com/duplicator-getalts', 'litg');"><?php _e('Pro Solutions!', 'duplicator') ?></button> &nbsp; 
+                    <button class="button button-primary button-large" onclick="window.open('https://snapcreek.com/duplicator/docs/faqs-tech/#faq-resource-050-q', 'litg');"><?php _e('Pro Solutions!', 'duplicator') ?></button> &nbsp; 
                 </div>
             </div>
         </div>
-
-
-
     </div>
 </div><br/><br/><br/><br/>
 
@@ -121,7 +118,7 @@ require_once(DUPLICATOR_PLUGIN_PATH . '/views/inc.header.php');
     jQuery(document).ready(function($) {
 
         Duplicator.OpenSupportWindow = function() {
-            var url = 'http://lifeinthegrid.com/duplicator/resources/';
+            var url = 'https://snapcreek.com/duplicator/docs/faqs-tech/#faq-resource';
             window.open(url, 'litg');
         }
 

@@ -23,20 +23,30 @@ class DUP_Server
 		//PHP SUPPORT
 		$safe_ini = strtolower(ini_get('safe_mode'));
 		$dup_tests['PHP']['SAFE_MODE'] = $safe_ini  != 'on' || $safe_ini != 'yes' || $safe_ini != 'true' || ini_get("safe_mode") != 1 ? 'Pass' : 'Fail';
-		$dup_tests['PHP']['VERSION'] = version_compare(phpversion(), '5.2.9') >= 0 ? 'Pass' : 'Fail';
+		$dup_tests['PHP']['VERSION'] = DUP_Util::$on_php_529_plus				? 'Pass' : 'Fail';
 		$dup_tests['PHP']['ZIP']	 = class_exists('ZipArchive')				? 'Pass' : 'Fail';
 		$dup_tests['PHP']['FUNC_1']  = function_exists("file_get_contents")		? 'Pass' : 'Fail';
 		$dup_tests['PHP']['FUNC_2']  = function_exists("file_put_contents")		? 'Pass' : 'Fail';
 		$dup_tests['PHP']['FUNC_3']  = function_exists("mb_strlen")				? 'Pass' : 'Fail';
 		$dup_tests['PHP']['ALL']	 = ! in_array('Fail', $dup_tests['PHP'])	? 'Pass' : 'Fail';		
 		
-		//PERMISSIONS
-		$handle_test = @opendir(DUPLICATOR_WPROOTPATH);		
-		$dup_tests['IO']['WPROOT']	= is_writeable(DUPLICATOR_WPROOTPATH) && $handle_test ? 'Pass' : 'Fail';
-		$dup_tests['IO']['SSDIR']	= is_writeable(DUPLICATOR_SSDIR_PATH)		? 'Pass' : 'Fail';
+		//REQUIRED PATHS
+		if (file_exists(DUPLICATOR_SSDIR_PATH) && is_writeable(DUPLICATOR_SSDIR_PATH)) 
+		{
+			$dup_tests['IO']['SSDIR']	= 'Pass';
+			$dup_tests['IO']['WPROOT']	= 'Pass';
+		}
+		else 
+		{	
+			$handle_test = @opendir(DUPLICATOR_WPROOTPATH);
+			$dup_tests['IO']['WPROOT']	= is_writeable(DUPLICATOR_WPROOTPATH) && $handle_test ? 'Pass' : 'Fail';
+			$dup_tests['IO']['SSDIR']	= 'Fail';
+			@closedir($handle_test);
+		}
+		
 		$dup_tests['IO']['SSTMP']	= is_writeable(DUPLICATOR_SSDIR_PATH_TMP)	? 'Pass' : 'Fail';
 		$dup_tests['IO']['ALL']		= ! in_array('Fail', $dup_tests['IO'])		? 'Pass' : 'Fail'; 
-		@closedir($handle_test);
+	
 		
 		//SERVER SUPPORT
 		$dup_tests['SRV']['MYSQLi']		= function_exists('mysqli_connect')					? 'Pass' : 'Fail'; 

@@ -6,7 +6,7 @@
     form#dup-form-opts fieldset {border-radius:4px;  border-top:1px solid #dfdfdf;  line-height:20px}
     form#dup-form-opts fieldset{padding:10px 15px 15px 15px; min-height:275px; margin:0 10px 10px 10px}
     form#dup-form-opts textarea, input[type="text"] {width:100%}
-    form#dup-form-opts textarea#filter-dirs {height:100px}
+    form#dup-form-opts textarea#filter-dirs {height:85px}
     form#dup-form-opts textarea#filter-exts {height:27px}
     textarea#package_notes {height:37px;}
 	div.dup-notes-add {float:right; margin:-4px 2px 4px 0;}
@@ -16,13 +16,14 @@
     form#dup-form-opts div.tabs-panel{max-height:550px; padding:10px; min-height:280px}
     form#dup-form-opts ul li.tabs{font-weight:bold}
     ul.category-tabs li {padding:4px 15px 4px 15px}
-    select#archive-format {min-width:100px; margin:1px 0px 4px 0px}
+    select#archive-format {min-width:100px; margin:1px 0 4px 0}
     span#dup-archive-filter-file {color:#A62426; display:none}
     span#dup-archive-filter-db {color:#A62426; display:none}
-    div#dup-file-filter-items, div#dup-db-filter-items {padding:2px 0px 0px 15px; font-stretch:ultra-condensed; font-family:Calibri; }
-    label.dup-enable-filters {display:inline-block; margin:-5px 0px 5px 0px}
+    div#dup-file-filter-items, div#dup-db-filter-items {padding:5px 0;}
+	div#dup-db-filter-items {font-stretch:ultra-condensed; font-family:Calibri; }
+    label.dup-enable-filters {display:inline-block; margin:-5px 0 5px 0}
     div.dup-quick-links {font-size:11px; float:right; display:inline-block; margin-top:2px; font-style:italic}
-    div.dup-tabs-opts-help {font-style:italic; font-size:11px; margin:10px 0px 0px 10px; color:#777}
+    div.dup-tabs-opts-help {font-style:italic; font-size:11px; margin:10px 0 0 10px; color:#777}
     table#dup-dbtables td {padding:1px 15px 1px 4px}
 	table.dbmysql-compatibility td{padding:2px 20px 2px 2px}
 	div.dup-store-pro {font-size:12px; font-style:italic;}
@@ -35,12 +36,14 @@
     div.dup-installer-header-2 {font-weight:bold; border-bottom:1px solid #dfdfdf; padding-bottom:2px; width:100%}
     label.chk-labels {display:inline-block; margin-top:1px}
     table.dup-installer-tbl {width:95%; margin-left:20px}
+	div.dup-installer-panel-optional {text-align: center; font-style: italic; font-size: 12px; color:#777}
+	
+	/*TABS*/
+	ul.add-menu-item-tabs li, ul.category-tabs li {padding:3px 30px 5px}
 </style>
 
 <form id="dup-form-opts" method="post" action="?page=duplicator&tab=new2" data-validate="parsley">
 <input type="hidden" id="dup-form-opts-action" name="action" value="">
-<!-- RSR Removed the following -->
-<!-- <input type="hidden" id="dup-form-opts-hash" name="package-hash" value="<?php echo $package_hash; ?>">-->
 <div>
 	<label for="package-name"><b><?php _e('Name', 'duplicator') ?>:</b> </label>
 		<div class="dup-notes-add">
@@ -86,11 +89,11 @@ STORAGE -->
 							<img src="<?php echo DUPLICATOR_PLUGIN_URL ?>assets/img/google_drive_64px.png" /> 
 							<img src="<?php echo DUPLICATOR_PLUGIN_URL ?>assets/img/ftp-64.png" /> 
 							<?php echo sprintf(__('%1$s, %2$s, %3$s, %4$s and other storage options available in', 'duplicator'), 'Amazon', 'Dropbox', 'Google Drive', 'FTP'); ?>
-							<a href="http://snapcreek.com/duplicator/?free-storage" target="_blank"><?php _e('Professional', 'duplicator');?></a> 
+							<a href="https://snapcreek.com/duplicator/?utm_source=duplicator_free&utm_medium=wordpress_plugin&utm_content=free_storage&utm_campaign=duplicator_pro" target="_blank"><?php _e('Professional', 'duplicator');?></a> 
 							<i class="fa fa-lightbulb-o" 
-								data-tooltip-title="<?php DUP_Util::_e("Additional Storage:"); ?>" 
-								data-tooltip="<?php DUP_Util::_e('Professional allows you to create a package and then store it at a custom location on this server or to a cloud '
-										. 'based location such as Google Drive, Amazon, Dropbox or FTP.'); ?>">
+								data-tooltip-title="<?php _e("Additional Storage:", 'duplicator'); ?>" 
+								data-tooltip="<?php _e('Professional allows you to create a package and then store it at a custom location on this server or to a cloud '
+										. 'based location such as Google Drive, Amazon, Dropbox or FTP.', 'duplicator'); ?>">
 							 </i>
 						</span>
 					</div>                            
@@ -117,14 +120,14 @@ ARCHIVE -->
         <input type="hidden" name="archive-format" value="ZIP" />
 		
         <!-- NESTED TABS -->
-        <div class="categorydiv" data-dup-tabs='true'>
-            <ul class="category-tabs">
-                <li class="tabs"><?php _e('Files', 'duplicator') ?></li>
+        <div data-dup-tabs='true'>
+            <ul>
+                <li><?php _e('Files', 'duplicator') ?></li>
                 <li><?php _e('Database', 'duplicator') ?></li>
             </ul>
 
             <!-- TAB1:PACKAGE -->
-            <div class="tabs-panel">
+            <div>
                 <!-- FILTERS -->
                 <?php
 					$uploads = wp_upload_dir();
@@ -133,6 +136,11 @@ ARCHIVE -->
                 <div class="dup-enable-filters">
                     <input type="checkbox" id="filter-on" name="filter-on" onclick="Duplicator.Pack.ToggleFileFilters()" <?php echo ($Package->Archive->FilterOn) ? "checked='checked'" :""; ?> />	
                     <label for="filter-on"><?php _e("Enable File Filters", 'duplicator') ?></label>
+					<i class="fa fa-question-circle" 
+					   data-tooltip-title="<?php _e("File Filters:", 'duplicator'); ?>" 
+					   data-tooltip="<?php _e('File filters allow you to ignore directories and file extensions.  When creating a package only include the data you '
+					   . 'want and need.  This helps to improve the overall archive build time and keep your backups simple and clean.', 'duplicator'); ?>">
+					</i>
                 </div>
 
                 <div id="dup-file-filter-items">
@@ -158,18 +166,18 @@ ARCHIVE -->
                     </div>
 					<br/>
 					<span class="dup-pro-text">
-						<?php echo sprintf(DUP_Util::__('%1$s are available in'), 'Individual file filters'); ?>
-						<a href="http://snapcreek.com/duplicator/?free-file-filters" target="_blank"><?php _e('Professional', 'duplicator');?></a>
+						<?php echo sprintf(__('%1$s are available in', 'duplicator'), 'Individual file filters'); ?>
+						<a href="https://snapcreek.com/duplicator/?utm_source=duplicator_free&utm_medium=wordpress_plugin&utm_content=free_file_filters&utm_campaign=duplicator_pro" target="_blank"><?php _e('Professional', 'duplicator');?></a>
 						<i class="fa fa-lightbulb-o" 
-							data-tooltip-title="<?php DUP_Util::_e("File Filters:"); ?>" 
-							data-tooltip="<?php DUP_Util::_e('File filters allows you to select individual files and add them to an exclusion list that will filter them from the package.'); ?>">
+							data-tooltip-title="<?php _e("File Filters:", 'duplicator'); ?>" 
+							data-tooltip="<?php _e('File filters allows you to select individual files and add them to an exclusion list that will filter them from the package.', 'duplicator'); ?>">
 						 </i>
 					</span>
                 </div>
             </div>
 
             <!-- TAB2: DATABASE -->
-            <div class="tabs-panel">
+            <div>
                 <div class="dup-enable-filters">						
                     <table>
 						<tr>
@@ -182,8 +190,8 @@ ARCHIVE -->
                             <td>
 								<label for="dbfilter-on"><?php _e("Enable Table Filters", 'duplicator') ?> &nbsp;</label> 
 								<i class="fa fa-question-circle" 
-								   data-tooltip-title="<?php DUP_Util::_e("Enable Table Filters:"); ?>" 
-								   data-tooltip="<?php DUP_Util::_e('Checked tables will not be added to the database script.  Excluding certain tables can possibly cause your site or plugins to not work correctly after install!'); ?>">
+								   data-tooltip-title="<?php _e("Enable Table Filters:", 'duplicator'); ?>" 
+								   data-tooltip="<?php _e('Checked tables will not be added to the database script.  Excluding certain tables can possibly cause your site or plugins to not work correctly after install!', 'duplicator'); ?>">
 								</i>
 							</td>
                         </tr>
@@ -225,15 +233,15 @@ ARCHIVE -->
                     </div>	
                 </div>
 				<br/>
-				<?php DUP_Util::_e("Compatibility Mode") ?> &nbsp;
+				<?php _e("Compatibility Mode", 'duplicator') ?> &nbsp;
 				<i class="fa fa-question-circle" 
-				   data-tooltip-title="<?php DUP_Util::_e("Compatibility Mode:"); ?>" 
-				   data-tooltip="<?php DUP_Util::_e('This is an advanced database backwards compatibility feature that should ONLY be used if having problems installing packages.'
+				   data-tooltip-title="<?php _e("Compatibility Mode:", 'duplicator'); ?>" 
+				   data-tooltip="<?php _e('This is an advanced database backwards compatibility feature that should ONLY be used if having problems installing packages.'
 						   . ' If the database server version is lower than the version where the package was built then these options may help generate a script that is more compliant'
-						   . ' with the older database server. It is recommended to try each option separately starting with mysql40.'); ?>">
+						   . ' with the older database server. It is recommended to try each option separately starting with mysql40.', 'duplicator'); ?>">
 				</i> &nbsp;
 				<small style="font-style:italic">
-					<a href="https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_compatible" target="_blank">[<?php DUP_Util::_e('details'); ?>]</a>
+					<a href="https://dev.mysql.com/doc/refman/5.7/en/mysqldump.html#option_mysqldump_compatible" target="_blank">[<?php _e('details', 'duplicator'); ?>]</a>
 				</small>
 				<br/>
 				
@@ -249,24 +257,24 @@ ARCHIVE -->
 						<tr>
 							<td>
 								<input type="checkbox" name="dbcompat[]" id="dbcompat-mysql40" value="mysql40" <?php echo $is_mysql40 ? 'checked="true"' :''; ?> > 
-								<label for="dbcompat-mysql40"><?php DUP_Util::_e("mysql40") ?></label> 
+								<label for="dbcompat-mysql40"><?php _e("mysql40", 'duplicator') ?></label> 
 							</td>
 							<td>
 								<input type="checkbox" name="dbcompat[]" id="dbcompat-no_table_options" value="no_table_options" <?php echo $is_no_table ? 'checked="true"' :''; ?>> 
-								<label for="dbcompat-no_table_options"><?php DUP_Util::_e("no_table_options") ?></label>
+								<label for="dbcompat-no_table_options"><?php _e("no_table_options", 'duplicator') ?></label>
 							</td>
 							<td>
 								<input type="checkbox" name="dbcompat[]" id="dbcompat-no_key_options" value="no_key_options" <?php echo $is_no_key ? 'checked="true"' :''; ?>> 
-								<label for="dbcompat-no_key_options"><?php DUP_Util::_e("no_key_options") ?></label>
+								<label for="dbcompat-no_key_options"><?php _e("no_key_options", 'duplicator') ?></label>
 							</td>
 							<td>
 								<input type="checkbox" name="dbcompat[]" id="dbcompat-no_field_options" value="no_field_options" <?php echo $is_no_field ? 'checked="true"' :''; ?>> 
-								<label for="dbcompat-no_field_options"><?php DUP_Util::_e("no_field_options") ?></label>
+								<label for="dbcompat-no_field_options"><?php _e("no_field_options", 'duplicator') ?></label>
 							</td>
 						</tr>					
 					</table>
 				<?php else :?>
-					<i><?php DUP_Util::_e("This option is only availbe with mysqldump mode."); ?></i>
+					<i><?php _e("This option is only availbe with mysqldump mode.", 'duplicator'); ?></i>
 				<?php endif; ?>
 
             </div>
@@ -281,8 +289,14 @@ INSTALLER -->
         <i class="fa fa-bolt"></i> <?php _e('Installer', 'duplicator') ?>
         <div class="dup-box-arrow"></div>
     </div>			
-
+	
     <div class="dup-box-panel" id="dup-pack-installer-panel" style="<?php echo $ui_css_installer ?>">
+		
+		<div class="dup-installer-panel-optional">
+			<b><?php _e('All values in this section are', 'duplicator'); ?> <u><?php _e('optional', 'duplicator'); ?></u>.</b>
+			<?php _e("The installer can have these fields pre-filled at install time.", 'duplicator'); ?> 
+		</div>	
+		
         <div class="dup-installer-header-1"><i class="fa fa-caret-square-o-right"></i> <?php echo _e('STEP 1 - INPUTS', 'duplicator'); ?></div><br/>
         <table class="dup-installer-tbl">
             <tr>
@@ -343,20 +357,16 @@ INSTALLER -->
                 <td style="width:130px"><?php _e("New URL", 'duplicator') ?></td>
                 <td><input type="text" name="url-new" id="url-new" value="<?php echo $Package->Installer->OptsURLNew ?>" placeholder="http://mynewsite.com" /></td>
             </tr>
-        </table>
+        </table>	
 		
-        <div class="dup-tabs-opts-help">
-			<?php _e("The installer can have these fields pre-filled at install time.", 'duplicator'); ?> <b><?php _e('All values are optional.', 'duplicator'); ?></b>
-        </div>	
-		
-		<div style="padding:10px 0 0 12px; display:none">
+		<div style="padding:10px 0 0 12px;">
 			<span class="dup-pro-text">
 				<img src="<?php echo DUPLICATOR_PLUGIN_URL ?>assets/img/cpanel-48.png" style="width:16px; height:12px" />
 				<?php _e("Connect to a cPanel database with.", 'duplicator'); ?> 
-				<a href="http://snapcreek.com/duplicator/?free-file-filters" target="_blank"><?php _e('Professional', 'duplicator');?></a>
+				<a href="https://snapcreek.com/duplicator/?utm_source=duplicator_free&utm_medium=wordpress_plugin&utm_content=free_cpanel&utm_campaign=duplicator_pro" target="_blank"><?php _e('Professional', 'duplicator');?></a>
 				<i class="fa fa-lightbulb-o" 
-					data-tooltip-title="<?php DUP_Util::_e("cPanel Access:"); ?>" 
-					data-tooltip="<?php DUP_Util::_e('If your server supports cPanel API access then you can create new databases and select existing ones with Duplicator Professional.'); ?>">
+					data-tooltip-title="<?php _e("cPanel Access:", 'duplicator'); ?>" 
+					data-tooltip="<?php _e('If your server supports cPanel API access then you can create new databases and select existing ones with Duplicator Professional at install time.', 'duplicator'); ?>">
 				</i>
 			</span>
 		</div>
@@ -367,7 +377,7 @@ INSTALLER -->
 
 <div class="dup-button-footer">
     <input type="button" value="<?php _e("Reset", 'duplicator') ?>" class="button button-large" <?php echo ($dup_tests['Success']) ? '' :'disabled="disabled"'; ?> onclick="Duplicator.Pack.ResetSettings()" />
-    <input type="submit" value="<?php _e("Next", 'duplicator') ?> &#9658;" class="button button-primary button-large" <?php echo ($dup_tests['Success']) ? '' :'disabled="disabled"'; ?> />
+    <input type="submit" value="<?php _e("Next", 'duplicator') ?> &#9654;" class="button button-primary button-large" <?php echo ($dup_tests['Success']) ? '' :'disabled="disabled"'; ?> />
 </div>
 
 </form>

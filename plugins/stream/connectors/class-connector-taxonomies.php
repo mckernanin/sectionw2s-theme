@@ -123,7 +123,7 @@ class Connector_Taxonomies extends Connector {
 		unset( $object_type );
 
 		$taxonomy_obj = (object) $args;
-		$label        = get_taxonomy_labels( $taxonomy_obj )->name;
+		$label        = get_taxonomy_labels( $taxonomy_obj )->singular_name;
 
 		$this->context_labels[ $taxonomy ] = $label;
 
@@ -140,7 +140,7 @@ class Connector_Taxonomies extends Connector {
 	 * @param string $taxonomy
 	 */
 	public function callback_created_term( $term_id, $tt_id, $taxonomy ) {
-		if ( in_array( $taxonomy, $this->get_excluded_taxonomies() ) ) {
+		if ( in_array( $taxonomy, $this->get_excluded_taxonomies(), true ) ) {
 			return;
 		}
 
@@ -173,7 +173,7 @@ class Connector_Taxonomies extends Connector {
 	 * @param object $deleted_term
 	 */
 	public function callback_delete_term( $term_id, $tt_id, $taxonomy, $deleted_term ) {
-		if ( in_array( $taxonomy, $this->get_excluded_taxonomies() ) ) {
+		if ( in_array( $taxonomy, $this->get_excluded_taxonomies(), true ) ) {
 			return;
 		}
 
@@ -209,7 +209,7 @@ class Connector_Taxonomies extends Connector {
 	}
 
 	public function callback_edited_term( $term_id, $tt_id, $taxonomy ) {
-		if ( in_array( $taxonomy, $this->get_excluded_taxonomies() ) ) {
+		if ( in_array( $taxonomy, $this->get_excluded_taxonomies(), true ) ) {
 			return;
 		}
 

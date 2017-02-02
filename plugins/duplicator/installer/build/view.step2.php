@@ -1,21 +1,20 @@
 <?php
 	// Exit if accessed directly
 	if (! defined('DUPLICATOR_INIT')) {
-		$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-		$_baseURL =  "http://" . $_baseURL;
+		$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];;
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: $_baseURL");
 		exit; 
 	}
-	$dbh = DupUtil::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], $_POST['dbname'], $_POST['dbport']);
+	$dbh = DUPX_Util::db_connect($_POST['dbhost'], $_POST['dbuser'], $_POST['dbpass'], $_POST['dbname'], $_POST['dbport']);
 
-	$all_tables     = DupUtil::get_database_tables($dbh);
-	$active_plugins = DupUtil::get_active_plugins($dbh);
+	$all_tables     = DUPX_Util::get_database_tables($dbh);
+	$active_plugins = DUPX_Util::get_active_plugins($dbh);
 	
 
 	$old_path = $GLOBALS['FW_WPROOT'];
-	$new_path = DupUtil::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']);
-	$new_path = ((strrpos($old_path, '/') + 1) == strlen($old_path)) ? DupUtil::add_slash($new_path) : $new_path; 
+	$new_path = DUPX_Util::set_safe_path($GLOBALS['CURRENT_ROOT_PATH']);
+	$new_path = ((strrpos($old_path, '/') + 1) == strlen($old_path)) ? DUPX_Util::add_slash($new_path) : $new_path; 
 ?>
 
 <script type="text/javascript">
@@ -140,13 +139,13 @@ VIEW: STEP 2- INPUT -->
 	<input type="hidden" name="dbcharset" 	 value="<?php echo $_POST['dbcharset'] ?>" />
 	<input type="hidden" name="dbcollate" 	 value="<?php echo $_POST['dbcollate'] ?>" />
 	
-	
 	<div class="dup-logfile-link"><a href="installer-log.txt" target="_blank">installer-log.txt</a></div>
-	<h3>Step 2: Files &amp; Database</h3>
-	<hr size="1" /><br />
+	<div class="hdr-main">
+		Step 2: Update Files &amp; Database
+	</div><br />
 
-	<div class="title-header">Old Settings</div>
-	<table class="table-inputs-step2">
+	<div class="hdr-sub">Old Settings</div>
+	<table class="table-inputs-s2">
 		<tr valign="top">
 			<td style="width:80px">URL</td>
 			<td>
@@ -163,8 +162,8 @@ VIEW: STEP 2- INPUT -->
 		</tr>
 	</table>
 
-	<div class="title-header" style="margin-top:8px">New Settings</div>
-	<table class="table-inputs-step2">		
+	<div class="hdr-sub" style="margin-top:8px">New Settings</div>
+	<table class="table-inputs-s2">		
 		<tr>
 			<td style="width:80px">URL</td>
 			<td>
@@ -180,30 +179,31 @@ VIEW: STEP 2- INPUT -->
 			<td>Title</td>
 			<td><input type="text" name="blogname" id="blogname" value="<?php echo $GLOBALS['FW_BLOGNAME'] ?>" /></td>
 		</tr>
-	</table><br/>
-	
-	<!-- ==========================
-    CREATE NEW USER -->
-	<a href="javascript:void(0)" onclick="$('#dup-step2-user-opts').toggle(0)"><b>New Admin Account...</b></a>
-	<div id='dup-step2-user-opts' style="display:none;">
-	<table class="table-inputs-step2" style="margin-top:7px">
-		<tr><td colspan="2"><i style="color:gray;font-size: 11px">This feature is optional.  If the username already exists the account will NOT be created or updated.</i></td></tr>
-		<tr>
-			<td>Username </td>
-			<td><input type="text" name="wp_username" id="wp_username" value="" title="4 characters minimum" placeholder="(4 or more characters)" /></td>
-		</tr>	
-		<tr>
-			<td valign="top">Password</td>
-			<td><input type="text" name="wp_password" id="wp_password" value="" title="6 characters minimum"  placeholder="(6 or more characters)" /></td>
-		</tr>
 	</table>
-	</div><br/><br/>
-	
-	
+	<br/><br/>
+		
 	<!-- ==========================
     ADVANCED OPTIONS -->
-	<a href="javascript:void(0)" onclick="$('#dup-step2-adv-opts').toggle(0)"><b>Advanced Options...</b></a>
-	<div id='dup-step2-adv-opts' style="display:none;">
+	<a href="javascript:void(0)" onclick="$('#dup-s2-adv-opts').toggle(0)"><b style="font-size:14px">Advanced Options...</b></a>
+	<div id='dup-s2-adv-opts' style="display:none;">
+		
+		<br/>
+		<div class="hdr-sub">Add New Admin Account</div>
+		<table class="table-inputs-s2" style="margin-top:7px">
+			<tr><td colspan="2"><i style="color:gray;font-size: 11px">This feature is optional.  If the username already exists the account will NOT be created or updated.</i></td></tr>
+			<tr>
+				<td>Username </td>
+				<td><input type="text" name="wp_username" id="wp_username" value="" title="4 characters minimum" placeholder="(4 or more characters)" /></td>
+			</tr>	
+			<tr>
+				<td valign="top">Password</td>
+				<td><input type="text" name="wp_password" id="wp_password" value="" title="6 characters minimum"  placeholder="(6 or more characters)" /></td>
+			</tr>
+		</table>
+		<br/><br/>
+		
+		
+		<div class="hdr-sub">Scan Options</div>
 		<table style="width: 100%;">
 			<tr>
 				<td valign="top" style="width:80px">Site URL</td>
@@ -213,20 +213,18 @@ VIEW: STEP 2- INPUT -->
 				</td>
 			</tr>
 		</table><br/>
-		
-
 		<table>
 			<tr>
 				<td style="padding-right:10px">
 					Scan Tables
-					<div class="dup-step2-allnonelinks">
+					<div class="dup-s2-allnonelinks">
 						<a href="javascript:void(0)" onclick="$('#tables option').prop('selected',true);">[All]</a> 
 						<a href="javascript:void(0)" onclick="$('#tables option').prop('selected',false);">[None]</a>
 					</div><br style="clear:both" />
 					<select id="tables" name="tables[]" multiple="multiple" style="width:315px; height:100px">
 						<?php
 						foreach( $all_tables as $table ) {
-							echo '<option selected="selected" value="' . DupUtil::esc_html_attr( $table ) . '">' . $table . '</option>';
+							echo '<option selected="selected" value="' . DUPX_Util::esc_html_attr( $table ) . '">' . $table . '</option>';
 						} 
 						?>
 					</select>
@@ -234,14 +232,14 @@ VIEW: STEP 2- INPUT -->
 				</td>
 				<td valign="top">
 					Activate Plugins
-					<div class="dup-step2-allnonelinks">
+					<div class="dup-s2-allnonelinks">
 						<a href="javascript:void(0)" onclick="$('#plugins option').prop('selected',true);">[All]</a> 
 						<a href="javascript:void(0)" onclick="$('#plugins option').prop('selected',false);">[None]</a>
 					</div><br style="clear:both" />
 					<select id="plugins" name="plugins[]" multiple="multiple" style="width:315px; height:100px">
 						<?php
 						foreach ($active_plugins as $plugin) {
-							echo '<option selected="selected" value="' . DupUtil::esc_html_attr( $plugin ) . '">' . dirname($plugin) . '</option>';
+							echo '<option selected="selected" value="' . DUPX_Util::esc_html_attr( $plugin ) . '">' . dirname($plugin) . '</option>';
 						} 
 						?>
 					</select>
@@ -256,7 +254,7 @@ VIEW: STEP 2- INPUT -->
 		
 	</div>
 
-	<div class="dup-footer-buttons">
+	<div class="dup-footer-buttons" style='position: absolute; bottom:20px'>
 		<input id="dup-step2-next" type="button" value=" Run Update " onclick="Duplicator.runUpdate()"  />
 	</div>	
 </form>
@@ -272,8 +270,9 @@ VIEW: STEP 2 - AJAX RESULT  -->
 	<input type="hidden" name="json"    id="ajax-json" />	
 	
 	<div class="dup-logfile-link"><a href="installer-log.txt" target="_blank">installer-log.txt</a></div>
-	<h3>Step 2: Update Table Data</h3>
-	<hr size="1" />
+	<div class="hdr-main">
+		Step 2: Update Files &amp; Database
+	</div><br />
 	
 	<!--  PROGRESS BAR -->
 	<div id="progress-area">
@@ -291,7 +290,7 @@ VIEW: STEP 2 - AJAX RESULT  -->
 			<div id="ajaxerr-data">An unknown issue has occurred with the data replacement setup process.  Please see the installer-log.txt file for more details.</div>
 			<div style="text-align:center; margin:10px auto 0px auto">
 				<input type="button" onclick='Duplicator.hideErrorResult2()' value="&laquo; Try Again" /><br/><br/>
-				<i style='font-size:11px'>See online help for more details at <a href='http://lifeinthegrid.com/support' target='_blank'>support.lifeinthegrid.com</a></i>
+				<i style='font-size:11px'>See online help for more details at <a href='https://snapcreek.com/ticket' target='_blank'>snapcreek.com</a></i>
 			</div>
 		</div>
 	</div>

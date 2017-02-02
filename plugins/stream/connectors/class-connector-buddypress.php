@@ -157,7 +157,7 @@ class Connector_BuddyPress extends Connector {
 	 * @return array Action links
 	 */
 	public function action_links( $links, $record ) {
-		if ( in_array( $record->context, array( 'components' ) ) ) {
+		if ( in_array( $record->context, array( 'components' ), true ) ) {
 			$option_key = $record->get_meta( 'option_key', true );
 
 			if ( 'bp-active-components' === $option_key ) {
@@ -182,14 +182,14 @@ class Connector_BuddyPress extends Connector {
 					$links[ esc_html__( 'View', 'stream' ) ]      = get_permalink( $page_id );
 				}
 			}
-		} elseif ( in_array( $record->context, array( 'settings' ) ) ) {
+		} elseif ( in_array( $record->context, array( 'settings' ), true ) ) {
 			$links[ esc_html__( 'Edit setting', 'stream' ) ] = add_query_arg(
 				array(
 					'page' => $record->get_meta( 'page', true ),
 				),
 				admin_url( 'admin.php' )
 			);
-		} elseif ( in_array( $record->context, array( 'groups' ) ) ) {
+		} elseif ( in_array( $record->context, array( 'groups' ), true ) ) {
 			$group_id = $record->get_meta( 'id', true );
 			$group    = \groups_get_group( array( 'group_id' => $group_id ) );
 
@@ -204,7 +204,7 @@ class Connector_BuddyPress extends Connector {
 				$links[ esc_html__( 'View group', 'stream' ) ] = $visit_url;
 				$links[ esc_html__( 'Delete group', 'stream' ) ] = $delete_url;
 			}
-		} elseif ( in_array( $record->context, array( 'activity' ) ) ) {
+		} elseif ( in_array( $record->context, array( 'activity' ), true ) ) {
 			$activity_id = $record->get_meta( 'id', true );
 			$activities = \bp_activity_get( array( 'in' => $activity_id, 'spam' => 'all' ) );
 			if ( ! empty( $activities['activities'] ) ) {
@@ -225,7 +225,7 @@ class Connector_BuddyPress extends Connector {
 				}
 				$links[ esc_html__( 'Delete', 'stream' ) ] = $delete_url;
 			}
-		} elseif ( in_array( $record->context, array( 'profile_fields' ) ) ) {
+		} elseif ( in_array( $record->context, array( 'profile_fields' ), true ) ) {
 			$field_id = $record->get_meta( 'field_id', true );
 			$group_id = $record->get_meta( 'group_id', true );
 
@@ -673,7 +673,7 @@ class Connector_BuddyPress extends Connector {
 			'mod'   => esc_html_x( 'Moderator', 'buddypress', 'stream' ),
 		);
 		$message = sprintf(
-			__( 'Promoted "%s" to "%s" in "%s"', 'stream' ),
+			__( 'Promoted "%1$s" to "%2$s" in "%3$s"', 'stream' ),
 			$user->display_name,
 			$roles[ $status ],
 			$group->name
@@ -685,7 +685,7 @@ class Connector_BuddyPress extends Connector {
 		$group = \groups_get_group( array( 'group_id' => $group_id ) );
 		$user = new \WP_User( $user_id );
 		$message = sprintf(
-			__( 'Demoted "%s" to "%s" in "%s"', 'stream' ),
+			__( 'Demoted "%1$s" to "%2$s" in "%3$s"', 'stream' ),
 			$user->display_name,
 			_x( 'Member', 'buddypress', 'stream' ),
 			$group->name

@@ -5,8 +5,7 @@
 *******************************************/
 
 
-function rc_settings_page()
-{
+function rc_settings_page() {
 	global $rc_options;
 		
 	?>
@@ -104,4 +103,4 @@ function rc_settings_menu() {
 	// add settings page
 	add_submenu_page('options-general.php', __('Restrict Content Settings', 'restrict-content'), __('Restrict Content', 'restrict-content'), 'manage_options', 'restrict-content-settings', 'rc_settings_page');
 }
-add_action('admin_menu', 'rc_settings_menu');
+add_action( 'admin_menu', 'rc_settings_menu' );

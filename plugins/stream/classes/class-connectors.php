@@ -83,7 +83,7 @@ class Connectors {
 
 		$classes = array();
 		foreach ( $connectors as $connector ) {
-			include_once $this->plugin->locations['dir'] . '/connectors/class-connector-' . $connector .'.php';
+			include_once $this->plugin->locations['dir'] . '/connectors/class-connector-' . $connector . '.php';
 			$class_name = sprintf( '\WP_Stream\Connector_%s', str_replace( '-', '_', $connector ) );
 			if ( ! class_exists( $class_name ) ) {
 				continue;
@@ -93,12 +93,8 @@ class Connectors {
 				continue;
 			}
 			if ( $class->is_dependency_satisfied() ) {
-				$classes[] = $class;
+				$classes[ $class->name ] = $class;
 			}
-		}
-
-		if ( empty( $classes ) ) {
-			return;
 		}
 
 		/**
@@ -107,6 +103,10 @@ class Connectors {
 		 * @param array $classes An array of Connector objects.
 		 */
 		$this->connectors = apply_filters( 'wp_stream_connectors', $classes );
+
+		if ( empty( $this->connectors ) ) {
+			return;
+		}
 
 		foreach ( $this->connectors as $connector ) {
 			if ( ! method_exists( $connector, 'get_label' ) ) {
@@ -120,35 +120,35 @@ class Connectors {
 
 		foreach ( $this->connectors as $connector ) {
 			if ( ! method_exists( $connector, 'get_label' ) ) {
-				$this->plugin->admin->notice( sprintf( __( "%s class wasn't loaded because it doesn't implement the get_label method.", 'stream' ), $connector->name, 'Connector' ), true );
+				$this->plugin->admin->notice( sprintf( __( '%s class wasn\'t loaded because it doesn\'t implement the get_label method.', 'stream' ), $connector->name, 'Connector' ), true );
 				continue;
 			}
 			if ( ! method_exists( $connector, 'register' ) ) {
-				$this->plugin->admin->notice( sprintf( __( "%s class wasn't loaded because it doesn't implement the register method.", 'stream' ), $connector->name, 'Connector' ), true );
+				$this->plugin->admin->notice( sprintf( __( '%s class wasn\'t loaded because it doesn\'t implement the register method.', 'stream' ), $connector->name, 'Connector' ), true );
 				continue;
 			}
 			if ( ! method_exists( $connector, 'get_context_labels' ) ) {
-				$this->plugin->admin->notice( sprintf( __( "%s class wasn't loaded because it doesn't implement the get_context_labels method.", 'stream' ), $connector->name, 'Connector' ), true );
+				$this->plugin->admin->notice( sprintf( __( '%s class wasn\'t loaded because it doesn\'t implement the get_context_labels method.', 'stream' ), $connector->name, 'Connector' ), true );
 				continue;
 			}
 			if ( ! method_exists( $connector, 'get_action_labels' ) ) {
-				$this->plugin->admin->notice( sprintf( __( "%s class wasn't loaded because it doesn't implement the get_action_labels method.", 'stream' ), $connector->name, 'Connector' ), true );
+				$this->plugin->admin->notice( sprintf( __( '%s class wasn\'t loaded because it doesn\'t implement the get_action_labels method.', 'stream' ), $connector->name, 'Connector' ), true );
 				continue;
 			}
 
-			// Check if the connectors extends the Connector class, if not skip it
+			// Check if the connectors extends the Connector class, if not skip it.
 			if ( ! is_subclass_of( $connector, '\WP_Stream\Connector' ) ) {
-				$this->plugin->admin->notice( sprintf( __( "%s class wasn't loaded because it doesn't extends the %s class.", 'stream' ), $connector->name, 'Connector' ), true );
+				$this->plugin->admin->notice( sprintf( __( '%1$s class wasn\'t loaded because it doesn\'t extends the %2$s class.', 'stream' ), $connector->name, 'Connector' ), true );
 				continue;
 			}
 
 			// Store connector label
-			if ( ! in_array( $connector->name, $this->term_labels['stream_connector'] ) ) {
+			if ( ! in_array( $connector->name, $this->term_labels['stream_connector'], true ) ) {
 				$this->term_labels['stream_connector'][ $connector->name ] = $connector->get_label();
 			}
 
 			$connector_name = $connector->name;
-			$is_excluded    = in_array( $connector_name, $excluded_connectors );
+			$is_excluded    = in_array( $connector_name, $excluded_connectors, true );
 
 			/**
 			 * Allows excluded connectors to be overridden and registered.

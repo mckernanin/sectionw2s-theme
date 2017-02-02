@@ -220,8 +220,10 @@ class Network {
 			'wp_stream_hidden_option_fields',
 			array(
 				'general' => array(
-					'delete_all_records',
 					'records_ttl',
+				),
+				'advanced' => array(
+					'delete_all_records',
 				),
 			)
 		);
@@ -257,7 +259,7 @@ class Network {
 					continue;
 				}
 
-				if ( in_array( $field['name'], $hidden_options[ $section_key ] ) ) {
+				if ( in_array( $field['name'], $hidden_options[ $section_key ], true ) ) {
 					unset( $fields[ $section_key ]['fields'][ $key ] );
 				}
 			}
@@ -319,7 +321,7 @@ class Network {
 			$this->default_settings_page_slug,
 		);
 
-		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $allowed_referers ) ) {
+		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $allowed_referers, true ) ) {
 			return;
 		}
 
@@ -394,10 +396,10 @@ class Network {
 		);
 
 		// add all sites
-		foreach ( wp_get_sites() as $blog ) {
-			$blog_data = get_blog_details( $blog );
+		foreach ( wp_stream_get_sites() as $blog ) {
+			$blog_data = get_blog_details( $blog->blog_id );
 
-			$blogs[ $blog['blog_id'] ] = array(
+			$blogs[ $blog->blog_id ] = array(
 				'label'    => $blog_data->blogname,
 				'disabled' => '',
 			);
@@ -479,7 +481,7 @@ class Network {
 	 */
 	public function network_admin_page_title( $page_title ) {
 		if ( is_network_admin() ) {
-			$site_count = sprintf( _n( '1 site', '%s sites', get_blog_count(), 'stream' ), number_format( get_blog_count() ) );
+			$site_count = sprintf( _n( '%d site', '%d sites', get_blog_count(), 'stream' ), number_format( get_blog_count() ) );
 			$page_title = sprintf( '%s (%s)', $page_title, $site_count );
 		}
 

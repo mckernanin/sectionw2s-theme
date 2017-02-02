@@ -146,7 +146,9 @@ class IWP_MMB_Backup_Singlecall extends IWP_MMB_Core
     }*/
     
     function set_backup_task($params){
-		if (!empty($params)) {
+		global $iwp_mmb_activities_log;
+		
+		if (!empty($params)) {			
         	
 			$this->statusLog($historyID, array('stage' => 'verification', 'status' => 'processing', 'statusMsg' => 'verificationInitiated'), $params);
 			
@@ -165,6 +167,8 @@ class IWP_MMB_Backup_Singlecall extends IWP_MMB_Core
 				if (is_array($result) && array_key_exists('error', $result)) {
 					$return = $result;
 				} else {
+					$iwp_mmb_activities_log->iwp_mmb_collect_backup_details($params);
+					
 					$return = unserialize($backup_settings['taskResults']);
 				}
 			//}
@@ -1104,9 +1108,7 @@ function delete_task_now($task_name){
                }
 				$insert_sql .= "\n\n\n";
 				
-               if ( $wpdb->check_connection() ) { // Still connected to database.
-                    $wpdb->flush(); // Free memory.
-                }   
+                $wpdb->flush(); // Free memory.   
 				// Help keep HTTP alive.
 				echo ' ';
 				flush();
@@ -2054,6 +2056,7 @@ function ftp_backup($args)
 			CFCredentials::set(array('development' => array('key' => trim($as3_access_key), 'secret' => trim(str_replace(' ', '+', $as3_secure_key)), 'default_cache_config' => '', 'certificate_authority' => true, 'use_ssl'=>false, 'ssl_verification'=>false), '@default' => 'development'));
 			$s3 = new AmazonS3();
             $response = $s3->create_object($as3_bucket, $as3_file, array('fileUpload' => $backup_file));
+            $s3->set_object_acl($as3_bucket, $as3_file, AmazonS3::ACL_PRIVATE);
 			$upload = $response->isOk();
 			if($upload) {
                 return true;
@@ -2516,15 +2519,13 @@ function ftp_backup($args)
 		$stats = array();
 		$table_name = $wpdb->base_prefix . "iwp_backup_status";
 		
-		$rows = $wpdb->get_results("SELECT taskName,taskResults FROM ".$table_name,  ARRAY_A);
-		
+		$rows = $wpdb->get_results("SELECT ID, taskName, taskResults FROM ".$table_name." ORDER BY ID DESC",  ARRAY_A);
+		$this->cleanup_failed_backups($rows);
 		$task_res = array();
 		foreach($rows as $key => $value){
 			$task_results = unserialize($value['taskResults']);
-			
-			if(!empty($task_results['task_results']))
+            if (!empty($task_results['task_results']))
 			foreach($task_results['task_results'] as $key => $data){
-				
 				$task_res[$value['taskName']]['task_results'][$key] = $data;
 			}
 		}
@@ -2532,6 +2533,31 @@ function ftp_backup($args)
 		return $task_res;
 	}
 	
+    function cleanup_failed_backups($rows){
+        $rowCount = 0;
+        if (empty($rows) || !is_array($rows)) {
+            return false;
+        }
+        foreach($rows as $key => $value){
+            $task_results = unserialize($value['taskResults']);
+            if(empty($task_results['task_results'])){
+                if ($rowCount > 0) {
+                   $this->remove_failed_backups($value['ID']);
+                }
+                $rowCount++;
+                continue;
+            }
+            $rowCount++;
+        }
+    }
+
+    function remove_failed_backups($ID){
+        global $wpdb;
+        $table_name = $wpdb->base_prefix . "iwp_backup_status";
+        $delete_query = "DELETE FROM ".$table_name." WHERE ID = '".$ID."' ";
+        $deleteRes = $wpdb->query($delete_query);
+    }
+
 	function get_this_tasks($requestParams = ''){
 		$this->wpdb_reconnect();
 				
@@ -2798,7 +2824,6 @@ function ftp_backup($args)
     function cleanup()
     {
 		$tasks = $this->get_all_tasks(); //all backups task results array.
-		
         $backup_folder     = WP_CONTENT_DIR . '/' . md5('iwp_mmb-client') . '/iwp_backups/';
         $backup_folder_new = IWP_BACKUP_DIR . '/';
 		$backup_temp_folder = IWP_PCLZIP_TEMPORARY_DIR;
@@ -2923,8 +2948,7 @@ function ftp_backup($args)
   		
   		if(empty($historyID))
 		{
-			
-  			$insert  = $wpdb->insert($wpdb->base_prefix.'iwp_backup_status',array( 'stage' => $statusArray['stage'], 'status' => $statusArray['status'],  'action' => $params['args']['action'], 'type' => $params['args']['type'],'category' => $params['args']['what'],'historyID' => $GLOBALS['IWP_CLIENT_HISTORY_ID'],'finalStatus' => 'pending','startTime' => microtime(true),'endTime' => '','statusMsg' => $statusArray['statusMsg'],'requestParams' => serialize($params),'taskName' => $params['task_name']), array( '%s', '%s','%s', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s' ) );
+  			$insert  = $wpdb->insert($wpdb->base_prefix.'iwp_backup_status',array( 'stage' => $statusArray['stage'], 'status' => $statusArray['status'],  'action' => $params['args']['action'], 'type' => $params['args']['type'],'category' => $params['args']['what'],'historyID' => $GLOBALS['IWP_CLIENT_HISTORY_ID'],'finalStatus' => 'pending','startTime' => microtime(true),'lastUpdateTime' => microtime(true), 'endTime' => '','statusMsg' => $statusArray['statusMsg'],'requestParams' => serialize($params),'taskName' => $params['task_name']), array( '%s', '%s','%s', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s' ) );
 			if($insert)
 			{
 				$insertID = $wpdb->insert_id;
@@ -2933,16 +2957,15 @@ function ftp_backup($args)
 		else if(isset($statusArray['responseParams']))
 		{
 			
-			$update = $wpdb->update($wpdb->base_prefix.'iwp_backup_status',array( 'responseParams' => serialize($statusArray['responseParams']),'stage' => $statusArray['stage'], 'status' => $statusArray['status'],'statusMsg' => $statusArray['statusMsg'], 'taskResults' =>  serialize($statusArray['task_result'])),array( 'historyID' => $historyID),array('%s','%s', '%s', '%s', '%s'),array('%d'));
+			$update = $wpdb->update($wpdb->base_prefix.'iwp_backup_status',array( 'responseParams' => serialize($statusArray['responseParams']),'stage' => $statusArray['stage'], 'status' => $statusArray['status'],'statusMsg' => $statusArray['statusMsg'], 'taskResults' =>  serialize($statusArray['task_result']), 'lastUpdateTime' => microtime(true)),array( 'historyID' => $historyID),array('%s','%s', '%s', '%s', '%s'),array('%d'));
 			
 			
 		}
   		else
 		{
-			$update = $wpdb->update($wpdb->base_prefix.'iwp_backup_status',array( 'stage' => $statusArray['stage'], 'status' => $statusArray['status'],'statusMsg' => $statusArray['statusMsg'], 'taskResults' =>  serialize($statusArray['task_result']) ),array( 'historyID' => $historyID),array('%s', '%s', '%s', '%s'),array('%d'));
+			$update = $wpdb->update($wpdb->base_prefix.'iwp_backup_status',array( 'stage' => $statusArray['stage'], 'status' => $statusArray['status'],'statusMsg' => $statusArray['statusMsg'], 'taskResults' =>  serialize($statusArray['task_result']), 'lastUpdateTime' => microtime(true)),array( 'historyID' => $historyID),array('%s', '%s', '%s', '%s'),array('%d'));
 						
 		}
-		
 		if( (isset($update)&&(!$update)) || (isset($insert)&&(!$insert)) )
 		{
 			//return array('error'=> $statusArray['statusMsg']);

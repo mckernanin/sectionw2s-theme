@@ -5,57 +5,27 @@ if ( ! defined('DUPLICATOR_VERSION') ) exit; // Exit if accessed directly
  * Helper Class for UI internactions
  * @package Dupicator\classes
  */
-class DUP_UI {
+class DUP_UI 
+{
 	
 	/**
 	 * The key used in the wp_options table
 	 * @var string 
 	 */
-	private static $OptionsTableKey = 'duplicator_ui_view_state';
+	private static $OptionsViewStateKey = 'duplicator_ui_view_state';
 	
 	/** 
      * Save the view state of UI elements
 	 * @param string $key A unique key to define the ui element
 	 * @param string $value A generic value to use for the view state
      */
-	static public function SaveViewState($key, $value) {
-	   
+	public static function SaveViewState($key, $value) 
+	{
 		$view_state = array();
-		$view_state = get_option(self::$OptionsTableKey);
+		$view_state = get_option(self::$OptionsViewStateKey);
 		$view_state[$key] =  $value;
-		$success = update_option(self::$OptionsTableKey, $view_state);
-		
+		$success = update_option(self::$OptionsViewStateKey, $view_state);
 		return $success;
-    }
-	
-	
-    /** 
-     * Saves the state of a UI element via post params
-	 * @return json result string
-	 * <code>
-	 * //JavaScript Ajax Request
-	 * Duplicator.UI.SaveViewStateByPost('dup-pack-archive-panel', 1);
-	 * 
-	 * //Call PHP Code
-	 * $view_state       = DUP_UI::GetViewStateValue('dup-pack-archive-panel');
-	 * $ui_css_archive   = ($view_state == 1)   ? 'display:block' : 'display:none';
-	 * </code>
-     */
-    static public function SaveViewStateByPost() {
-		
-		DUP_Util::CheckPermissions('read');
-		
-		$post  = stripslashes_deep($_POST);
-		$key   = esc_html($post['key']);
-		$value = esc_html($post['value']);
-		$success = self::SaveViewState($key, $value);
-		
-		//Show Results as JSON
-		$json = array();
-		$json['key']    = $key;
-		$json['value']  = $value;
-		$json['update-success'] = $success;
-		die(json_encode($json));
     }
 	
 	
@@ -63,8 +33,9 @@ class DUP_UI {
      *	Gets all the values from the settings array
 	 *  @return array Returns and array of all the values stored in the settings array
      */
-    static public function GetViewStateArray() {
-		return get_option(self::$OptionsTableKey);
+    public static function GetViewStateArray() 
+	{
+		return get_option(self::$OptionsViewStateKey);
 	}
 	
 	 /** 
@@ -72,8 +43,9 @@ class DUP_UI {
 	  * @param type $searchKey The key to search on
 	  * @return string Returns the value of the key searched or null if key is not found
 	  */
-    static public function GetViewStateValue($searchKey) {
-		$view_state = get_option(self::$OptionsTableKey);
+    public static function GetViewStateValue($searchKey) 
+	{
+		$view_state = get_option(self::$OptionsViewStateKey);
 		if (is_array($view_state)) {
 			foreach ($view_state as $key => $value) {
 				if ($key == $searchKey) {
@@ -88,7 +60,7 @@ class DUP_UI {
 	 * Shows a display message in the wp-admin if any researved files are found
 	 * @return type void
 	 */
-	static public function ShowReservedFilesNotice() 
+	public static function ShowReservedFilesNotice() 
 	{
 		//Show only on Duplicator pages and Dashboard when plugin is active
 		$dup_active = is_plugin_active('duplicator/duplicator.php');
@@ -104,13 +76,13 @@ class DUP_UI {
 			echo '<div class="error" id="dup-global-error-reserved-files"><p>';
 			if ($screen->id == 'duplicator_page_duplicator-tools' && $on_active_tab) 
 			{
-				DUP_Util::_e('Reserved Duplicator install files have been detected in the root directory.  Please delete these reserved files to avoid security issues.');
+				_e('Reserved Duplicator install files have been detected in the root directory.  Please delete these reserved files to avoid security issues.', 'duplicator');
 			}
 			else 
 			{
 				$duplicator_nonce = wp_create_nonce('duplicator_cleanup_page');
-				DUP_Util::_e('Reserved Duplicator install files have been detected in the root directory.  Please delete these reserved files to avoid security issues.');
-				@printf("<br/><a href='admin.php?page=duplicator-tools&tab=cleanup&_wpnonce=%s'>%s</a>", $duplicator_nonce, DUP_Util::__('Take me to the cleanup page!'));
+				_e('Reserved Duplicator install files have been detected in the root directory.  Please delete these reserved files to avoid security issues.', 'duplicator');
+				@printf("<br/><a href='admin.php?page=duplicator-tools&tab=cleanup&_wpnonce=%s'>%s</a>", $duplicator_nonce, __('Take me to the cleanup page!', 'duplicator'));
 			}			
 			echo "</p></div>";
 		} 

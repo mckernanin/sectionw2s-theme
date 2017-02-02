@@ -4,9 +4,10 @@ Plugin Name: Peter's Login Redirect
 Plugin URI: http://www.theblog.ca/wplogin-redirect
 Description: Redirect users to different locations after logging in. Define a set of rules for specific users, user with specific roles, users with specific capabilities, and a blanket rule for all other users. This is all managed in Settings > Login/logout redirects.
 Author: Peter Keung
-Version: 2.9.0
+Version: 2.9.1
 Text Domain: peters-login-redirect
 Change Log:
+2016-08-10  2.9.1: Support utf8mb4 encoding and prevent cross-site scripting when editing redirect URLs.
 2015-09-25  2.9.0: Update translation text domain in order to support translate.wordpress.org translation system
 2015-08-03  2.8.3: Add new URL variable "userslug" to match author URLs
 2014-09-06  2.8.2: Translation string fix.
@@ -61,7 +62,7 @@ global $rul_db_addresses;
 global $rul_version;
 // Name of the database table that will hold group information and moderator rules
 $rul_db_addresses = $wpdb->prefix . 'login_redirects';
-$rul_version = '2.9.0';
+$rul_version = '2.9.1';
 
 // A global variable that we will add to on the fly when $rul_local_only is set to equal 1
 $rul_allowed_hosts = array();
@@ -1209,10 +1210,10 @@ if( is_admin() )
                 {
                     $rul_usernamevalues .= '<form name="rul_username_edit_form[' . $i_user . ']" action="?page=' . basename(__FILE__) . '" method="post">';
                     $rul_usernamevalues .= '<tr>';
-                    $rul_usernamevalues .= '<td><p><input type="hidden" name="rul_username" value="' . $rul_value . '" /> ' . $rul_value . '</p></td>';
+                    $rul_usernamevalues .= '<td><p><input type="hidden" name="rul_username" value="' . htmlspecialchars( $rul_value ) . '" /> ' . $rul_value . '</p></td>';
                     $rul_usernamevalues .= '<td>';
-                    $rul_usernamevalues .= '<p>' . __('Login URL', 'peters-login-redirect' ) . '<br /><input type="text" size="90" maxlength="500" name="rul_username_address" value="' . $rul_url . '" /></p>';
-                    $rul_usernamevalues .= '<p>' . __('Logout URL', 'peters-login-redirect' ) . '<br /><input type="text" size="60" maxlength="500" name="rul_username_logout" value="' . $rul_url_logout . '" /></p>';
+                    $rul_usernamevalues .= '<p>' . __('Login URL', 'peters-login-redirect' ) . '<br /><input type="text" size="90" maxlength="500" name="rul_username_address" value="' . htmlspecialchars( $rul_url ) . '" /></p>';
+                    $rul_usernamevalues .= '<p>' . __('Logout URL', 'peters-login-redirect' ) . '<br /><input type="text" size="60" maxlength="500" name="rul_username_logout" value="' . htmlspecialchars( $rul_url_logout ) . '" /></p>';
                     $rul_usernamevalues .= '</td>';
                     $rul_usernamevalues .= '<td><p><input name="rul_username_edit" type="submit" value="' . __( 'Edit', 'peters-login-redirect' ) . '" /> <input type="submit" name="rul_username_delete" value="' . __( 'Delete', 'peters-login-redirect' ) . '" /></p></td>';
                     $rul_usernamevalues .= '</tr>';
@@ -1227,10 +1228,10 @@ if( is_admin() )
                 {
                     $rul_rolevalues .= '<form name="rul_role_edit_form[' . $i_role . ']" action="?page=' . basename(__FILE__) . '" method="post">';
                     $rul_rolevalues .= '<tr>';
-                    $rul_rolevalues .= '<td><p><input type="hidden" name="rul_role" value="' . $rul_value . '" /> ' . $rul_value . '</p></td>';
+                    $rul_rolevalues .= '<td><p><input type="hidden" name="rul_role" value="' . htmlspecialchars( $rul_value ) . '" /> ' . $rul_value . '</p></td>';
                     $rul_rolevalues .= '<td>';
-                    $rul_rolevalues .= '<p>' . __('Login URL', 'peters-login-redirect' ) . '<br /><input type="text" size="90" maxlength="500" name="rul_role_address" value="' . $rul_url . '" /></p>';
-                    $rul_rolevalues .= '<p>' . __('Logout URL', 'peters-login-redirect' ) . '<br /><input type="text" size="60" maxlength="500" name="rul_role_logout" value="' . $rul_url_logout . '" /></p>';
+                    $rul_rolevalues .= '<p>' . __('Login URL', 'peters-login-redirect' ) . '<br /><input type="text" size="90" maxlength="500" name="rul_role_address" value="' . htmlspecialchars( $rul_url ) . '" /></p>';
+                    $rul_rolevalues .= '<p>' . __('Logout URL', 'peters-login-redirect' ) . '<br /><input type="text" size="60" maxlength="500" name="rul_role_logout" value="' . htmlspecialchars( $rul_url_logout ) . '" /></p>';
                     $rul_rolevalues .= '</td>';
                     $rul_rolevalues .= '<td><p><input name="rul_role_edit" type="submit" value="' . __( 'Edit', 'peters-login-redirect' ) . '" /> <input type="submit" name="rul_role_delete" value="' . __( 'Delete', 'peters-login-redirect' ) . '" /></p></td>';
                     $rul_rolevalues .= '</tr>';
@@ -1244,10 +1245,10 @@ if( is_admin() )
                 {
                     $rul_levelvalues .= '<form name="rul_level_edit_form[' . $i_level . ']" action="?page=' . basename(__FILE__) . '" method="post">';
                     $rul_levelvalues .= '<tr>';
-                    $rul_levelvalues .= '<td><p><input type="hidden" name="rul_level" value="' . $rul_value . '" /> ' . $rul_value . '</p></td>';
+                    $rul_levelvalues .= '<td><p><input type="hidden" name="rul_level" value="' . htmlspecialchars( $rul_value ) . '" /> ' . $rul_value . '</p></td>';
                     $rul_levelvalues .= '<td>';
-                    $rul_levelvalues .= '<p>' . __('Login URL', 'peters-login-redirect' ) . '<br /><input type="text" size="90" maxlength="500" name="rul_level_address" value="' . $rul_url . '" /></p>';
-                    $rul_levelvalues .= '<p>' . __('Logout URL', 'peters-login-redirect' ) . '<br /><input type="text" size="60" maxlength="500" name="rul_level_logout" value="' . $rul_url_logout . '" /></p>';
+                    $rul_levelvalues .= '<p>' . __('Login URL', 'peters-login-redirect' ) . '<br /><input type="text" size="90" maxlength="500" name="rul_level_address" value="' . htmlspecialchars( $rul_url ) . '" /></p>';
+                    $rul_levelvalues .= '<p>' . __('Logout URL', 'peters-login-redirect' ) . '<br /><input type="text" size="60" maxlength="500" name="rul_level_logout" value="' . htmlspecialchars( $rul_url_logout ) . '" /></p>';
                     $rul_levelvalues .= '</td>';
                     $rul_levelvalues .= '<td><p><input name="rul_level_order" type="text" size="2" maxlength="2" value="' . $rul_order . '" /></td>';
                     $rul_levelvalues .= '<td><p><input name="rul_level_edit" type="submit" value="' . __( 'Edit', 'peters-login-redirect' ) . '" /> <input type="submit" name="rul_level_delete" value="' . __( 'Delete', 'peters-login-redirect' ) . '" /></p></td>';
@@ -1356,8 +1357,8 @@ if( is_admin() )
         
         <h3><?php _e( 'All other users', 'peters-login-redirect' ); ?></h3>
         <form name="rul_allform" action="<?php '?page=' . basename(__FILE__); ?>" method="post">
-            <p><?php _e('URL:', 'peters-login-redirect' ) ?> <input type="text" size="90" maxlength="500" name="rul_all" value="<?php print $rul_allvalue; ?>" /></p>
-            <p><?php _e('Logout URL:', 'peters-login-redirect' ) ?> <input type="text" size="90" maxlength="500" name="rul_all_logout" value="<?php print $rul_allvalue_logout; ?>" /></p>
+            <p><?php _e('URL:', 'peters-login-redirect' ) ?> <input type="text" size="90" maxlength="500" name="rul_all" value="<?php print htmlspecialchars( $rul_allvalue ); ?>" /></p>
+            <p><?php _e('Logout URL:', 'peters-login-redirect' ) ?> <input type="text" size="90" maxlength="500" name="rul_all_logout" value="<?php print htmlspecialchars( $rul_allvalue_logout ); ?>" /></p>
             <p class="submit"><input type="submit" name="rul_allupdatesubmit" value="<?php _e('Update', 'peters-login-redirect' ); ?>" /> <input type="submit" name="rul_alldeletesubmit" value="<?php _e('Delete', 'peters-login-redirect' ); ?>" /></p>
         </form>
         
@@ -1365,7 +1366,7 @@ if( is_admin() )
         
         <h3><?php _e( 'Post-registration', 'peters-login-redirect' ); ?></h3>
         <form name="rul_registerform" action="<?php '?page=' . basename(__FILE__); ?>" method="post">
-            <p><?php _e( 'URL:', 'peters-login-redirect' ) ?> <input type="text" size="90" maxlength="500" name="rul_register" value="<?php print $rul_registervalue; ?>" /></p>
+            <p><?php _e( 'URL:', 'peters-login-redirect' ) ?> <input type="text" size="90" maxlength="500" name="rul_register" value="<?php print htmlspecialchars( $rul_registervalue ); ?>" /></p>
             <p class="submit"><input type="submit" name="rul_registerupdatesubmit" value="<?php _e( 'Update', 'peters-login-redirect' ); ?>" /> <input type="submit" name="rul_registerdeletesubmit" value="<?php _e( 'Delete', 'peters-login-redirect' ); ?>" /></p>
         </form>
         
@@ -1464,14 +1465,14 @@ if( is_admin() )
 
         if( $current_version < 220 )
         {
-            $wpdb->query( "ALTER TABLE '$rul_db_addresses' ADD `rul_url_logout` LONGTEXT NOT NULL default '' AFTER `rul_url`" );
+            $wpdb->query( "ALTER TABLE `$rul_db_addresses` ADD `rul_url_logout` LONGTEXT NOT NULL default '' AFTER `rul_url`" );
         }
 
         if( $current_version < 250 )
         {
             // Insert the "on-register" redirect entry
             
-            $wpdb->query( "ALTER TABLE '$rul_db_addresses' CHANGE `rul_type` `rul_type` ENUM( 'user', 'role', 'level', 'all', 'register' ) NOT NULL" );
+            $wpdb->query( "ALTER TABLE `$rul_db_addresses` CHANGE `rul_type` `rul_type` ENUM( 'user', 'role', 'level', 'all', 'register' ) NOT NULL" );
             $wpdb->insert( $rul_db_addresses,
                 array( 'rul_type' => 'register' )
             );
@@ -1480,15 +1481,21 @@ if( is_admin() )
         if( $current_version < 253 )
         {
             // Allow NULL values for non-essential fields
-            $wpdb->query( "ALTER TABLE '$rul_db_addresses' CHANGE `rul_value` `rul_value` varchar(255) NULL default NULL" );
-            $wpdb->query( "ALTER TABLE '$rul_db_addresses' CHANGE `rul_url` `rul_url` LONGTEXT NULL default NULL" );
-            $wpdb->query( "ALTER TABLE '$rul_db_addresses' CHANGE `rul_url_logout` `rul_url_logout` LONGTEXT NULL default NULL" );
+            $wpdb->query( "ALTER TABLE `$rul_db_addresses` CHANGE `rul_value` `rul_value` varchar(255) NULL default NULL" );
+            $wpdb->query( "ALTER TABLE `$rul_db_addresses` CHANGE `rul_url` `rul_url` LONGTEXT NULL default NULL" );
+            $wpdb->query( "ALTER TABLE `$rul_db_addresses` CHANGE `rul_url_logout` `rul_url_logout` LONGTEXT NULL default NULL" );
         }
 
         if( $current_version < 261 )
         {
             // Change required capability to access settings page to manage_categories (since manage_links is deprecated)
             rulRedirectFunctionCollection::set_setting( 'rul_required_capability', 'manage_categories' );
+        }
+        
+        if( $current_version < 291 )
+        {
+            // Reduce size of rul_value field to support utf8mb4 character encoding
+            $wpdb->query( "ALTER TABLE `$rul_db_addresses` CHANGE `rul_value` `rul_value` varchar(191) NULL default NULL" );
         }
         
         if( $current_version != intval( str_replace( '.', '', $rul_version ) ) )
@@ -1507,7 +1514,7 @@ if( is_admin() )
         {
             $sql = "CREATE TABLE $rul_db_addresses (
             `rul_type` enum('user','role','level','all','register') NOT NULL,
-            `rul_value` varchar(255) NULL default NULL,
+            `rul_value` varchar(191) NULL default NULL,
             `rul_url` LONGTEXT NULL default NULL,
             `rul_url_logout` LONGTEXT NULL default NULL,
             `rul_order` int(2) NOT NULL default '0',

@@ -1,41 +1,38 @@
 <?php
 // Exit if accessed directly
 if (! defined('DUPLICATOR_INIT')) {
-	$_baseURL =  strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
-	$_baseURL =  "http://" . $_baseURL;
+	$_baseURL = "http://" . strlen($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST'];
 	header("HTTP/1.1 301 Moved Permanently");
 	header("Location: $_baseURL");
 	exit; 
 }
 
 /** * *****************************************************
- *  CLASS::DupUtil
  *  Various Static Utility methods for working with the installer */
-class DupUtil {
+class DUPX_Util 
+{
 
-
-
-    /** METHOD: GET_MICROTIME
+    /** 
      * Get current microtime as a float. Can be used for simple profiling.
      */
-    static public function get_microtime() {
+    public static function get_microtime() {
         return microtime(true);
     }
 
-    /** METHOD: ELAPSED_TIME
+    /** 
      * Return a string with the elapsed time.
      * Order of $end and $start can be switched. 
      */
-    static public function elapsed_time($end, $start) {
+    public static function elapsed_time($end, $start) {
         return sprintf("%.4f sec.", abs($end - $start));
     }
 
-    /** METHOD: ESC_HTML_ATTR
+    /** 
      * @param string $string Thing that needs escaping
      * @param bool $echo   Do we echo or return?
      * @return string    Escaped string. 
      */
-    static public function esc_html_attr($string = '', $echo = false) {
+    public static function esc_html_attr($string = '', $echo = false) {
         $output = htmlentities($string, ENT_QUOTES, 'UTF-8');
         if ($echo)
             echo $output;
@@ -43,22 +40,22 @@ class DupUtil {
             return $output;
     }
 
-    /** METHOD: TABLE_COUNT
+    /** 
      *  Count the tables in a given database
      *  @param string $_POST['dbname']		Database to count tables in 
      */
-    static public function dbtable_count($conn, $dbname) {
+    public static function dbtable_count($conn, $dbname) {
         $res = mysqli_query($conn, "SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = '{$dbname}' ");
         $row = mysqli_fetch_row($res);
         return is_null($row) ? 0 : $row[0];
     }
 
-    /** METHOD: TABLE_ROW_COUNT
+    /** 
      *  Returns the table count
      *  @param string $conn	        A valid link resource
      *  @param string $table_name	A valid table name
      */
-    static public function table_row_count($conn, $table_name) {
+    public static function table_row_count($conn, $table_name) {
         $total = mysqli_query($conn, "SELECT COUNT(*) FROM `$table_name`");
         if ($total) {
             $total = @mysqli_fetch_array($total);
@@ -68,11 +65,11 @@ class DupUtil {
         }
     }
 
-    /** METHOD: ADD_ENDING_SLASH
+    /** 
      *  Adds a slash to the end of a path
      *  @param string $path		A path
      */
-    static public function add_slash($path) {
+    public static function add_slash($path) {
         $last_char = substr($path, strlen($path) - 1, 1);
         if ($last_char != '/') {
             $path .= '/';
@@ -80,36 +77,36 @@ class DupUtil {
         return $path;
     }
 
-    /** METHOD: SET_SAFE_PATH
+    /** 
      *  Makes path safe for any OS
      *  Paths should ALWAYS READ be "/"
      * 		uni: /home/path/file.xt
      * 		win:  D:/home/path/file.txt 
      *  @param string $path		The path to make safe
      */
-    static public function set_safe_path($path) {
+    public static function set_safe_path($path) {
         return str_replace("\\", "/", $path);
     }
 
-    static public function unset_safe_path($path) {
+    public static function unset_safe_path($path) {
         return str_replace("/", "\\", $path);
     }
 
-    /** METHOD: FCGI_FLUSH
+    /** 
      *  PHP_SAPI for fcgi requires a data flush of at least 256
      *  bytes every 40 seconds or else it forces a script hault
      */
-    static public function fcgi_flush() {
+    public static function fcgi_flush() {
         echo(str_repeat(' ', 256));
         @flush();
     }
 
-    /** METHOD: COPY_FILE
+    /** 
      *  A safe method used to copy larger files
      *  @param string $source		The path to the file being copied
      *  @param string $destination	The path to the file being made
      */
-    static public function copy_file($source, $destination) {
+    public static function copy_file($source, $destination) {
         $sp = fopen($source, 'r');
         $op = fopen($destination, 'w');
 
@@ -122,18 +119,19 @@ class DupUtil {
         fclose($sp);
     }
 
-    /** METHOD: string_has_value
-     *  Finds a string in a file and returns true if found
+    /** 
+     *  Looks for a list of strings in a string and returns each list item that is found
      *  @param array  $list		A list of strings to search for
      *  @param string $haystack	The string to search in
      */
-    static public function string_has_value($list, $file) {
+    public static function search_list_values($list, $haystack) {
+		$found = array();
         foreach ($list as $var) {
-            if (strstr($file, $var) !== false) {
-                return true;
+            if (strstr($haystack, $var) !== false) {
+				array_push($found, $var);
             }
         }
-        return false;
+        return $found;
     }
 
     /** METHOD: get_active_plugins
@@ -141,7 +139,7 @@ class DupUtil {
      *  @param  conn   $dbh	 A database connection handle
      *  @return array  $list A list of active plugins
      */
-    static public function get_active_plugins($dbh) {
+    public static function get_active_plugins($dbh) {
         $query = @mysqli_query($dbh, "SELECT option_value FROM `{$GLOBALS['FW_TABLEPREFIX']}options` WHERE option_name = 'active_plugins' ");
         if ($query) {
             $row = @mysqli_fetch_array($query);
@@ -153,12 +151,12 @@ class DupUtil {
         return array();
     }
 
-    /** METHOD: get_database_tables
+    /** 
      *  Returns the tables for a database
      *  @param  conn   $dbh	 A database connection handle	 
      *  @return array  $list A list of all table names
      */
-    static public function get_database_tables($dbh) {
+    public static function get_database_tables($dbh) {
         $query = @mysqli_query($dbh, 'SHOW TABLES');
         if ($query) {
             while ($table = @mysqli_fetch_array($query)) {
@@ -176,7 +174,7 @@ class DupUtil {
      * @param same as mysqli_connect
      * @return database connection handle
      */	
-	static public function db_connect( $host, $username, $password, $dbname = '', $port = null ) {
+	public static function db_connect( $host, $username, $password, $dbname = '', $port = null ) {
 
 		//sock connections
 		if ( 'sock' === substr( $host, -4 ) ) 
@@ -191,13 +189,12 @@ class DupUtil {
 		return $dbh;
 	}
 	
-
     /**
      * MySQL database version number
      * @param conn $dbh Database connection handle
      * @return false|string false on failure, version number on success
      */
-    static public function mysql_version($dbh) {
+    public static function mysqldb_version($dbh) {
         if (function_exists('mysqli_get_server_info')) {
             return preg_replace('/[^0-9.].*/', '', mysqli_get_server_info($dbh));
         } else {
@@ -210,7 +207,7 @@ class DupUtil {
      * @param conn $dbh Database connection handle
      * @return string the server variable to query for
      */
-    static public function mysql_variable_value($dbh, $variable) {
+    public static function mysqldb_variable_value($dbh, $variable) {
         $result = @mysqli_query($dbh, "SHOW VARIABLES LIKE '{$variable}'");
         $row = @mysqli_fetch_array($result);
         @mysqli_free_result($result);
@@ -223,8 +220,8 @@ class DupUtil {
      * @param string $feature the feature to check for
      * @return bool
      */
-    static public function mysql_has_ability($dbh, $feature) {
-        $version = self::mysql_version($dbh);
+    public static function mysqldb_has_ability($dbh, $feature) {
+        $version = self::mysqldb_version($dbh);
 
         switch (strtolower($feature)) {
             case 'collation' :
@@ -243,13 +240,13 @@ class DupUtil {
      * @param string   $charset The character set (optional)
      * @param string   $collate The collation (optional)
      */
-    static public function mysql_set_charset($dbh, $charset = null, $collate = null) {
+    public static function mysqldb_set_charset($dbh, $charset = null, $collate = null) {
 
         $charset = (!isset($charset) ) ? $GLOBALS['DBCHARSET_DEFAULT'] : $charset;
         $collate = (!isset($collate) ) ? $GLOBALS['DBCOLLATE_DEFAULT'] : $collate;
 
-        if (self::mysql_has_ability($dbh, 'collation') && !empty($charset)) {
-            if (function_exists('mysqli_set_charset') && self::mysql_has_ability($dbh, 'set_charset')) {
+        if (self::mysqldb_has_ability($dbh, 'collation') && !empty($charset)) {
+            if (function_exists('mysqli_set_charset') && self::mysqldb_has_ability($dbh, 'set_charset')) {
                 return mysqli_set_charset($dbh, $charset);
             } else {
                 $sql = " SET NAMES {$charset}";
@@ -261,11 +258,10 @@ class DupUtil {
     }
 
     /**
-     *  READABLE_BYTESIZE
      *  Display human readable byte sizes
      *  @param string $size		The size in bytes
      */
-    static public function readable_bytesize($size) {
+    public static function readable_bytesize($size) {
         try {
             $units = array('B', 'KB', 'MB', 'GB', 'TB');
             for ($i = 0; $size >= 1024 && $i < 4; $i++)
@@ -277,45 +273,70 @@ class DupUtil {
     }
 	
 	/**
-     *  PREG_REPLACEMENT_QUOTE
+	* Converts shorthand memory notation value to bytes
+	* From http://php.net/manual/en/function.ini-get.php
+	*
+	* @param $val Memory size shorthand notation string
+	*/
+	public static function return_bytes($val) 
+	{
+		$val = trim($val);
+		$last = strtolower($val[strlen($val)-1]);
+		switch($last) {
+			// The 'G' modifier is available since PHP 5.1.0
+			case 'g':
+				$val *= 1024;
+			case 'm':
+				$val *= 1024;
+			case 'k':
+				$val *= 1024;
+				break;
+			default :
+				$val = null;
+		}
+		return $val;
+    }
+	
+	/**
      *  The characters that are special in the replacement value of preg_replace are not the 
 	 *  same characters that are special in the pattern
      *  @param string $str		The string to replace on
      */
-	static public function preg_replacement_quote($str) {
+	public static function preg_replacement_quote($str) {
 		return preg_replace('/(\$|\\\\)(?=\d)/', '\\\\\1', $str);
 	}
 	
 	
 	/**
-     *  IS_WEB_CONNECTED
      *  Check to see if the internet is accessable
+	 *  NOTE: fsocketopen on windows doesn't seem to honor $timeout setting.
+	 * 
 	 *  @param string $url		A url e.g without prefix "ajax.googleapis.com"
 	 *  @param string $port		A valid port number
 	 *  @return bool
      */
-	static public function is_url_active($url, $port) {
-		if (function_exists('fsockopen')) {
+	public static function is_url_active($url, $port, $timeout=5) 
+	{
+		if (function_exists('fsockopen')) 
+		{
+			@ini_set("default_socket_timeout", 5);
 			$port = isset($port) && is_integer($port) ? $port : 80;
-			$connected = @fsockopen($url, $port); //website and port
+			$connected = @fsockopen($url, $port, $errno, $errstr, $timeout); //website and port
 			if ($connected){
-				$is_conn = true;
 				@fclose($connected);
-			} else {
-				$is_conn = false; 
-			}
-			return $is_conn;
+				return true;
+			} 
+			return false;
 		} else {
 			return false;
 		}
 	}
 	
 	/**
-     *  GET_ZIP_FILES
      *  Returns an array of zip files found in the current directory
 	 *  @return array of zip files
      */
-	static public function get_zip_files() {
+	public static function get_zip_files() {
 		
 		$files = array();
 		foreach (glob("*.zip") as $name) {
@@ -330,18 +351,26 @@ class DupUtil {
 		
 		//FALL BACK: Windows XP has bug with glob, 
 		//add secondary check for PHP lameness
-		$dh    = opendir('.');
-		while (false !== ($name = readdir($dh))) {
-			$ext = substr($name, strrpos($name, '.') + 1);
-			if(in_array($ext, array("zip"))) {
-				$files[] = $name;
+		if ($dh = opendir('.')) 
+		{
+			while (false !== ($name = readdir($dh))) {
+				$ext = substr($name, strrpos($name, '.') + 1);
+				if(in_array($ext, array("zip"))) {
+					$files[] = $name;
+				}
 			}
+			closedir($dh);
 		}
-		closedir($dh);
 		
 		return $files;
 	}
 	
-	
+	/**
+	*  Does a string have non ascii characters
+	*/
+	public static function is_non_ascii($string)
+    {
+		return preg_match('/[^\x20-\x7f]/', $string);
+    }
 }
 ?>

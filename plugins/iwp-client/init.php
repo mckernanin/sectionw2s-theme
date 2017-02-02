@@ -4,7 +4,7 @@ Plugin Name: InfiniteWP - Client
 Plugin URI: http://infinitewp.com/
 Description: This is the client plugin of InfiniteWP that communicates with the InfiniteWP Admin panel.
 Author: Revmakx
-Version: 1.5.0
+Version: 1.6.3.2
 Author URI: http://www.revmakx.com
 */
 /************************************************************
@@ -28,7 +28,7 @@ if(basename($_SERVER['SCRIPT_FILENAME']) == "init.php"):
     exit;
 endif;
 if(!defined('IWP_MMB_CLIENT_VERSION'))
-	define('IWP_MMB_CLIENT_VERSION', '1.5.0');
+	define('IWP_MMB_CLIENT_VERSION', '1.6.3.2');
 	
 
 
@@ -47,6 +47,7 @@ $iwp_mmb_plugin_url = WP_PLUGIN_URL . '/' . basename(dirname(__FILE__));
 
 require_once("$iwp_mmb_plugin_dir/helper.class.php");
 require_once("$iwp_mmb_plugin_dir/core.class.php");
+require_once("$iwp_mmb_plugin_dir/activities_log.class.php");
 require_once("$iwp_mmb_plugin_dir/stats.class.php");
 //require_once("$iwp_mmb_plugin_dir/backup.class.php");
 //require_once("$iwp_mmb_plugin_dir/backup.class.singlecall.php");
@@ -91,7 +92,7 @@ if( !function_exists ( 'iwp_mmb_filter_params' )) {
 if( !function_exists ('iwp_mmb_parse_request')) {
 	function iwp_mmb_parse_request()
 	{
-		global $HTTP_RAW_POST_DATA;
+		global $HTTP_RAW_POST_DATA, $iwp_mmb_activities_log;
 		$HTTP_RAW_POST_DATA_LOCAL = NULL;
 		$HTTP_RAW_POST_DATA_LOCAL = file_get_contents('php://input');
 		if(empty($HTTP_RAW_POST_DATA_LOCAL)){
@@ -103,18 +104,48 @@ if( !function_exists ('iwp_mmb_parse_request')) {
 		ob_start();
 		
 		global $current_user, $iwp_mmb_core, $new_actions, $wp_db_version, $wpmu_version, $_wp_using_ext_object_cache;
-		$data = base64_decode($HTTP_RAW_POST_DATA_LOCAL);
+		if (strrpos($HTTP_RAW_POST_DATA_LOCAL, '_IWP_JSON_PREFIX_') !== false) {
+			$request_data_array = explode('_IWP_JSON_PREFIX_', $HTTP_RAW_POST_DATA_LOCAL);
+			$request_raw_data = $request_data_array[1];
+			$data = trim(base64_decode($request_raw_data));
+			$request_data = NULL;
+			$GLOBALS['IWP_JSON_COMMUNICATION'] = 1;
+		} else{
+			$request_raw_data = $HTTP_RAW_POST_DATA_LOCAL;
+			$data = trim(base64_decode($request_raw_data));
+			if (is_serialized($data)) {
+				if ((strpos($data, 'get_stats') || strpos($data, 'add_site') || strpos($data, 'remove_site')) && (strpos($data,'2.10.1') || strpos($data,'2.10.0') || strpos($data,'2.10.0.1'))) {
+					$request_data = iwp_mmb_safe_unserialize($data);
+				}else{
+					iwp_mmb_response(array('error' => 'Please update your IWP Admin Panel to version 2.10.1', 'error_code' => 'update_panel'), false, true);
+				}
+			}else{
+				return false;
+			}
+		}
 		if ($data){
+
 			//$num = @extract(unserialize($data));
-			$unserialized_data = @unserialize($data);
-			if(isset($unserialized_data['params'])){ 
-				$unserialized_data['params'] = iwp_mmb_filter_params($unserialized_data['params']);
+			if (!isset($request_data) && $request_data['iwp_action'] != 'add_site' && $request_data['iwp_action'] != 'get_stats' && $request_data['iwp_action'] != 'remove_site') {
+				$request_data = json_decode($data, true);
 			}
 			
-			$iwp_action 	= $unserialized_data['iwp_action'];
-			$params 		= $unserialized_data['params'];
-			$id 			= $unserialized_data['id'];
-			$signature 		= $unserialized_data['signature'];
+			if(isset($request_data['params'])){ 
+				$request_data['params'] = iwp_mmb_filter_params($request_data['params']);
+			}
+			if (isset($GLOBALS['IWP_JSON_COMMUNICATION']) && $GLOBALS['IWP_JSON_COMMUNICATION']) {
+				$signature  = base64_decode($request_data['signature']);
+			}else{
+				$signature  = $request_data['signature'];
+			}
+
+			$iwp_action 					= $request_data['iwp_action'];
+			$params 						= $request_data['params'];
+			$id 							= $request_data['id'];
+			if(isset($request_data['is_save_activity_log'])) {
+				$is_save_activity_log	= $request_data['is_save_activity_log'];
+			}
+			$GLOBALS['activities_log_datetime'] = $request_data['activities_log_datetime'];
 		}
 		
 		if (isset($iwp_action)) {
@@ -126,7 +157,7 @@ if( !function_exists ('iwp_mmb_parse_request')) {
 			error_reporting(E_ALL ^ E_NOTICE);
 			@ini_set("display_errors", 1);
 			
-			iwp_mmb_create_backup_table();
+			iwp_mmb_backup_db_changes();
 			
 			run_hash_change_process();
 			
@@ -138,12 +169,14 @@ if( !function_exists ('iwp_mmb_parse_request')) {
 				iwp_mmb_response(array('error' => 'Username <b>' . $params['username'] . '</b> does not have administrative access. Enter the correct username in the site options.', 'error_code' => 'username_does_not_have_administrative_access'), false);
 			
 			if ($action == 'add_site') {
+				$params['is_save_activity_log'] = $is_save_activity_log;
 				iwp_mmb_add_site($params);
 				iwp_mmb_response(array('error' => 'You should never see this.', 'error_code' => 'you_should_never_see_this'), false);
 			}
 			if ($action == 'readd_site') {
-                                $params['id'] = $id;
-                                $params['signature'] = $signature;
+                $params['id'] = $id;
+                $params['signature'] = $signature;
+				$params['is_save_activity_log'] = $is_save_activity_log;				
 				iwp_mmb_readd_site($params);
 				iwp_mmb_response(array('error' => 'You should never see this.', 'error_code' => 'you_should_never_see_this'), false);
 			}
@@ -185,9 +218,13 @@ if( !function_exists ('iwp_mmb_parse_request')) {
 				}
 				
 				if(isset($params['secure'])){
-					
+					if (isset($GLOBALS['IWP_JSON_COMMUNICATION']) && $GLOBALS['IWP_JSON_COMMUNICATION']) {
+						$params['secure'] = iwp_mmb_safe_unserialize(base64_decode($params['secure']));
+					}
 					if($decrypted = $iwp_mmb_core->_secure_data($params['secure'])){
-						$decrypted = maybe_unserialize($decrypted);
+						if (is_serialized($decrypted)) {
+							$decrypted = iwp_mmb_safe_unserialize($decrypted);
+						}
 						if(is_array($decrypted)){
 									
 							foreach($decrypted as $key => $val){
@@ -207,7 +244,8 @@ if( !function_exists ('iwp_mmb_parse_request')) {
 					global $_iwp_mmb_plugin_actions;					
 					$_iwp_mmb_plugin_actions[$action] = $params;
 				}
-				
+				$iwp_mmb_activities_log->iwp_mmb_update_is_save_activity_log($is_save_activity_log);
+				$iwp_mmb_activities_log->iwp_mmb_save_options_for_activity_log('parse_request');
 			} else {
 				iwp_mmb_response($auth, false);
 			}
@@ -235,7 +273,7 @@ if( !function_exists('iwp_mmb_convert_wperror_obj_to_arr')){
 			return $obj;
 		}
 		if($state == 'initial' ){
-			if(is_wp_error($obj['error'])){
+			if(isset($obj['error']) && is_wp_error($obj['error'])){
 				$errMsgTemp = $result['error']['errors'];
 				$errCodesTemp = $result['error']['error_codes'];
 				if(!empty($result['error']['error_data']) ){
@@ -261,7 +299,7 @@ if( !function_exists('iwp_mmb_convert_wperror_obj_to_arr')){
 /* Main response function */
 if( !function_exists ( 'iwp_mmb_response' )) {
 
-	function iwp_mmb_response($response = false, $success = true)
+	function iwp_mmb_response($response = false, $success = true, $send_serialize_response=false)
 	{	
 		$return = array();
 
@@ -283,8 +321,14 @@ if( !function_exists ( 'iwp_mmb_response' )) {
 			header('HTTP/1.0 200 OK');
 			header('Content-Type: text/plain');
 		}
-		$GLOBALS['IWP_RESPONSE_SENT'] = true;
-		exit("<IWPHEADER>" . base64_encode(serialize($return))."<ENDIWPHEADER>");
+		if (!$send_serialize_response) {
+			$GLOBALS['IWP_RESPONSE_SENT'] = true;
+			$response_data = '_IWP_JSON_PREFIX_'.base64_encode(iwp_mmb_json_encode($return));
+		}else{
+			$GLOBALS['IWP_RESPONSE_SENT'] = true;
+			$response_data = base64_encode(serialize($return));
+		}
+		exit("<IWPHEADER>" .$response_data."<ENDIWPHEADER>");
 	}
 }
 
@@ -293,7 +337,7 @@ if( !function_exists ( 'iwp_mmb_response' )) {
 if( !function_exists ( 'iwp_mmb_add_site' )) {
 	function iwp_mmb_add_site($params)
 	{
-		global $iwp_mmb_core;
+		global $iwp_mmb_core, $iwp_mmb_activities_log;
 		$num = extract($params);
 		
 		if ($num) {
@@ -320,6 +364,8 @@ if( !function_exists ( 'iwp_mmb_add_site' )) {
 						}
 						
 						iwp_mmb_response($iwp_mmb_core->stats_instance->get_initial_stats(), true);
+						$iwp_mmb_activities_log->iwp_mmb_update_is_save_activity_log($params['is_save_activity_log']);
+						$iwp_mmb_activities_log->iwp_mmb_save_options_for_activity_log('add_site');
 						delete_option('iwp_client_activate_key');//iwp
 					} else if ($verify == 0) {
 						iwp_mmb_response(array('error' => 'Invalid message signature. Please contact us if you see this message often.', 'error_code' => 'iwp_mmb_add_site_invalid_message_signature'), false);
@@ -343,7 +389,8 @@ if( !function_exists ( 'iwp_mmb_add_site' )) {
 						if(is_array($brand) && !empty($brand)){
 							update_option('iwp_client_brand',$brand);
 						}
-						
+						$iwp_mmb_activities_log->iwp_mmb_update_is_save_activity_log($params['is_save_activity_log']);
+						$iwp_mmb_activities_log->iwp_mmb_save_options_for_activity_log('add_site');
 						iwp_mmb_response($iwp_mmb_core->stats_instance->get_initial_stats(), true);
 						delete_option('iwp_client_activate_key');//IWP
 					} else
@@ -360,7 +407,7 @@ if( !function_exists ( 'iwp_mmb_add_site' )) {
 
 if( !function_exists ( 'iwp_mmb_readd_site' )) {
 	function iwp_mmb_readd_site($params){
-		global $iwp_mmb_core;
+		global $iwp_mmb_core,$iwp_mmb_activities_log;
 		$num = extract($params);
 		if ($num) {
 			if (!get_option('iwp_client_action_message_id') && !get_option('iwp_client_public_key')) {
@@ -382,6 +429,8 @@ if( !function_exists ( 'iwp_mmb_readd_site' )) {
 						if(isset($brand) && is_array($brand) && !empty($brand)){
 							update_option('iwp_client_brand',$brand);
 						}
+						$iwp_mmb_activities_log->iwp_mmb_update_is_save_activity_log($params['is_save_activity_log']);
+						$iwp_mmb_activities_log->iwp_mmb_save_options_for_activity_log('readd_site');
 						iwp_mmb_response($iwp_mmb_core->stats_instance->get_initial_stats(), true);
 						delete_option('iwp_client_activate_key');//iwp
 					} else if ($verify == 0) {
@@ -406,7 +455,8 @@ if( !function_exists ( 'iwp_mmb_readd_site' )) {
 						if(is_array($brand) && !empty($brand)){
 							update_option('iwp_client_brand',$brand);
 						}
-
+						$iwp_mmb_activities_log->iwp_mmb_update_is_save_activity_log($params['is_save_activity_log']);
+						$iwp_mmb_activities_log->iwp_mmb_save_options_for_activity_log('readd_site');
 						iwp_mmb_response($iwp_mmb_core->stats_instance->get_initial_stats(), true);
 						delete_option('iwp_client_activate_key');//IWP
 					} else
@@ -593,7 +643,6 @@ if( !function_exists ( 'iwp_mmb_scheduled_backup' )) {
 	function iwp_mmb_scheduled_backup($params)
 	{
 		global $iwp_mmb_core;
-		
 		$iwp_mmb_core->get_backup_instance($params['mechanism']);
 		$return = $iwp_mmb_core->backup_instance->set_backup_task($params);
 		iwp_mmb_response($return, $return);
@@ -1694,13 +1743,73 @@ if(!function_exists('iwp_mmb_convert_data')){
 	}
 }
 
-if(!function_exists('iwp_mmb_alter_backup_table')){
-	function iwp_mmb_alter_backup_table(){
-		$IWP_MMB_BACKUP_TABLE_VERSION =	get_site_option('iwp_backup_table_version');
-		
-		if(version_compare($IWP_MMB_BACKUP_TABLE_VERSION, '1.1.1') != -1){
-			return true;
+if (!function_exists('iwp_mmb_backup_db_changes')) {
+	function iwp_mmb_backup_db_changes(){
+		$IWP_MMB_BACKUP_TABLE_VERSION =	iwp_mmb_get_site_option('iwp_backup_table_version');
+		if (empty($IWP_MMB_BACKUP_TABLE_VERSION) || $IWP_MMB_BACKUP_TABLE_VERSION == false ) {
+			iwp_mmb_create_backup_status_table();
 		}
+		if(version_compare(iwp_mmb_get_site_option('iwp_backup_table_version'), '1.1.2', '<')){
+			iwp_mmb_change_collation_backup_status_table();
+		}
+		if(version_compare(iwp_mmb_get_site_option('iwp_backup_table_version'), '1.1.3', '<')){
+			iwp_mmb_add_lastUpdateTime_column_backup_status_table();
+		}
+	}
+}
+
+if(!function_exists('iwp_mmb_create_backup_status_table')){
+	//write new backup_status_table changes also in this function.
+	function iwp_mmb_create_backup_status_table(){
+		global $wpdb;
+		if(method_exists($wpdb, 'get_charset_collate')){
+			$charset_collate = $wpdb->get_charset_collate();
+		}
+
+		$table_name = $wpdb->base_prefix . "iwp_backup_status";
+
+		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name){
+			if (!empty($charset_collate)){
+				$cachecollation = $charset_collate;
+			}
+			else{
+				$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
+			}
+
+			$sql = "
+				CREATE TABLE IF NOT EXISTS $table_name (
+				  `ID` int(11) NOT NULL AUTO_INCREMENT,
+				  `historyID` int(11) NOT NULL,
+				  `taskName` varchar(255) NOT NULL,
+				  `action` varchar(50) NOT NULL,
+				  `type` varchar(50) NOT NULL,
+				  `category` varchar(50) NOT NULL,
+				  `stage` varchar(255) NOT NULL,
+				  `status` varchar(255) NOT NULL,
+				  `finalStatus` varchar(50) DEFAULT NULL,
+				  `statusMsg` varchar(255) NOT NULL,
+				  `requestParams` text NOT NULL,
+				  `responseParams` longtext,
+				  `taskResults` text,
+				  `startTime` int(11) DEFAULT NULL,
+				  `lastUpdateTime` int(10) unsigned DEFAULT NULL,
+				  `endTime` int(11) NOT NULL,
+				  PRIMARY KEY (`ID`)
+				)".$cachecollation." ;
+			";
+
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			dbDelta( $sql );
+
+			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+				update_option( "iwp_backup_table_version", '1.1.3');
+			}
+		}
+	}
+}
+
+if(!function_exists('iwp_mmb_change_collation_backup_status_table')){
+	function iwp_mmb_change_collation_backup_status_table(){
 		global $wpdb;
 		if(method_exists($wpdb, 'get_charset_collate')){
 			$charset_collate = $wpdb->get_charset_collate();
@@ -1710,10 +1819,12 @@ if(!function_exists('iwp_mmb_alter_backup_table')){
 		
 		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
 			if (!empty($charset_collate)){
-				$cachecollation = $charset_collate;
+			    $cachecollation_table = $charset_collate;
+				$cachecollation = str_ireplace('DEFAULT ', '', $charset_collate);
 			}
 			else{
 				$cachecollation = ' CHARACTER SET utf8 COLLATE utf8_general_ci ';
+				$cachecollation_table = $cachecollation;
 			}
 	
 			$sql = array();
@@ -1751,66 +1862,31 @@ if(!function_exists('iwp_mmb_alter_backup_table')){
 			$sql[] = "alter table " . $table_name . " change taskResults taskResults BLOB;";
 			$sql[] = "alter table " . $table_name . " change taskResults taskResults TEXT $cachecollation ;";
 			
-			$sql[] = "ALTER TABLE " . $table_name . " CHARACTER SET utf8;";
+			$sql[] = "ALTER TABLE " . $table_name . " $cachecollation_table ;";
 			$this_reurn = array();
 			foreach($sql as $v){
 				//global $wpdb;
 				$this_reurn[] = $wpdb->query($v);
 			}
-			update_option( "iwp_backup_table_version", '1.1.1');
+			update_option( "iwp_backup_table_version", '1.1.2');
 		}
 	}
 }
 
-if(!function_exists('iwp_mmb_create_backup_table')){
-	function iwp_mmb_create_backup_table(){
+if(!function_exists('iwp_mmb_add_lastUpdateTime_column_backup_status_table')){
+	function iwp_mmb_add_lastUpdateTime_column_backup_status_table(){
 		global $wpdb;
-		if(method_exists($wpdb, 'get_charset_collate')){
-			$charset_collate = $wpdb->get_charset_collate();
+		$table_name = $wpdb->base_prefix . "iwp_backup_status";
+		if($wpdb->get_var("SHOW COLUMNS FROM `$table_name` WHERE Field = 'lastUpdateTime'")){
+			update_option( "iwp_backup_table_version", '1.1.3');
+			return false;
 		}
-			
-		$IWP_MMB_BACKUP_TABLE_VERSION =	get_site_option('iwp_backup_table_version');
-		$table_name = $wpdb->base_prefix . "iwp_backup_status"; 
-		
-		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name){
-			if (!empty($charset_collate)){
-				$cachecollation = $charset_collate;
-			}
-			else{
-				$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
-			}
-			
-			$sql = "
-				CREATE TABLE IF NOT EXISTS $table_name (
-				  `ID` int(11) NOT NULL AUTO_INCREMENT,
-				  `historyID` int(11) NOT NULL,
-				  `taskName` varchar(255) NOT NULL,
-				  `action` varchar(50) NOT NULL,
-				  `type` varchar(50) NOT NULL,
-				  `category` varchar(50) NOT NULL,
-				  `stage` varchar(255) NOT NULL,
-				  `status` varchar(255) NOT NULL,
-				  `finalStatus` varchar(50) DEFAULT NULL,
-				  `statusMsg` varchar(255) NOT NULL,
-				  `requestParams` text NOT NULL,
-				  `responseParams` longtext,
-				  `taskResults` text,
-				  `startTime` int(11) DEFAULT NULL,
-				  `endTime` int(11) NOT NULL,
-				  PRIMARY KEY (`ID`)
-				)".$cachecollation." ;
-			";
-				
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			dbDelta( $sql );
-			
-			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
-				update_option( "iwp_backup_table_version", '1.1.1');
-			}
+		$sql = "ALTER TABLE ".$table_name." ADD `lastUpdateTime` INT(10) UNSIGNED NULL;";
+		$isDone = $wpdb->query($sql);
+		if ($isDone) {
+			update_option( "iwp_backup_table_version", '1.1.3');
 		}
-		else if(version_compare($IWP_MMB_BACKUP_TABLE_VERSION, '1.1.1') == -1){
-			iwp_mmb_alter_backup_table();
-		}
+
 	}
 }
 
@@ -1879,7 +1955,9 @@ if( !function_exists('iwp_mmb_backup_test_site')){
 //register_activation_hook( __FILE__, 'iwp_mmb_create_backup_table' );
 
 $iwp_mmb_core = new IWP_MMB_Core();
+$GLOBALS['iwp_mmb_activities_log'] = new IWP_MMB_Activities_log();
 $mmb_core = 1;
+$GLOBALS['iwp_activities_log_post_type'] = 'iwp_log';
 
 if(isset($_GET['auto_login']))
 	$iwp_mmb_core->automatic_login();	
@@ -2076,9 +2154,391 @@ if (!function_exists('rename_old_backup_file_name')) {
 	}
 }
 
+if(!function_exists('iwp_mmb_get_site_option')) {
+
+	function iwp_mmb_get_site_option($option_name){
+		if(is_multisite()){
+			$blog_id = get_current_blog_id();
+			$option_value = get_blog_option($blog_id,$option_name);
+		}
+		else {
+			$option_value = get_site_option($option_name);
+		}
+		return $option_value;
+	}
+}
+
 if ( !get_option('iwp_client_public_key')  && function_exists('add_action')){
 	add_action('admin_enqueue_scripts', 'iwp_mmb_add_zero_clipboard_scripts');
 }
 
+if (!function_exists('iwp_mmb_json_encode')) {
+	function iwp_mmb_json_encode($data, $options = 0, $depth = 512){
+		if ( version_compare( PHP_VERSION, '5.5', '>=' ) ) {
+			$args = array( $data, $options, $depth );
+		} elseif ( version_compare( PHP_VERSION, '5.3', '>=' ) ) {
+			$args = array( $data, $options );
+		} else {
+			$args = array( $data );
+		}
+		$json = @call_user_func_array( 'json_encode', $args );
+		
+		if ( false !== $json && ( version_compare( PHP_VERSION, '5.5', '>=' ) || false === strpos( $json, 'null' ) ) )  {
+			return $json;
+		}
+
+		$args[0] = iwp_mmb_json_compatible_check( $data, $depth );
+		return @call_user_func_array( 'json_encode', $args );
+		}
+}
+
+if (!function_exists('json_encode'))
+{
+  function json_encode($a=false)
+  {
+    if (is_null($a)) return 'null';
+    if ($a === false) return 'false';
+    if ($a === true) return 'true';
+    if (is_scalar($a))
+    {
+      if (is_float($a))
+      {
+        // Always use "." for floats.
+        return floatval(str_replace(",", ".", strval($a)));
+      }
+
+      if (is_string($a))
+      {
+        static $jsonReplaces = array(array("\\", "/", "\n", "\t", "\r", "\b", "\f", '"'), array('\\\\', '\\/', '\\n', '\\t', '\\r', '\\b', '\\f', '\"'));
+        return '"' . str_replace($jsonReplaces[0], $jsonReplaces[1], $a) . '"';
+      }
+      else
+        return $a;
+    }
+    $isList = true;
+    for ($i = 0, reset($a); $i < count($a); $i++, next($a))
+    {
+      if (key($a) !== $i)
+      {
+        $isList = false;
+        break;
+      }
+    }
+    $result = array();
+    if ($isList)
+    {
+      foreach ($a as $v) $result[] = iwp_mmb_json_encode($v);
+      return '[' . join(',', $result) . ']';
+    }
+    else
+    {
+      foreach ($a as $k => $v) $result[] = iwp_mmb_json_encode($k).':'.iwp_mmb_json_encode($v);
+      return '{' . join(',', $result) . '}';
+    }
+  }
+}
+if (!function_exists('iwp_mmb_json_compatible_check')) {
+	function iwp_mmb_json_compatible_check( $data, $depth ) {
+		if ( $depth < 0 ) {
+			return false;
+		}
+
+		if ( is_array( $data ) ) {
+			$output = array();
+			foreach ( $data as $key => $value ) {
+				if ( is_string( $key ) ) {
+					$id = iwp_mmb_json_convert_string( $key );
+				} else {
+					$id = $key;
+				}
+				if ( is_array( $value ) || is_object( $value ) ) {
+					$output[ $id ] = iwp_mmb_json_compatible_check( $value, $depth - 1 );
+				} elseif ( is_string( $value ) ) {
+					$output[ $id ] = iwp_mmb_json_convert_string( $value );
+				} else {
+					$output[ $id ] = $value;
+				}
+			}
+		} elseif ( is_object( $data ) ) {
+			$output = new stdClass;
+			foreach ( $data as $key => $value ) {
+				if ( is_string( $key ) ) {
+					$id = iwp_mmb_json_convert_string( $key );
+				} else {
+					$id = $key;
+				}
+
+				if ( is_array( $value ) || is_object( $value ) ) {
+					$output->$id = iwp_mmb_json_compatible_check( $value, $depth - 1 );
+				} elseif ( is_string( $value ) ) {
+					$output->$id = iwp_mmb_json_convert_string( $value );
+				} else {
+					$output->$id = $value;
+				}
+			}
+		} elseif ( is_string( $data ) ) {
+			return iwp_mmb_json_convert_string( $data );
+		} else {
+			return $data;
+		}
+
+		return $output;
+	}
+}
+if (!function_exists('iwp_mmb_json_convert_string')) {
+	function iwp_mmb_json_convert_string( $string ) {
+		if ( function_exists( 'mb_convert_encoding' ) ) {
+			$encoding = mb_detect_encoding( $string, mb_detect_order(), true );
+			if ( $encoding ) {
+				return mb_convert_encoding( $string, 'UTF-8', $encoding );
+			} else {
+				return mb_convert_encoding( $string, 'UTF-8', 'UTF-8' );
+			}
+		} else {
+			return check_invalid_UTF8( $string, $true);
+		}
+	}
+}
+
+if ( !function_exists('mb_detect_encoding') ) { 
+	function mb_detect_encoding ($string, $enc=null, $ret=null) { 
+
+		static $enclist = array( 
+		'UTF-8',
+		// 'ASCII', 
+		// 'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-3', 'ISO-8859-4', 'ISO-8859-5', 
+		// 'ISO-8859-6', 'ISO-8859-7', 'ISO-8859-8', 'ISO-8859-9', 'ISO-8859-10', 
+		// 'ISO-8859-13', 'ISO-8859-14', 'ISO-8859-15', 'ISO-8859-16', 
+		// 'Windows-1251', 'Windows-1252', 'Windows-1254', 
+		);
+
+		$result = false; 
+
+		foreach ($enclist as $item) { 
+			$sample = $string;
+			if(function_exists('iconv'))
+				$sample = iconv($item, $item, $string); 
+			if (md5($sample) == md5($string)) { 
+				if ($ret === NULL) { $result = $item; } else { $result = true; } 
+				break; 
+			}
+		}
+
+		return $result; 
+	}
+}
+
+if (!function_exists('check_invalid_UTF8')) {
+	function check_invalid_UTF8( $string, $strip = false ) {
+		$string = (string) $string;
+
+		if ( 0 === strlen( $string ) ) {
+			return '';
+		}
+
+		// Check for support for utf8 in the installed PCRE library once and store the result in a static
+		static $utf8_pcre = null;
+		if ( ! isset( $utf8_pcre ) ) {
+			$utf8_pcre = @preg_match( '/^./u', 'a' );
+		}
+		// We can't demand utf8 in the PCRE installation, so just return the string in those cases
+		if ( !$utf8_pcre ) {
+			return $string;
+		}
+
+		// preg_match fails when it encounters invalid UTF8 in $string
+		if ( 1 === @preg_match( '/^./us', $string ) ) {
+			return $string;
+		}
+
+		// Attempt to strip the bad chars if requested (not recommended)
+		if ( $strip && function_exists( 'iconv' ) ) {
+			return iconv( 'utf-8', 'utf-8', $string );
+		}
+
+		return '';
+	}
+}
+
+define('MAX_SERIALIZED_INPUT_LENGTH', 8192);
+define('MAX_SERIALIZED_ARRAY_LENGTH', 512);
+define('MAX_SERIALIZED_ARRAY_DEPTH', 20);
+function _iwp_mmb_safe_unserialize($str)
+{
+	if(strlen($str) > MAX_SERIALIZED_INPUT_LENGTH)
+	{
+		// input exceeds MAX_SERIALIZED_INPUT_LENGTH
+		return false;
+	}
+	if(empty($str) || !is_string($str))
+	{
+		return false;
+	}
+	$stack = array();
+	$expected = array();
+	/*
+	 * states:
+	 *   0 - initial state, expecting a single value or array
+	 *   1 - terminal state
+	 *   2 - in array, expecting end of array or a key
+	 *   3 - in array, expecting value or another array
+	 */
+	$state = 0;
+	while($state != 1)
+	{
+		$type = isset($str[0]) ? $str[0] : '';
+		if($type == '}')
+		{
+			$str = substr($str, 1);
+		}
+		else if($type == 'N' && $str[1] == ';')
+		{
+			$value = null;
+			$str = substr($str, 2);
+		}
+		else if($type == 'b' && preg_match('/^b:([01]);/', $str, $matches))
+		{
+			$value = $matches[1] == '1' ? true : false;
+			$str = substr($str, 4);
+		}
+		else if($type == 'i' && preg_match('/^i:(-?[0-9]+);(.*)/s', $str, $matches))
+		{
+			$value = (int)$matches[1];
+			$str = $matches[2];
+		}
+		else if($type == 'd' && preg_match('/^d:(-?[0-9]+\.?[0-9]*(E[+-][0-9]+)?);(.*)/s', $str, $matches))
+		{
+			$value = (float)$matches[1];
+			$str = $matches[3];
+		}
+		else if($type == 's' && preg_match('/^s:([0-9]+):"(.*)/s', $str, $matches) && substr($matches[2], (int)$matches[1], 2) == '";')
+		{
+			$value = substr($matches[2], 0, (int)$matches[1]);
+			$str = substr($matches[2], (int)$matches[1] + 2);
+		}
+		else if($type == 'a' && preg_match('/^a:([0-9]+):{(.*)/s', $str, $matches) && $matches[1] < MAX_SERIALIZED_ARRAY_LENGTH)
+		{
+			$expectedLength = (int)$matches[1];
+			$str = $matches[2];
+		}
+		else
+		{
+			// object or unknown/malformed type
+			return false;
+		}
+		switch($state)
+		{
+			case 3: // in array, expecting value or another array
+				if($type == 'a')
+				{
+					if(count($stack) >= MAX_SERIALIZED_ARRAY_DEPTH)
+					{
+						// array nesting exceeds MAX_SERIALIZED_ARRAY_DEPTH
+						return false;
+					}
+					$stack[] = &$list;
+					$list[$key] = array();
+					$list = &$list[$key];
+					$expected[] = $expectedLength;
+					$state = 2;
+					break;
+				}
+				if($type != '}')
+				{
+					$list[$key] = $value;
+					$state = 2;
+					break;
+				}
+				// missing array value
+				return false;
+			case 2: // in array, expecting end of array or a key
+				if($type == '}')
+				{
+					if(count($list) < end($expected))
+					{
+						// array size less than expected
+						return false;
+					}
+					unset($list);
+					$list = &$stack[count($stack)-1];
+					array_pop($stack);
+					// go to terminal state if we're at the end of the root array
+					array_pop($expected);
+					if(count($expected) == 0) {
+						$state = 1;
+					}
+					break;
+				}
+				if($type == 'i' || $type == 's')
+				{
+					if(count($list) >= MAX_SERIALIZED_ARRAY_LENGTH)
+					{
+						// array size exceeds MAX_SERIALIZED_ARRAY_LENGTH
+						return false;
+					}
+					if(count($list) >= end($expected))
+					{
+						// array size exceeds expected length
+						return false;
+					}
+					$key = $value;
+					$state = 3;
+					break;
+				}
+				// illegal array index type
+				return false;
+			case 0: // expecting array or value
+				if($type == 'a')
+				{
+					if(count($stack) >= MAX_SERIALIZED_ARRAY_DEPTH)
+					{
+						// array nesting exceeds MAX_SERIALIZED_ARRAY_DEPTH
+						return false;
+					}
+					$data = array();
+					$list = &$data;
+					$expected[] = $expectedLength;
+					$state = 2;
+					break;
+				}
+				if($type != '}')
+				{
+					$data = $value;
+					$state = 1;
+					break;
+				}
+				// not in array
+				return false;
+		}
+	}
+	if(!empty($str))
+	{
+		// trailing data in input
+		return false;
+	}
+	return $data;
+}
+/**
+ * Wrapper for _safe_unserialize() that handles exceptions and multibyte encoding issue
+ *
+ * @param string $str
+ * @return mixed
+ */
+function iwp_mmb_safe_unserialize( $str )
+{
+	// ensure we use the byte count for strings even when strlen() is overloaded by mb_strlen()
+	if (function_exists('mb_internal_encoding') &&
+		(((int) ini_get('mbstring.func_overload')) & 2))
+	{
+		$mbIntEnc = mb_internal_encoding();
+		mb_internal_encoding('ASCII');
+	}
+	$out = _iwp_mmb_safe_unserialize($str);
+	if (isset($mbIntEnc))
+	{
+		mb_internal_encoding($mbIntEnc);
+	}
+	return $out;
+}
 
 ?>

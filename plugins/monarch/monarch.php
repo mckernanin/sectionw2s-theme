@@ -2,7 +2,7 @@
 /*
  * Plugin Name: Monarch Plugin
  * Plugin URI: http://www.elegantthemes.com
- * Version: 1.2.7.2
+ * Version: 1.3.2
  * Description: Social Media Plugin
  * Author: Elegant Themes
  * Author URI: http://www.elegantthemes.com
@@ -17,7 +17,7 @@ define( 'ET_MONARCH_PLUGIN_DIR', trailingslashit( dirname(__FILE__) ) );
 define( 'ET_MONARCH_PLUGIN_URI', plugins_url('', __FILE__) );
 
 class ET_Monarch {
-	var $plugin_version = '1.2.7.2';
+	var $plugin_version = '1.3.2';
 	var $db_version = '1.2';
 	var $monarch_options;
 	var $_options_pagename = 'et_monarch_options';
@@ -91,6 +91,8 @@ class ET_Monarch {
 		// Saves settings into database
 		add_action( 'wp_ajax_ajax_save_settings', array( $this, 'ajax_save_settings' ) );
 
+		add_action( 'wp_ajax_monarch_save_updates_settings', array( $this, 'save_updates_settings' ) );
+
 		// Exports/imports settings
 		add_action( 'admin_init', array( $this, 'process_settings_export' ) );
 		add_action( 'admin_init', array( $this, 'process_settings_import' ) );
@@ -129,6 +131,9 @@ class ET_Monarch {
 		$this->frontend_register_locations();
 
 		add_action( 'admin_init', array( $this, 'include_options' ) );
+
+		// Plugins Updates system should be loaded before a theme core loads
+		$this->add_updates();
 	}
 
 	/**
@@ -140,8 +145,37 @@ class ET_Monarch {
 		return self::$_this;
 	}
 
+	function add_updates() {
+		require_once( ET_MONARCH_PLUGIN_DIR . 'core/updates_init.php' );
+
+		et_core_enable_automatic_updates( ET_MONARCH_PLUGIN_URI, $this->plugin_version );
+	}
+
 	public static function get_options_array() {
 		return get_option( 'et_monarch_options' ) ? get_option( 'et_monarch_options' ) : array();
+	}
+
+	/**
+	 * Saves the Updates Settings
+	 */
+	function save_updates_settings() {
+		if ( ! wp_verify_nonce( $_POST['updates_settings_nonce'] , 'updates_settings' ) ) {
+			die( -1 );
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			die( -1 );
+		}
+
+		$username = ! empty( $_POST['et_monarch_updates_username'] ) ? sanitize_text_field( $_POST['et_monarch_updates_username'] ) : '';
+		$api_key = ! empty( $_POST['et_monarch_updates_api_key'] ) ? sanitize_text_field( $_POST['et_monarch_updates_api_key'] ) : '';
+
+		update_option( 'et_automatic_updates_options', array(
+			'username' => $username,
+			'api_key' => $api_key,
+		) );
+
+		die();
 	}
 
 	function include_options() {
@@ -166,6 +200,7 @@ class ET_Monarch {
 		$this->follow_shortcode_options    = $follow_shortcode_options;
 		$this->general_main_options        = $general_main_options;
 		$this->header_importexport_options = $header_importexport_options;
+		$this->header_updates_options      = $header_updates_options;
 		$this->header_stats_options        = $header_stats_options;
 
 		$this->update_frequency = isset( $this->monarch_options['general_main_update_freq'] ) ? $this->monarch_options['general_main_update_freq'] : 0;
@@ -592,6 +627,7 @@ class ET_Monarch {
 			'save_settings'    => wp_create_nonce( 'save_settings' ),
 			'get_stats'        => wp_create_nonce( 'get_stats' ),
 			'generate_warning' => wp_create_nonce( 'generate_warning' ),
+			'updates_settings' => wp_create_nonce( 'updates_settings' ),
 		) );
 	}
 
@@ -600,7 +636,7 @@ class ET_Monarch {
 			return;
 		}
 
-		wp_enqueue_style( 'et-open-sans-700', "{$this->protocol}://fonts.googleapis.com/css?family=Open+Sans:700", array(), $this->plugin_version );
+		et_core_load_main_fonts();
 		wp_enqueue_style( 'et-monarch-admin', ET_MONARCH_PLUGIN_URI . '/css/admin.css', array(), $this->plugin_version );
 	}
 
@@ -1269,22 +1305,23 @@ class ET_Monarch {
 			die( -1 );
 		}
 
-		$monarch_options             = $this->monarch_options;
-		$monarch_sections            = $this->monarch_sections;
-		$sharing_locations_options   = $this->sharing_locations_options;
-		$sharing_networks_options    = $this->sharing_networks_options;
-		$sharing_sidebar_options     = $this->sharing_sidebar_options;
-		$sharing_inline_options      = $this->sharing_inline_options;
-		$sharing_popup_options       = $this->sharing_popup_options;
-		$sharing_flyin_options       = $this->sharing_flyin_options;
-		$sharing_media_options       = $this->sharing_media_options;
-		$follow_networks_options     = $this->follow_networks_options;
-		$follow_widget_options       = $this->follow_widget_options;
-		$follow_shortcode_options    = $this->follow_shortcode_options;
-		$general_main_options        = $this->general_main_options;
-		$monarch_post_types          = $this->monarch_post_types;
-		$header_importexport_options = $this->header_importexport_options;
-		$header_stats_options        = $this->header_stats_options;
+		$monarch_options              = $this->monarch_options;
+		$monarch_sections             = $this->monarch_sections;
+		$sharing_locations_options    = $this->sharing_locations_options;
+		$sharing_networks_options     = $this->sharing_networks_options;
+		$sharing_sidebar_options      = $this->sharing_sidebar_options;
+		$sharing_inline_options       = $this->sharing_inline_options;
+		$sharing_popup_options        = $this->sharing_popup_options;
+		$sharing_flyin_options        = $this->sharing_flyin_options;
+		$sharing_media_options        = $this->sharing_media_options;
+		$follow_networks_options      = $this->follow_networks_options;
+		$follow_widget_options        = $this->follow_widget_options;
+		$follow_shortcode_options     = $this->follow_shortcode_options;
+		$general_main_options         = $this->general_main_options;
+		$monarch_post_types           = $this->monarch_post_types;
+		$header_importexport_options  = $this->header_importexport_options;
+		$header_updates_options       = $this->header_updates_options;
+		$header_stats_options         = $this->header_stats_options;
 
 		echo '
 			<div id="et_social_wrapper_outer">
@@ -1937,6 +1974,55 @@ class ET_Monarch {
 								);
 							break;
 
+							case 'updates' :
+								$et_updates_settings = get_option( 'et_automatic_updates_options' );
+
+								printf( '<div class="et_social_form et_social_row">
+										<h2>%1$s</h2>
+										<p>%2$s</p>
+										<ul>
+											<li class="input clearfix et_social_longinput">
+												<p>%3$s</p>
+												<input type="password" name="updates_username" value="%4$s" class="updates_option updates_option_username">
+												<span class="more_info et_social_icon">
+													<span class="et_social_more_text">%5$s</span>
+												</span>
+											</li>
+											<li class="input clearfix et_social_longinput">
+												<p>%6$s</p>
+												<input type="password" name="updates_api_key" value="%7$s" class="updates_option updates_option_api_key">
+												<span class="more_info et_social_icon">
+													<span class="et_social_more_text">%8$s</span>
+												</span>
+											</li>
+											<li class="et_social_action_button">
+												<a href="#" class="et_social_icon et_authorize_updates">%9$s</a>
+												<span class="spinner"></span>
+											</li>
+										</ul>
+									</div>',
+									esc_html__( 'Enable Updates', 'Monarch' ),
+									sprintf( esc_html__( 'Keeping your plugins updated is important. To %1$s for Monarch, you must first authenticate your Elegant Themes account by inputting your account Username and API Key below. Your username is the same username you use when logging into your Elegant Themes account, and your API Key can be found by logging into your account and navigating to the Account > API Key page.', 'Monarch' ),
+										sprintf( '<a href="%1$s" target="_blank">%2$s</a>',
+											esc_attr( 'https://www.elegantthemes.com/members-area/documentation.html#update' ),
+											esc_html__( 'enable updates', 'Monarch' )
+										)
+									),
+									esc_html__( 'Username', 'Monarch' ),
+									isset( $et_updates_settings['username'] ) ? esc_attr( $et_updates_settings['username'] ) : '',
+									esc_html__( 'Please enter your ElegantThemes.com username', 'Monarch' ), // #5
+									esc_html__( 'Personal API Key', 'Monarch' ),
+									isset( $et_updates_settings['api_key'] ) ? esc_attr( $et_updates_settings['api_key'] ) : '',
+									sprintf( esc_html__( 'Enter your %1$s here.', 'Monarch' ),
+										sprintf( '<a href="%1$s" target="_blank">%2$s</a>',
+											esc_attr( 'https://www.elegantthemes.com/members-area/api-key.php' ),
+											esc_html__( 'Elegant Themes API Key', 'Monarch' )
+										)
+									),
+									esc_html__( 'Authorize', 'Monarch' )
+								);
+								break;
+
 						} // end switch
 					} // end foreach( $options_array as $option )
 				} // end if ( isset( $options_array ) )
@@ -2248,7 +2334,7 @@ class ET_Monarch {
 
 					break;
 				case 'facebook':
-					$access_token_url = 'https://graph.facebook.com/v2.4/oauth/access_token';
+					$access_token_url = 'https://graph.facebook.com/v2.6/oauth/access_token';
 
 					break;
 			}
@@ -2482,6 +2568,7 @@ class ET_Monarch {
 
 		if ( 'all' !== $networks ) {
 			$i = 0;
+			$need_closing_brace = false;
 
 			foreach ( $networks as $network ) {
 				//do not count likes
@@ -2489,11 +2576,12 @@ class ET_Monarch {
 					$operator   = 0 < $i ? ' OR ' : ' AND ( ';
 					$sql       .= "{$operator}network = %s";
 					$sql_args[] = $network;
+					$need_closing_brace = true; // need to close the brace in SQL string if we have at least one network excluding Like
 					$i++;
 				}
 			}
 
-			$sql .= ');';
+			$sql .= $need_closing_brace ? ');' : '';
 		}
 
 		$total_stats = $wpdb->get_var( $wpdb->prepare( $sql, $sql_args ) );
@@ -2894,7 +2982,7 @@ class ET_Monarch {
 			if ( '' !== $post_link ) {
 				$permalink = $post_link;
 			} else {
-				$permalink = ( class_exists( 'WooCommerce' ) && is_checkout() || is_front_page() ) ? get_bloginfo( 'url' ) : get_permalink();
+				$permalink = ( class_exists( 'WooCommerce' ) && is_checkout() || $this->is_homepage() ) ? get_bloginfo( 'url' ) : get_permalink();
 
 				if ( class_exists( 'BuddyPress' ) && is_buddypress() ) {
 					$permalink = bp_get_requested_url();
@@ -2906,7 +2994,7 @@ class ET_Monarch {
 			if ( '' !== $post_title ) {
 				$title = $post_title;
 			} else {
-				$title = class_exists( 'WooCommerce' ) && is_checkout() || is_front_page() ? get_bloginfo( 'name' ) : get_the_title();
+				$title = class_exists( 'WooCommerce' ) && is_checkout() || $this->is_homepage() ? get_bloginfo( 'name' ) : get_the_title();
 			}
 
 			$title = rawurlencode( wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES, 'UTF-8' ) ) );
@@ -3427,7 +3515,7 @@ class ET_Monarch {
 			switch ( $social_network ) {
 				case 'facebook' :
 					if ( isset( $monarch_options['access_tokens']['facebook'] ) ) {
-						$request_url = sprintf( 'https://graph.facebook.com/v2.4/?access_token=%1$s&id=', esc_attr( $monarch_options['access_tokens']['facebook'] ) );
+						$request_url = sprintf( 'https://graph.facebook.com/v2.6/?access_token=%1$s&id=', esc_attr( $monarch_options['access_tokens']['facebook'] ) );
 					}
 
 					break;
@@ -3575,7 +3663,7 @@ class ET_Monarch {
 				$display_there = true;
 			}
 		} else {
-			if ( is_front_page() ) {
+			if ( $this->is_homepage() ) {
 				if ( ( in_array( 'home', $post_types ) && 'inline' !== $location ) || ( is_page() && in_array( 'home', $post_types ) && 'inline' == $location ) ) {
 					$display_there = true;
 				}
@@ -3690,7 +3778,7 @@ class ET_Monarch {
 			if ( '' !== $current_id ) {
 				$post_id = $current_id;
 			} else {
-				$post_id = is_front_page() && ! is_page() ? '-1' : get_the_ID();
+				$post_id = $this->is_homepage() && ! is_page() ? '-1' : get_the_ID();
 			}
 
 			foreach ( $current_networks as $icon ) {
@@ -3826,8 +3914,8 @@ class ET_Monarch {
 							</li>',
 							esc_attr( $type ),
 							esc_attr( $post_id ),
-							is_front_page() && ! is_page() ? esc_url( get_bloginfo( 'url' ) ) : esc_url( get_permalink( $post_id ) ),
-							is_front_page() && ! is_page() ? esc_attr( get_bloginfo( 'name' ) ) : esc_attr( get_the_title( $post_id ) )
+							$this->is_homepage() && ! is_page() ? esc_url( get_bloginfo( 'url' ) ) : esc_url( get_permalink( $post_id ) ),
+							$this->is_homepage() && ! is_page() ? esc_attr( get_bloginfo( 'name' ) ) : esc_attr( get_the_title( $post_id ) )
 						);
 						break;
 
@@ -3841,8 +3929,8 @@ class ET_Monarch {
 							</li>',
 							esc_attr( $type ),
 							esc_attr( $post_id ),
-							is_front_page() && ! is_page() ? esc_url( get_bloginfo( 'url' ) ) : esc_url( get_permalink( $post_id ) ),
-							is_front_page() && ! is_page() ? esc_attr( get_bloginfo( 'name' ) ) : esc_attr( get_the_title( $post_id ) ),
+							$this->is_homepage() && ! is_page() ? esc_url( get_bloginfo( 'url' ) ) : esc_url( get_permalink( $post_id ) ),
+							$this->is_homepage() && ! is_page() ? esc_attr( get_bloginfo( 'name' ) ) : esc_attr( get_the_title( $post_id ) ),
 							esc_url( $media_url )
 						);
 						break;
@@ -4481,7 +4569,7 @@ class ET_Monarch {
 			case 'facebook' :
 				if ( isset( $settings['access_tokens']['facebook'] ) && isset( $settings['follow_networks_networks_sorting']['client_id'][ $index ] ) ) {
 					$url = sprintf(
-						'https://graph.facebook.com/v2.4/?id=%1$s&access_token=%2$s&fields=likes',
+						'https://graph.facebook.com/v2.6/?id=%1$s&access_token=%2$s&fields=fan_count',
 						esc_attr( $settings['follow_networks_networks_sorting']['client_id'][ $index ] ),
 						esc_attr( $settings['access_tokens']['facebook'] )
 					);
@@ -4550,15 +4638,13 @@ class ET_Monarch {
 		}
 
 		$request = wp_remote_get( esc_url_raw( $url ) );
-
+		$data = '';
 		if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 ) {
 			$data = wp_remote_retrieve_body( $request );
-			if ( 'linkedin' !== $network ) {
-				$data = json_decode( $data );
-			}
+			$data = json_decode( $data );
 		}
 
-		if ( isset( $data ) ) {
+		if ( '' !== $data ) {
 			switch ( $network ) {
 				case 'vimeo':
 					$result = $data->total;
@@ -4569,11 +4655,7 @@ class ET_Monarch {
 
 					break;
 				case 'linkedin':
-					preg_match( '/<num-connections>(.*)<\/num-connections>/', $data, $matches );
-
-					if ( is_array( $matches ) ) {
-						$result = isset( $matches[1] ) ? $matches[1] : 0;
-					}
+					$result = $data->numConnections;
 
 					break;
 				case 'soundcloud':
@@ -4581,7 +4663,11 @@ class ET_Monarch {
 
 					break;
 				case 'facebook':
-					$result = isset( $data->likes ) ? $data->likes : 0;
+					if ( isset( $data->fan_count ) ) {
+						$result = $data->fan_count;
+					} else {
+						return -1;
+					}
 
 					break;
 				case 'dribbble':
@@ -4938,6 +5024,14 @@ class ET_Monarch {
 		}
 
 		return $newurl;
+	}
+
+	/**
+	 * Check the homepage
+	 * @return bool
+	 */
+	function is_homepage() {
+		return is_front_page() || is_home();
 	}
 
 	function frontend_register_locations() {

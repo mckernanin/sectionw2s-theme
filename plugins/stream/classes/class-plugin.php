@@ -7,7 +7,7 @@ class Plugin {
 	 *
 	 * @const string
 	 */
-	const VERSION = '3.0.4';
+	const VERSION = '3.1.1';
 
 	/**
 	 * WP-CLI command
@@ -20,6 +20,16 @@ class Plugin {
 	 * @var Admin
 	 */
 	public $admin;
+
+	/**
+	 * @var Alerts
+	 */
+	public $alerts;
+
+	/**
+	 * @var Alerts_List
+	 */
+	public $alerts_list;
 
 	/**
 	 * @var Connectors
@@ -98,9 +108,11 @@ class Plugin {
 		add_action( 'wp_head', array( $this, 'frontend_indicator' ) );
 
 		// Load admin area classes
-		if ( is_admin() || ( defined( 'WP_STREAM_DEV_DEBUG' ) && WP_STREAM_DEV_DEBUG ) ) {
+		if ( is_admin() || ( defined( 'WP_STREAM_DEV_DEBUG' ) && WP_STREAM_DEV_DEBUG ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			$this->admin   = new Admin( $this );
 			$this->install = new Install( $this );
+		} elseif ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+			$this->admin = new Admin( $this );
 		}
 
 		// Load WP-CLI command
@@ -148,13 +160,16 @@ class Plugin {
 	}
 
 	/*
-	 * Load Settings and Connectors
+	 * Load Settings, Notifications, and Connectors
 	 *
 	 * @action init
 	 */
 	public function init() {
-		$this->settings   = new Settings( $this );
-		$this->connectors = new Connectors( $this );
+		$this->settings      = new Settings( $this );
+		$this->connectors    = new Connectors( $this );
+		$this->alerts        = new Alerts( $this );
+		$this->alerts_list   = new Alerts_List( $this );
+
 	}
 
 	/**
@@ -193,7 +208,7 @@ class Plugin {
 		$dir_url          = trailingslashit( plugins_url( '', dirname( __FILE__ ) ) );
 		$dir_path         = plugin_dir_path( dirname( __FILE__ ) );
 		$dir_basename     = basename( $dir_path );
-		$plugin_basename  = trailingslashit( $dir_basename ) . $dir_basename. '.php';
+		$plugin_basename  = trailingslashit( $dir_basename ) . $dir_basename . '.php';
 
 		return compact( 'dir_url', 'dir_path', 'dir_basename', 'plugin_basename' );
 	}

@@ -198,7 +198,7 @@ class IWP_MMB_Optimize extends IWP_MMB_Core
 	global $wpdb;
 		$db_clean = DB_NAME;
 			
-		$local_query = 'SHOW TABLE STATUS FROM infinite';
+		$local_query = 'SHOW TABLE STATUS FROM `'. $db_clean.'`';
 		$result = $wpdb->get_results($local_query);
 		if ($wpdb->num_rows){
 			foreach ($result as $row) 

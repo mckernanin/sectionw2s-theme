@@ -4,44 +4,27 @@
 * Restrict Content User Checks
 *******************************************/
 
-function rcCheckUser()
-{
-	if (current_user_can('read'))
-	{		
-		if (current_user_can('edit_posts'))
-		{		
-			if (current_user_can('upload_files'))
-			{
-				if (current_user_can('moderate_comments'))
-				{
-					if (current_user_can('switch_themes'))
-					{
-					//do nothing here for admin
-					}
-					else
-					{
+function rcCheckUser() {
+	if (current_user_can('read')) {		
+		if (current_user_can('edit_posts')) {		
+			if (current_user_can('upload_files')) {
+				if (current_user_can('moderate_comments')) {
+					if (current_user_can('switch_themes')) {
+						//do nothing here for admin
+					} else {
 						add_filter('the_content', 'rcMetaDisplayEditor');
 					}
-				}
-				else
-				{
+				} else {
 					add_filter('the_content', 'rcMetaDisplayAuthor');
 				}
-			}
-			else
-			{
+			} else {
 				add_filter('the_content', 'rcMetaDisplayContributor');
 			}
-		}
-		else
-		{
+		} else {
 			add_filter('the_content', 'rcMetaDisplaySubscriber');
 		}				
-	}
-	else
-	{
+	} else {
 		add_filter('the_content', 'rcMetaDisplayNone');
 	}
-
 }
 add_action('loop_start', 'rcCheckUser');

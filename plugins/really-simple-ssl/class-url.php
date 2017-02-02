@@ -6,13 +6,20 @@ defined('ABSPATH') or die("you do not have acces to this page!");
 
 */
 
-class rlrsssl_url {
-  public $error_number = 0;
+if ( ! class_exists( 'rsssl_url' ) ) {
+  class rsssl_url {
+    public $error_number = 0;
+    private static $_this;
 
+  function __construct() {
+    if ( isset( self::$_this ) )
+        wp_die( sprintf( __( '%s is a singleton class and you cannot create a second instance.','really-simple-ssl' ), get_class( $this ) ) );
 
-  public function __construct()
-  {
+    self::$_this = $this;
+  }
 
+  static function this() {
+    return self::$_this;
   }
 
 
@@ -37,14 +44,15 @@ class rlrsssl_url {
 
 
   public function get_contents($url, $timeout = 5, $iteration=0) {
+    $use_curl = $this->is_curl_installed();
     //prevent infinite loops.
-    if ($iteration>5) {
+    if ($iteration>3) {
       $this->error_number = 404;
-      return "";
+      $use_curl = false;
     }
-    //preferrably with curl, but else with file get contents
-    if ($this->is_curl_installed()) {
 
+    //preferrably with curl, but else with file get contents
+    if ($use_curl) {
         $ch = curl_init();
         curl_setopt($ch,CURLOPT_URL,$url);
         curl_setopt($ch,CURLOPT_HEADER, true);
@@ -53,6 +61,7 @@ class rlrsssl_url {
         curl_setopt($ch,CURLOPT_FRESH_CONNECT, TRUE);
         curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch,CURLOPT_SSL_VERIFYHOST, false);
+        //curl_setopt($ch,CURLOPT_USERAGENT, 'User-Agent: curl/7.39.0');
         $filecontents = curl_exec($ch);
 
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -66,7 +75,6 @@ class rlrsssl_url {
         curl_close($ch);
         if ($this->error_number==0 && $http_code != 200) { //301, 302, 403, 404, etc.
             if ($http_code == 301 || $http_code == 302) {
-                error_log("301 or 302");
                 list($header) = explode("\r\n\r\n", $filecontents, 2);
                 $matches = array();
                 preg_match("/(Location:|URI:)[^(\n)]*/", $header, $matches);
@@ -77,19 +85,20 @@ class rlrsssl_url {
                   return $this->get_contents($url, $timeout, $iteration+1);
                 } else {
                   $this->error_number = 404;
-                  return "";
                 }
-            } else {
+            } else { //403, 404
               $this->error_number = $http_code;
-              return "";
             }
+        } elseif( ($this->error_number==0) && ($http_code == 200)) {
+          error_log("returning filecontents through curl.");
+          return $filecontents;
         }
-      } else {
-        set_error_handler(array($this,'custom_error_handling'));
-        $filecontents = file_get_contents($url);
-        //errors back to normal
-        restore_error_handler();
       }
+      //if we are here, curl didn't return a valid response, so we try with file_get_contents
+      set_error_handler(array($this,'custom_error_handling'));
+      $filecontents = file_get_contents($url);
+      //errors back to normal
+      restore_error_handler();
       return $filecontents;
   }
 
@@ -200,3 +209,4 @@ class rlrsssl_url {
       return $error_codes[$error_no];
     }
   }
+}

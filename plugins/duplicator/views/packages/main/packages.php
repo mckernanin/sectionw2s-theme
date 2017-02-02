@@ -5,6 +5,7 @@
 	$statusCount	= count($qryStatus);
 	$package_debug	= DUP_Settings::Get('package_debug');
     $ajax_nonce		= wp_create_nonce('package_list');
+	$ui_create_frmt = is_numeric(DUP_Settings::Get('package_ui_created')) ? DUP_Settings::Get('package_ui_created') : 1;
 ?>
 
 <style>
@@ -32,12 +33,13 @@
 	td.error-msg a {color:maroon}
 	td.error-msg a i {color:maroon}
 	td.error-msg span {display:inline-block; padding:7px 18px 0px 0px; color:maroon}
+	
 </style>
 
 <form id="form-duplicator" method="post">
-
-<?php if($statusCount >= 3)  :	?>
-	<div style="font-size:13px; position: absolute; top:10px; right:20px">
+	
+<?php if($statusCount >= 2)  :	?>
+	<div style="font-size:14px; position: absolute; top:15px; right:25px">
 		<a href="admin.php?page=duplicator-about"  style="color:maroon"><i><i class="fa fa-check-circle"></i> <?php _e("Help Support Duplicator", 'duplicator') ?></i> </a>
 	</div>
 <?php endif; ?>	
@@ -47,20 +49,17 @@ TOOL-BAR -->
 <table id="dup-toolbar">
 	<tr valign="top">
 		<td style="white-space: nowrap">
-			<div class="alignleft actions">
-				<select id="dup-pack-bulk-actions">
-					<option value="-1" selected="selected"><?php _e("Bulk Actions", 'duplicator') ?></option>
-					<option value="delete" title="<?php _e("Delete selected package(s)", 'duplicator') ?>"><?php _e("Delete", 'duplicator') ?></option>
-				</select>
-				<input type="button" id="dup-pack-bulk-apply" class="button action" value="<?php _e("Apply", 'duplicator') ?>" onclick="Duplicator.Pack.Delete()">
-			</div>
-			<br class="clear">
+			<select id="dup-pack-bulk-actions">
+				<option value="-1" selected="selected"><?php _e("Bulk Actions", 'duplicator') ?></option>
+				<option value="delete" title="<?php _e("Delete selected package(s)", 'duplicator') ?>"><?php _e("Delete", 'duplicator') ?></option>
+			</select>
+			<input type="button" id="dup-pack-bulk-apply" class="button action" value="<?php _e("Apply", 'duplicator') ?>" onclick="Duplicator.Pack.Delete()">
 		</td>
-		<td align="center">
+		<td align="center" >
 			<a href="?page=duplicator-tools" id="btn-logs-dialog" class="button"  title="<?php _e("Package Logs", 'duplicator') ?>..."><i class="fa fa-list-alt"></i>
 		</td>
-		<td class="dup-toolbar-btns">
-			<span><i class="fa fa-archive"></i> <?php _e("All Packages", 'duplicator'); ?></span> &nbsp;
+		<td>						
+			<span><i class="fa fa-archive"></i> <?php _e("All Packages", 'duplicator'); ?></span>
 			<a id="dup-pro-create-new"  href="?page=duplicator&tab=new1" class="add-new-h2"><?php _e("Create New", 'duplicator'); ?></a>
 		</td>
 	</tr>
@@ -78,15 +77,7 @@ TOOL-BAR -->
 				<div id='dup-list-alert-nodata'>
 					<i class="fa fa-archive"></i> 
 					<?php _e("No Packages Found.", 'duplicator'); ?><br/>
-					<?php _e("Click the 'Create New' button to build a package.", 'duplicator'); ?> <br/><br/>
-					<i>
-						<?php
-							printf("%s <a href='admin.php?page=duplicator-help'>%s</a> %s",
-								__("Please visit the", 'duplicator'), 
-								__("help page", 'duplicator'),
-								__("for additional support", 'duplicator'));
-						?>
-					</i>
+					<?php _e("Click the 'Create New' button to build a package.", 'duplicator'); ?>
 					<div style="height:75px">&nbsp;</div>
 				</div>
 				</td>
@@ -140,7 +131,7 @@ TOOL-BAR -->
 			<?php if ($row['status'] >= 100) : ?>
 				<tr class="dup-pack-info <?php echo $css_alt ?>">
 					<td class="pass"><input name="delete_confirm" type="checkbox" id="<?php echo $row['id'] ;?>" /></td>
-					<td><?php echo date( "m-d-y G:i", strtotime($row['created']));?></td>
+					<td><?php echo DUP_Package::FormatCreatedDate($row['created'], $ui_create_frmt);?></td>
 					<td><?php echo DUP_Util::ByteSize($pack_archive_size); ?></td>
 					<td class='pack-name'><?php	echo  $pack_name ;?></td>
 					<td class="get-btns">
@@ -150,7 +141,7 @@ TOOL-BAR -->
 						<button id="<?php echo "{$uniqueid}_archive.zip" ?>" class="button no-select" onclick="Duplicator.Pack.DownloadFile('<?php echo $packagepath; ?>', this); return false;">
 							<i class="fa fa-file-archive-o"></i> <?php _e("Archive", 'duplicator') ?>
 						</button>
-						<button type="button" class="button no-select" title="<?php DUP_Util::_e("Package Details") ?>" onclick="Duplicator.Pack.OpenPackageDetails(<?php echo "{$row['id']}"; ?>);">
+						<button type="button" class="button no-select" title="<?php _e("Package Details", 'duplicator') ?>" onclick="Duplicator.Pack.OpenPackageDetails(<?php echo "{$row['id']}"; ?>);">
 							<i class="fa fa-archive" ></i> 
 						</button>
 					</td>
@@ -171,7 +162,7 @@ TOOL-BAR -->
 				?>
 				<tr class="dup-pack-info  <?php echo $css_alt ?>">
 					<td class="fail"><input name="delete_confirm" type="checkbox" id="<?php echo $row['id'] ;?>" /></td>
-					<td><?php echo date( "m-d-y G:i", strtotime($row['created']));?></td>
+					<td><?php echo DUP_Package::FormatCreatedDate($row['created'], $ui_create_frmt);?></td>
 					<td><?php echo DUP_Util::ByteSize($size); ?></td>
 					<td class='pack-name'><?php echo $pack_name ;?></td>
 					<td class="get-btns error-msg" colspan="2">		
@@ -179,7 +170,7 @@ TOOL-BAR -->
 							<i class="fa fa-exclamation-triangle"></i>
 							<a href="<?php echo $error_url; ?>"><?php _e("Error Processing", 'duplicator') ?></a>
 						</span>			
-						<a class="button no-select" title="<?php DUP_Util::_e("Package Details") ?>" href="<?php echo $error_url; ?>">
+						<a class="button no-select" title="<?php _e("Package Details", 'duplicator') ?>" href="<?php echo $error_url; ?>">
 							<i class="fa fa-archive"></i> 
 						</a>						
 					</td>
@@ -192,7 +183,7 @@ TOOL-BAR -->
 	?>
 	<tfoot>
 		<tr>
-			<th colspan="8" style='text-align:right; font-size:12px'>						
+			<th colspan="11" style='text-align:right; font-size:12px'>						
 				<?php echo _e("Packages", 'duplicator') . ': ' . $totalElements; ?> |
 				<?php echo _e("Total Size", 'duplicator') . ': ' . DUP_Util::ByteSize($totalSize); ?> 
 			</th>
@@ -241,7 +232,7 @@ jQuery(document).ready(function($)
 			event.preventDefault(); 
 	};
 	
-	/*  METHOD: Toogles the Bulk Action Check boxes */
+	/* Toogles the Bulk Action Check boxes */
 	Duplicator.Pack.SetDeleteAll = function() 
 	{
 		var state = $('input#dup-bulk-action-all').is(':checked') ? 1 : 0;
@@ -250,10 +241,11 @@ jQuery(document).ready(function($)
 		});
 	}
 	
-	/*	METHOD: Opens detail screen */
+	/*	Opens detail screen */
 	Duplicator.Pack.OpenPackageDetails = function (package_id) 
 	{
 		window.location.href = '?page=duplicator&action=detail&tab=detail&id=' + package_id;
 	}
+	
 });
 </script>

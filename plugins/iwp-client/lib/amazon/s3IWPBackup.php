@@ -154,7 +154,7 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
 					'Bucket'     => $as3_bucket,
 					'SourceFile' => $backup_file,
 					'Key'        => $as3_file,
-					'ACL' => 'public-read'
+					'ACL' => 'authenticated-read'
 					));
 					$current_file_num += 1;
 					$resArray = array (
@@ -207,7 +207,7 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
 						$result = $s3->createMultipartUpload(array(
 						'Bucket'       => $as3_bucket,
 						'Key'          => $as3_file,
-						'ACL'          => 'public-read',
+						'ACL'          => 'authenticated-read',
 					
 						));
 					
@@ -523,7 +523,7 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
       }
     }
 	
-	function postUploadS3Verification($backup_file, $destFile, $type = "", $as3_bucket = "", $as3_access_key = "", $as3_secure_key = "", $as3_bucket_region = ""){
+	function postUploadS3Verification($backup_file, $destFile, $type = "", $as3_bucket = "", $as3_access_key = "", $as3_secure_key = "", $as3_bucket_region = "", $size1, $size2){
 		$s3 = S3Client::factory(array(
 			'key'=>$as3_access_key,
 			'secret'=>trim(str_replace(' ', '+', $as3_secure_key)),
@@ -533,18 +533,20 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
 			return false;
 		}
 		try {
-			// Get the object
-			$result = $s3->getObject(array(
+
+			$result = $s3->headObject(array(
 			'Bucket' => $as3_bucket,
 			'Key'    => $destFile
 			));
-			
-			// Display the object in the browser
-			//  header("Content-Type: {$result['ContentType']}");
-			echo "S3 fileszie during verification - ".$s3_filesize;
-				
-			if($result['LastModified']){
-				return true;
+
+			$s3_file_metadata = $result->toArray();
+			$s3_file_size = $s3_file_metadata['ContentLength'];
+			echo "S3 fileszie during verification - ".$s3_file_size.PHP_EOL."size 1 - ".$size1.PHP_EOL."size 2 - ".$size2.PHP_EOL;
+
+			if((($s3_file_size >= $size1 && $s3_file_size <= $actual_file_size) || ($s3_file_size <= $size2 && $s3_file_size >= $actual_file_size) || ($s3_file_size == $actual_file_size)) && ($s3_file_size != 0)){
+					return true;
+			} else {
+				return false;
 			}
 			
 		} catch (S3Exception $e) {
@@ -617,7 +619,7 @@ class IWP_MMB_S3_SINGLECALL extends IWP_MMB_Backup_Multicall
 						'Bucket'     => $as3_bucket,
 						'SourceFile' => $backup_file,
 						'Key'        => $as3_file,
-						'ACL' => 'public-read'
+						'ACL' => 'authenticated-read'
 					));
                    return true;
         }catch (Exception $e){
@@ -640,7 +642,7 @@ class IWP_MMB_S3_SINGLECALL extends IWP_MMB_Backup_Multicall
 				$result = $s3->createMultipartUpload(array(
 					'Bucket'       => $as3_bucket,
 					'Key'          => $as3_file,
-					'ACL'          => 'public-read',
+					'ACL'          => 'authenticated-read',
 				  
 				));
 

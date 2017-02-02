@@ -183,7 +183,7 @@ class DUP_Archive
         }
         else
         {
-            $this->Dirs = $this->dirsToArray($rootPath);
+			$this->Dirs = $this->dirsToArray($rootPath, $this->FilterDirsAll);
             $this->Dirs[] = $this->PackDir;
         }
 		
@@ -191,30 +191,22 @@ class DUP_Archive
 		//Invalid test contains checks for: characters over 250, invlaid characters, 
 		//empty string and directories ending with period (Windows incompatable)
 		foreach ($this->Dirs as $key => $val) 
-		{
-			//Remove path filter directories
-			foreach($this->FilterDirsAll as $item) 
-			{ 
-				if (strstr($val, $item . '/') || $val == $item) 
-				{
-					unset($this->Dirs[$key]);
-					continue 2;
-				}
-			}
-			
-			//Locate invalid directories and warn
+		{		
+			//WARNING: Find OS items that may have issues
+			// was commented out in pro
 			$name = basename($val); 
-			$invalid_test = strlen($val) > 250 
-							|| 	preg_match('/(\/|\*|\?|\>|\<|\:|\\|\|)/', $name) 
-							|| 	trim($name) == "" 
-							||  (strrpos($name, '.') == strlen($name) - 1  && substr($name, -1) == '.');
 			
-			if ($invalid_test || preg_match('/[^\x20-\x7f]/', $name)) 
+			$warn_test  =  strlen($val) > 250 
+						|| preg_match('/(\/|\*|\?|\>|\<|\:|\\|\|)/', $name) 
+						|| trim($name) == "" 
+						|| (strrpos($name, '.') == strlen($name) - 1  && substr($name, -1) == '.')
+						|| preg_match('/[^\x20-\x7f]/', $name);
+			if ($warn_test) 
 			{
 				$this->FilterInfo->Dirs->Warning[] = DUP_Encoding::toUTF8($val);
 			} 
 			
-			//Dir is not readble remove and flag
+			//UNREADABLE: Directory is unreadable flag it
 			if (! is_readable($this->Dirs[$key])) 
 			{
 				unset($this->Dirs[$key]);
@@ -252,13 +244,12 @@ class DUP_Archive
 
 						if ($invalid_test || preg_match('/[^\x20-\x7f]/', $fileName))
 						{
-							$this->FilterInfo->Files->Warning[] = DUP_Encoding::toUTF8($filePath);
+							$filePath = DUP_Encoding::toUTF8($filePath);
+							$this->FilterInfo->Files->Warning[] = $filePath;
 						} 
-						else 
-						{
-							$this->Size += $fileSize;
-							$this->Files[] = $filePath;
-						}
+						$this->Size += $fileSize;
+						$this->Files[] = $filePath;
+					
 						
 						if ($fileSize > DUPLICATOR_SCAN_WARNFILESIZE) 
 						{
@@ -279,9 +270,10 @@ class DUP_Archive
 	// - basic conclusion wait on the SPL libs untill after php 5.4 is a requiremnt
 	// - since we are in a tight recursive loop lets remove the utiltiy call DUP_Util::SafePath("{$path}/{$file}") and 
 	//   squeeze out as much performance as we possible can
-	private function dirsToArray($path) 
-	{
-		$items = array();
+	
+	private function dirsToArray($path, $filterDirsAll)
+    {
+        $items = array();
         $handle = @opendir($path);
         if ($handle)
         {
@@ -290,17 +282,35 @@ class DUP_Archive
                 if ($file != '.' && $file != '..')
                 {
 					$fullPath = str_replace("\\", '/', "{$path}/{$file}");
-                    if (is_dir($fullPath))
+
+					if (is_dir($fullPath))
                     {
-                        $items = array_merge($items, $this->dirsToArray($fullPath));
-                        $items[] = $fullPath;
+						$addDir = true;
+						
+						//Remove path filter directories
+						foreach ($filterDirsAll as $filterDir)
+						{
+							$trimmedFilterDir = rtrim($filterDir, '/');
+							
+							if ($fullPath == $trimmedFilterDir || strstr($fullPath, $trimmedFilterDir . '/')) 
+							{
+								$addDir = false;
+								break;
+							}														
+						}
+																				
+						if($addDir)
+						{
+							$items = array_merge($items, $this->dirsToArray($fullPath, $filterDirsAll));
+							$items[] = $fullPath;
+						}
                     }
                 }
             }
             closedir($handle);
         }
+		
         return $items;
-	}
-	
+    }
 }
 ?>

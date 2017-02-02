@@ -1,21 +1,23 @@
 === Stream ===
-Contributors:      fjarrett, lukecarbis, shadyvb, westonruter, stream, xwp
-Tags:              actions, activity, activity log, activity logs, admin actions, analytics, audit, audit log, audit logs, change, changes, dashboard, log, logs, stream, tracking, troubleshooting, wp stream
-Requires at least: 3.7
-Tested up to:      4.4
-Stable tag:        3.0.4
+Contributors:      fjarrett, lukecarbis, stream, xwp
+Tags:              actions, activity, activity log, activity logs, admin actions, analytics, audit, audit log, audit logs, blackbox, black box, change, changes, dashboard, log, logs, stream, tracking, troubleshooting, wp stream
+Requires at least: 3.9
+Tested up to:      4.6
+Stable tag:        3.1.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Stream is the easiest and safest way to track content changes happening to your WordPress site and then view them in beautifully organized detail.
+Planes have a black box, WordPress has Stream. When something goes wrong, you need to know how it happened.
 
 == Description ==
 
-Never be in the dark about WP Admin activity again.
+With Stream, you're never left in the dark about WordPress Admin activity.
 
-Stream allows you to know exactly when changes to your site have been made, and more importantly, who did them.
+Every logged-in user action is displayed in an activity stream and organised for easy filtering by User, Role, Context, Action or IP address.
 
-Every logged-in user action is displayed in an activity stream and organized for easy filtering by User, Role, Context, Action and IP address.
+For advanced users, Stream also supports a Multisite view of all activity records on your network, the ability to set exclude rules to ignore certain kinds of user activity, and a WP‑CLI command for querying records.
+
+Stream is perfect for keeping tabs on your clients. When something breaks, Stream is there to help. See what changed and who changed it.
 
 **Built-In Tracking Integrations For Popular Plugins:**
 
@@ -55,8 +57,8 @@ Every logged-in user action is displayed in an activity stream and organized for
  * Multisite view of all activity records on a network
  * Limit who can view user activity records by user role
  * Set exclude rules to ignore certain kinds of user activity
- * Live update of user activity records in the Stream
- * Support for IPv6 addresses
+ * Live updates of user activity records in the Stream
+ * Export your Activity Stream as a CSV or JSON file
  * WP-CLI command for querying records
 
 **See room for improvement?**
@@ -67,7 +69,7 @@ Great! There are several ways you can get involved to help make Stream better:
 2. **Suggest New Features:** Have an awesome idea? Please share it! Simply [create a new topic](https://wordpress.org/support/plugin/stream) in the plugin forum to express your thoughts on why the feature should be included and get a discussion going around your idea.
 3. **Issue Pull Requests:** If you're a developer, the easiest way to get involved is to help out on [issues already reported](https://github.com/x-team/wp-stream/issues) in GitHub. Be sure to check out the [contributing guide](https://github.com/x-team/wp-stream/blob/master/contributing.md) for developers.
 
-Thank you for wanting to make Stream better for everyone! We salute you.
+Thank you for wanting to make Stream better for everyone!
 
 == Screenshots ==
 
@@ -77,6 +79,56 @@ Thank you for wanting to make Stream better for everyone! We salute you.
 
 == Changelog ==
 
+= 3.1.1 - October 31, 2016 =
+
+* Fix: Hotfix for Error Updating Stream DB.
+
+= 3.1 - October 31, 2016 =
+
+* New: Stream Alerts is here! Get notified when something happens in your WP-Admin, so that you don't miss a thing. ([#844](https://github.com/xwp/stream/pull/844))
+* Tweak: Better support for the latest version of Yoast SEO ([#838](https://github.com/xwp/stream/pull/838))
+* Tweak: Better support for the latest version of WooCommerce ([#851](https://github.com/xwp/stream/pull/851)[#864](https://github.com/xwp/stream/pull/864))
+* Tweak: Better taxonomy labelling ([#859](https://github.com/xwp/stream/pull/859))
+* Fix: Fatal error caused by conflict with Yoast SEO ([#879](https://github.com/xwp/stream/pull/879))
+* Fix: Activating Stream through WP CLI now works ([#880](https://github.com/xwp/stream/pull/880))
+* Fix: Custom roles track properly ([#836](https://github.com/xwp/stream/pull/836))
+
+Props [@chacha](https://github.com/chacha), [@lukecarbis](https://github.com/lukecarbis), [@johnbillion](https://github.com/johnbillion), [@rheinardkorf](https://github.com/rheinardkorf), [@frozzare](https://github.com/frozzare), [@johnregan3](https://github.com/johnregan3), [@jacobschweitzer](https://github.com/jacobschweitzer), [@wrongware](https://github.com/wrongware)
+
+= 3.0.7 - June 14, 2016 =
+
+* Tweak: Use get_sites instead of wp_get_sites when available ([#856](https://github.com/xwp/stream/pull/856))
+* Tweak: More stable record actions (like exporting) ([71e6ac1](https://github.com/xwp/stream/commit/71e6ac1ff66e4415909c7ae29b243733a1fd209d))
+* Tweak: Better multisite support ([cfab041](https://github.com/xwp/stream/commit/cfab0413e67b83d969bd6612c895ecdb05dbfce4))
+* Fix: Exclude rule settings have been restored and enhanced ([#855](https://github.com/xwp/stream/pull/855))
+* Fix: Loading users via ajax ([#854](https://github.com/xwp/stream/pull/854))
+* Fix: Use the correct label for events relating to taxonomies which are registered late ([#859](https://github.com/xwp/stream/pull/859))
+
+Props [@chacha](https://github.com/chacha), [@lukecarbis](https://github.com/lukecarbis), Eugene Kireev, [@johnbillion](https://github.com/johnbillion)
+
+= 3.0.6 - May 31, 2016 =
+
+* New: Better support for default themes ([#831](https://github.com/xwp/stream/pull/831))
+* New: Upgrade filter menus to Select2 4 ([c3f6c65](https://github.com/xwp/stream/commit/c3f6c65c1bd95cebb26da7f00a720050a9144586))
+* Fix: Security Fixes
+* Fix: Cron for purging old records has been fixed ([#843](https://github.com/xwp/stream/pull/843))
+* Fix: Better at storing records for Super Admins ([#835](https://github.com/xwp/stream/pull/835))
+* Fix: Allow Super Admins to be ignored and filtered ([#835](https://github.com/xwp/stream/pull/835))
+
+Props [@chacha](https://github.com/chacha), [@lukecarbis](https://github.com/lukecarbis), [@marcin-lawrowski](https://github.com/marcin-lawrowski)
+
+= 3.0.5 - March 15, 2016 =
+
+* New: Export your Stream records as CSV or JSON. ([#823](https://github.com/xwp/stream/pull/823))
+* Tweak: More mobile responsive list table ([#810](https://github.com/xwp/stream/pull/810))
+* Tweak: Better Javascript conflict prevention ([#812](https://github.com/xwp/stream/pull/812))
+* Tweak: Minor styling updates. It's about attention to detail. ([#826](https://github.com/xwp/stream/pull/826))
+* Fix: Gravity Forms error when adding a note ([#811](https://github.com/xwp/stream/pull/811))
+* Fix: In some instances, custom roles weren't being logged by Stream ([#824](https://github.com/xwp/stream/pull/824))
+* Fix: The Customiser fix you've been waiting for! Stream now properly records changes made from the Customiser. ([#827](https://github.com/xwp/stream/pull/827))
+
+Props [@chacha](https://github.com/chacha), [@lukecarbis](https://github.com/lukecarbis), [@Stayallive](https://github.com/Stayallive), [@barryceelen](https://github.com/barryceelen), Jonathan Desrosiers, [@marcin-lawrowski](https://github.com/marcin-lawrowski)
+
 = 3.0.4 - November 27, 2015 =
 
 * Tweak: Better descriptions when a post changes status ([0eada10](https://github.com/xwp/stream/commit/0eada108b443ed3b6f9bdae3f1e4c87c77128a0a))
@@ -84,6 +136,8 @@ Thank you for wanting to make Stream better for everyone! We salute you.
 * Fix: You may now actually choose an item from the filter dropdown menus, instead of having everything greyed out ([#800](https://github.com/xwp/stream/pull/800))
 * Fix: Logging in / out of a Multisite install is now possible ([#801](https://github.com/xwp/stream/pull/801))
 * Fix: The Settings connector now works with WP CLI ([78a56b2](https://github.com/xwp/stream/commit/78a56b2c6b33b4f41c7b4f1f256a4d03ad42b2cb))
+
+Props [@lukecarbis](https://github.com/lukecarbis)
 
 = 3.0.3 - November 6, 2015 =
 
@@ -95,6 +149,8 @@ Thank you for wanting to make Stream better for everyone! We salute you.
 * Fix: Multiple Multisite Mistakes Mended ([#788](https://github.com/xwp/stream/pull/788))
 * Fix: Internet Explorer 8 fix!! IE8!? Come on, people, it's 2015. ([#789](https://github.com/xwp/stream/pull/789))
 * Fix: EDD connector bug ([#790](https://github.com/xwp/stream/pull/790))
+
+Props [@lukecarbis](https://github.com/lukecarbis), [@rob](https://github.com/rob), [greguly](https://github.com/greguly)
 
 = 3.0.2 - October 2, 2015 =
 
@@ -108,7 +164,7 @@ Thank you for wanting to make Stream better for everyone! We salute you.
 * Fix: Jetpack is now able to connect without error while Stream is active ([#768](https://github.com/xwp/stream/pull/768))
 * Fix: Reset Filters text no longer wraps to a second line ([#765](https://github.com/xwp/stream/pull/765))
 
-Props [@lukecarbis](https://github.com/lukecarbis)
+Props [@lukecarbis](https://github.com/lukecarbis), Props [@sirjonathan](https://github.com/sirjonathan)
 
 = 3.0.1 - September 2, 2015 =
 

@@ -54,6 +54,8 @@ class Connector_Woocommerce extends Connector {
 
 	private $settings = array();
 
+	private $plugin_version = null;
+
 	public function register() {
 		parent::register();
 
@@ -72,6 +74,7 @@ class Connector_Woocommerce extends Connector {
 		global $woocommerce;
 
 		if ( class_exists( 'WooCommerce' ) && version_compare( $woocommerce->version, self::PLUGIN_MIN_VERSION, '>=' ) ) {
+			$this->plugin_version = $woocommerce->version;
 			return true;
 		}
 
@@ -209,7 +212,7 @@ class Connector_Woocommerce extends Connector {
 	 * @return array Action links
 	 */
 	public function action_links( $links, $record ) {
-		if ( in_array( $record->context, $this->post_types ) && get_post( $record->object_id ) ) {
+		if ( in_array( $record->context, $this->post_types, true ) && get_post( $record->object_id ) ) {
 			if ( $link = get_edit_post_link( $record->object_id ) ) {
 				$posts_connector = new Connector_Posts();
 				$post_type_name = $posts_connector->get_post_type_name( get_post_type( $record->object_id ) );
@@ -293,7 +296,7 @@ class Connector_Woocommerce extends Connector {
 		}
 
 		// Don't track minor status change actions
-		if ( in_array( wp_stream_filter_input( INPUT_GET, 'action' ), array( 'mark_processing', 'mark_on-hold', 'mark_completed' ) ) || defined( 'DOING_AJAX' ) ) {
+		if ( in_array( wp_stream_filter_input( INPUT_GET, 'action' ), array( 'mark_processing', 'mark_on-hold', 'mark_completed' ), true ) || defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -302,7 +305,7 @@ class Connector_Woocommerce extends Connector {
 			return;
 		}
 
-		if ( in_array( $new, array( 'auto-draft', 'draft', 'inherit' ) ) ) {
+		if ( in_array( $new, array( 'auto-draft', 'draft', 'inherit' ), true ) ) {
 			return;
 		} elseif ( 'auto-draft' === $old && 'publish' === $new ) {
 			$message = esc_html_x(
@@ -413,12 +416,19 @@ class Connector_Woocommerce extends Connector {
 			return;
 		}
 
-		$old_status = wp_stream_is_vip() ? wpcom_vip_get_term_by( 'slug', $old, 'shop_order_status' ) : get_term_by( 'slug', $old, 'shop_order_status' );
-		$new_status = wp_stream_is_vip() ? wpcom_vip_get_term_by( 'slug', $new, 'shop_order_status' ) : get_term_by( 'slug', $new, 'shop_order_status' );
-
 		// Don't track new statuses
-		if ( ! $old_status ) {
+		if ( empty( $old ) ) {
 			return;
+		}
+
+		if ( version_compare( $this->plugin_version, '2.2', '>=' ) ) {
+			$old_status_name = wc_get_order_status_name( $old );
+			$new_status_name = wc_get_order_status_name( $new );
+		} else {
+			$old_status = wp_stream_is_vip() ? wpcom_vip_get_term_by( 'slug', $old, 'shop_order_status' ) : get_term_by( 'slug', $old, 'shop_order_status' );
+			$new_status = wp_stream_is_vip() ? wpcom_vip_get_term_by( 'slug', $new, 'shop_order_status' ) : get_term_by( 'slug', $new, 'shop_order_status' );
+			$new_status_name = $new_status->name;
+			$old_status_name = $old_status->name;
 		}
 
 		$message = esc_html_x(
@@ -430,8 +440,6 @@ class Connector_Woocommerce extends Connector {
 		$order           = new \WC_Order( $order_id );
 		$order_title     = esc_html__( 'Order number', 'stream' ) . ' ' . esc_html( $order->get_order_number() );
 		$order_type_name = esc_html__( 'order', 'stream' );
-		$new_status_name = strtolower( $new_status->name );
-		$old_status_name = strtolower( $old_status->name );
 
 		$this->log(
 			$message,
@@ -446,7 +454,7 @@ class Connector_Woocommerce extends Connector {
 			),
 			$order_id,
 			'shop_order',
-			$new_status_name
+			'updated'
 		);
 	}
 
@@ -612,9 +620,9 @@ class Connector_Woocommerce extends Connector {
 			}
 
 			// Change connector::posts records
-			if ( 'posts' === $record['connector'] && in_array( $record['context'], $this->post_types ) ) {
+			if ( 'posts' === $record['connector'] && in_array( $record['context'], $this->post_types, true ) ) {
 				$recordarr[ $key ]['connector'] = $this->name;
-			} elseif ( 'taxonomies' === $record['connector'] && in_array( $record['context'], $this->taxonomies ) ) {
+			} elseif ( 'taxonomies' === $record['connector'] && in_array( $record['context'], $this->taxonomies, true ) ) {
 				$recordarr[ $key ]['connector'] = $this->name;
 			} elseif ( 'settings' === $record['connector'] ) {
 				$option = isset( $record['meta']['option_key'] ) ? $record['meta']['option_key'] : false;
@@ -703,7 +711,7 @@ class Connector_Woocommerce extends Connector {
 					$_fields = array_filter(
 						$page->get_settings( $section_key ),
 						function( $item ) {
-							return isset( $item['id'] ) && ( ! in_array( $item['type'], array( 'title', 'sectionend' ) ) );
+							return isset( $item['id'] ) && ( ! in_array( $item['type'], array( 'title', 'sectionend' ), true ) );
 						}
 					);
 
@@ -751,7 +759,7 @@ class Connector_Woocommerce extends Connector {
 			$shipping_method_settings = array();
 			$shipping_methods         = $woocommerce->shipping();
 
-			foreach ( $shipping_methods->shipping_methods as $section_key => $shipping_method ) {
+			foreach ( (array) $shipping_methods->shipping_methods as $section_key => $shipping_method ) {
 				$title = $shipping_method->title;
 				$key   = $shipping_method->plugin_id . $shipping_method->id . '_settings';
 
