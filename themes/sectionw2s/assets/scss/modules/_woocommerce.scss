@@ -54,12 +54,12 @@
 	}
 }
 
-.woocommerce .outofstock span.onsale, 
+.woocommerce .outofstock span.onsale,
 .woocommerce-page .outofstock span.onsale {
 	background: #e93838 !important;
 }
 
-.woocommerce .outofstock .et_overlay, 
+.woocommerce .outofstock .et_overlay,
 .woocommerce-page .outofstock .et_overlay {
 	display: none !important;
 }
@@ -80,7 +80,7 @@
 		#gform_browse_button_2_16 {
 			float: none;
 			padding: 5px 10px !important;
-			font-size: 14px !important;			
+			font-size: 14px !important;
 		}
 
 		.product_totals {
@@ -209,8 +209,28 @@
 	}
 }
 
-.product-conclave-2015 {
+.product-conclave-2017 {
+
 	.continue-shopping {
 		display: none !important;
+	}
+
+	div.product {
+
+		div.images {
+			display: none;
+		}
+
+		div.summary {
+			width: 100%;
+		}
+
+		.related {
+			display: none;
+		}
+	}
+
+	.woocommerce-tabs {
+		display: none;
 	}
 }
