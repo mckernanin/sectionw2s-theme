@@ -82,13 +82,18 @@ function rv_redirect_to_url() {
 
 	global $woocommerce, $post;
 
+	if ( ! isset( $_REQUEST['add-to-cart'] ) ) {
+		return;
+	}
+
 	$product_id = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_REQUEST['add-to-cart'] ) );
 
 	$rv_woo_redirect_url = get_post_meta( $product_id, '_rv_woo_product_custom_redirect_url', true );
 
 	if ( ! empty( $rv_woo_redirect_url ) ) {
 
-		wp_redirect( esc_url( $rv_woo_redirect_url ) ); exit;
+		wp_redirect( esc_url( $rv_woo_redirect_url ) );
+		exit;
 
 	}
 
