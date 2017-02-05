@@ -42,7 +42,7 @@ add_action( 'wp_enqueue_scripts', 'sublime_child_scripts' );
 function sublime_load_adminjs() {
 
 	if ( is_admin() ) {
-		wp_enqueue_script( 'sublime_admin_scripts', get_stylesheet_directory() . '/js/admin.js', array( 'jquery' ) );
+		wp_enqueue_script( 'sublime_admin_scripts', get_stylesheet_directory_uri() . '/js/admin.js', array( 'jquery' ) );
 	}
 }
 

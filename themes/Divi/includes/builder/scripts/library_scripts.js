@@ -19,7 +19,8 @@
 		}
 
 		$( 'body' ).on( 'click', '.add-new-h2, a.page-title-action', function() {
-			$( 'body' ).append( et_pb_new_template_options.modal_output );
+			$( 'body' ).addClass( 'et-core-nbfc' ).append( et_pb_new_template_options.modal_output );
+
 			return false;
 		} );
 
@@ -31,6 +32,7 @@
 
 			//remove the modal with overlay when animation complete
 			setTimeout( function() {
+				$( 'body' ).removeClass( 'et-core-nbfc' );
 				$modal_overlay.remove();
 			}, 600 );
 		} );
@@ -129,7 +131,7 @@
 					data:
 					{
 						action : 'et_pb_add_new_layout',
-						et_load_nonce : et_pb_new_template_options.et_load_nonce,
+						et_admin_load_nonce : et_pb_new_template_options.et_admin_load_nonce,
 						et_layout_options : JSON.stringify(fields_data),
 					},
 					success: function( data ) {
@@ -140,13 +142,5 @@
 				} );
 			}
 		} );
-
-		$( '#et_show_export_section' ).click( function() {
-			var this_link = $( this ),
-				max_height_value = this_link.hasClass( 'et_pb_opened' ) ? '0' : '1000px';
-
-			$( '.et_pb_export_section' ).animate( { maxHeight: max_height_value }, 500 );
-			this_link.toggleClass( 'et_pb_opened' );
-		});
 	});
 })(jQuery)

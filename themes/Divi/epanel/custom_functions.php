@@ -22,14 +22,28 @@ function et_activate_features(){
 	require_once TEMPLATEPATH . '/epanel/shortcodes/shortcodes.php';
 
 	/* activate page templates */
-	require_once TEMPLATEPATH . '/epanel/page_templates/page_templates.php';
+	require_once TEMPLATEPATH . '/includes/page_templates/page_templates.php';
 
 	/* import epanel settings */
-	require_once TEMPLATEPATH . '/epanel/import_settings.php';
+	require_once TEMPLATEPATH . '/includes/import_settings.php';
 }
 
 add_filter( 'widget_text', 'do_shortcode' );
 add_filter( 'the_excerpt', 'do_shortcode' );
+
+if ( ! function_exists( 'et_get_theme_version' ) ) :
+function et_get_theme_version() {
+	$theme_info = wp_get_theme();
+
+	if ( is_child_theme() ) {
+		$theme_info = wp_get_theme( $theme_info->parent_theme );
+	}
+
+	$theme_version = $theme_info->display( 'Version' );
+
+	return $theme_version;
+}
+endif;
 
 if ( ! function_exists( 'et_options_stored_in_one_row' ) ) {
 
@@ -40,6 +54,65 @@ if ( ! function_exists( 'et_options_stored_in_one_row' ) ) {
 	}
 
 }
+
+/* sync custom CSS from ePanel with WP custom CSS option introduced in WP 4.7 */
+if ( ! function_exists( 'et_sync_custom_css_options' ) ) {
+	function et_sync_custom_css_options() {
+		$css_synced = get_theme_mod( 'et_pb_css_synced', 'no' );
+
+		if ( 'yes' === $css_synced || ! function_exists( 'wp_get_custom_css' ) ) {
+			return;
+		}
+
+		global $shortname;
+
+		$legacy_custom_css = wp_unslash( et_get_option( "{$shortname}_custom_css" ) );
+
+		// nothing to sync if no custom css saved in ePanel
+		if ( '' === $legacy_custom_css || ! $legacy_custom_css || empty( $legacy_custom_css ) ) {
+			set_theme_mod( 'et_pb_css_synced', 'yes' );
+			return;
+		}
+
+		// get custom css string from WP customizer
+		$wp_custom_css = wp_get_custom_css();
+
+		// ePanel is completely synced with Customizer
+		if ( $wp_custom_css === $legacy_custom_css || false !== strpos( $wp_custom_css, $legacy_custom_css ) ) {
+			set_theme_mod( 'et_pb_css_synced', 'yes' );
+			return;
+		}
+
+		// merge custom css from WP customizer with ePanel custom css
+		$updated_custom_css = $legacy_custom_css . ' ' . $wp_custom_css;
+
+		$updated_status = wp_update_custom_css_post( $updated_custom_css );
+
+		// set theme mod in case of success
+		if ( is_object( $updated_status ) && ! empty( $updated_status ) ) {
+			set_theme_mod( 'et_pb_css_synced', 'yes' );
+		}
+	}
+}
+add_action( 'init', 'et_sync_custom_css_options' );
+
+/**
+ * sync custom CSS from WP custom CSS option introduced in WP 4.7 with theme options for backward compatibility
+ * it should be removed after a few WP major updates when we fully migrate to WP custom CSS system
+ */
+if ( ! function_exists( 'et_back_sync_custom_css_options' ) ) {
+	function et_back_sync_custom_css_options( $data ) {
+		global $shortname;
+
+		if ( ! empty( $data ) && isset( $data['css'] ) ) {
+			et_update_option( "{$shortname}_custom_css", $data['css'] );
+		}
+
+		return $data;
+	}
+}
+
+add_filter( 'update_custom_css_data', 'et_back_sync_custom_css_options' );
 
 /**
  * Gets option value from the single theme option, stored as an array in the database
@@ -55,10 +128,18 @@ if ( ! function_exists( 'et_options_stored_in_one_row' ) ) {
  */
 if ( ! function_exists( 'et_get_option' ) ) {
 
-	function et_get_option( $option_name, $default_value = '', $used_for_object = '', $force_default_value = false ){
+	function et_get_option( $option_name, $default_value = '', $used_for_object = '', $force_default_value = false, $is_global_setting = false, $global_setting_main_name = '', $global_setting_sub_name = '' ){
 		global $et_theme_options, $shortname;
 
-		if ( et_options_stored_in_one_row() ) {
+		if ( $is_global_setting ) {
+			$option_value = '';
+
+			$et_global_setting = get_option( $global_setting_main_name );
+
+			if ( false !== $et_global_setting && isset( $et_global_setting[ $global_setting_sub_name ] ) ) {
+				$option_value = $et_global_setting[ $global_setting_sub_name ];
+			}
+		} else if ( et_options_stored_in_one_row() ) {
 			$et_theme_options_name = 'et_' . $shortname;
 
 			if ( ! isset( $et_theme_options ) || isset( $_POST['wp_customize'] ) ) {
@@ -70,7 +151,7 @@ if ( ! function_exists( 'et_get_option' ) ) {
 		}
 
 		// option value might be equal to false, so check if the option is not set in the database
-		if ( ! isset( $et_theme_options[ $option_name ] ) && ( '' != $default_value || $force_default_value ) ) {
+		if ( et_options_stored_in_one_row() && ! isset( $et_theme_options[ $option_name ] ) && ( '' != $default_value || $force_default_value ) ) {
 			$option_value = $default_value;
 		}
 
@@ -84,10 +165,21 @@ if ( ! function_exists( 'et_get_option' ) ) {
 
 if ( ! function_exists( 'et_update_option' ) ) {
 
-	function et_update_option( $option_name, $new_value ){
+	function et_update_option( $option_name, $new_value, $is_new_global_setting = false, $global_setting_main_name = '', $global_setting_sub_name = '' ){
 		global $et_theme_options, $shortname;
 
-		if ( et_options_stored_in_one_row() ) {
+		if ( $is_new_global_setting && '' !== $global_setting_main_name && '' !== $global_setting_sub_name ) {
+			$global_setting = get_option( $global_setting_main_name );
+
+			if ( ! $global_setting ) {
+				$global_setting = array();
+			}
+
+			$global_setting[ $global_setting_sub_name ] = $new_value;
+
+			$option_name = $global_setting_main_name;
+			$new_value   = $global_setting;
+		} else if ( et_options_stored_in_one_row() ) {
 			$et_theme_options_name = 'et_' . $shortname;
 
 			if ( ! isset( $et_theme_options ) ) $et_theme_options = get_option( $et_theme_options_name );
@@ -121,28 +213,10 @@ if ( ! function_exists( 'et_delete_option' ) ) {
 
 }
 
-add_filter( 'body_class', 'et_browser_body_class' );
-
-function et_browser_body_class($classes) {
-	global $is_lynx, $is_gecko, $is_IE, $is_opera, $is_NS4, $is_safari, $is_chrome, $is_iphone;
-
-	if($is_lynx) $classes[] = 'lynx';
-	elseif($is_gecko) $classes[] = 'gecko';
-	elseif($is_opera) $classes[] = 'opera';
-	elseif($is_NS4) $classes[] = 'ns4';
-	elseif($is_safari) $classes[] = 'safari';
-	elseif($is_chrome) $classes[] = 'chrome';
-	elseif($is_IE) $classes[] = 'ie';
-	else $classes[] = 'unknown';
-
-	if($is_iphone) $classes[] = 'iphone';
-	return $classes;
-}
-
 /*this function allows for the auto-creation of post excerpts*/
 if ( ! function_exists( 'truncate_post' ) ) {
 
-	function truncate_post( $amount, $echo = true, $post = '' ) {
+	function truncate_post( $amount, $echo = true, $post = '', $strip_shortcodes = false ) {
 		global $shortname;
 
 		if ( '' == $post ) global $post;
@@ -160,8 +234,22 @@ if ( ! function_exists( 'truncate_post' ) ) {
 			// remove caption shortcode from the post content
 			$truncate = preg_replace( '@\[caption[^\]]*?\].*?\[\/caption]@si', '', $truncate );
 
-			// apply content filters
-			$truncate = apply_filters( 'the_content', $truncate );
+			// remove post nav shortcode from the post content
+			$truncate = preg_replace( '@\[et_pb_post_nav[^\]]*?\].*?\[\/et_pb_post_nav]@si', '', $truncate );
+
+			// Remove audio shortcode from post content to prevent unwanted audio file on the excerpt
+			// due to unparsed audio shortcode
+			$truncate = preg_replace( '@\[audio[^\]]*?\].*?\[\/audio]@si', '', $truncate );
+
+			// Remove embed shortcode from post content
+			$truncate = preg_replace( '@\[embed[^\]]*?\].*?\[\/embed]@si', '', $truncate );
+
+			if ( $strip_shortcodes ) {
+				$truncate = et_strip_shortcodes( $truncate );
+			} else {
+				// apply content filters
+				$truncate = apply_filters( 'the_content', $truncate );
+			}
 
 			// decide if we need to append dots at the end of the string
 			if ( strlen( $truncate ) <= $amount ) {
@@ -196,7 +284,7 @@ if ( ! function_exists( 'et_wp_trim_words' ) ) {
 
 	function et_wp_trim_words( $text, $num_words = 55, $more = null ) {
 		if ( null === $more )
-			$more = __( '&hellip;' );
+			$more = esc_html__( '&hellip;' );
 		$original_text = $text;
 		$text = wp_strip_all_tags( $text );
 
@@ -247,7 +335,17 @@ if ( ! function_exists( 'et_first_image' ) ) {
 	function et_first_image() {
 		global $post;
 		$img = '';
-		$output = preg_match_all( '/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $post->post_content, $matches );
+		$unprocessed_content = $post->post_content;
+
+		// truncate Post based shortcodes if Divi Builder enabled to avoid infinite loops
+		if ( function_exists( 'et_strip_shortcodes' ) ) {
+			$unprocessed_content = et_strip_shortcodes( $post->post_content, true );
+		}
+
+		// apply the_content filter to execute all shortcodes and get the correct image from the processed content
+		$processed_content = apply_filters( 'the_content', $unprocessed_content );
+
+		$output = preg_match_all( '/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $processed_content, $matches );
 		if ( isset( $matches[1][0] ) ) $img = $matches[1][0];
 
 		return trim( $img );
@@ -284,7 +382,7 @@ if ( ! function_exists( 'get_thumbnail' ) ) {
 				if ($thumb_array['thumb'] == '') $thumb_array['thumb'] = esc_attr( get_post_meta( $post->ID, 'Thumbnail', $single = true ) );
 			}
 
-			if (($thumb_array['thumb'] == '') && ((et_get_option( $shortname.'_grab_image' )) == 'on')) {
+			if ( '' === $thumb_array['thumb'] && et_grab_image_setting() ) {
 				$thumb_array['thumb'] = esc_attr( et_first_image() );
 				if ( $fullpath ) $thumb_array['fullpath'] = $thumb_array['thumb'];
 			}
@@ -301,6 +399,26 @@ if ( ! function_exists( 'get_thumbnail' ) ) {
 	}
 
 }
+
+if ( ! function_exists( 'et_grab_image_setting' ) ) :
+/**
+ * Filterable "Grab the first post image" setting.
+ * "Grab the first post image" needs to be filterable so it can be disabled forcefully.
+ * It uses et_first_image() which uses apply_filters( 'the_content' ) which could cause
+ * a conflict with third party plugin which extensively uses 'the_content' filter (ie. BuddyPress)
+ * @return bool
+ */
+function et_grab_image_setting() {
+	global $shortname;
+
+	// Force disable "Grab the first post image" in BuddyPress component page
+	$is_buddypress_component = function_exists( 'bp_current_component' ) && bp_current_component();
+
+	$setting = 'on' === et_get_option( "{$shortname}_grab_image" ) && ! $is_buddypress_component;
+
+	return apply_filters( 'et_grab_image_setting', $setting );
+}
+endif;
 
 /* this function prints thumbnail from Post Thumbnail or Custom field or First post image */
 if ( ! function_exists( 'print_thumbnail' ) ) {
@@ -500,7 +618,7 @@ if ( ! function_exists( 'show_page_menu' ) ) {
 
 		if ( $addUlContainer ) echo '<ul class="'.$customClass.'">';
 		if (et_get_option( $shortname . '_home_link' ) == 'on' && $addHomeLink) { ?>
-				<li <?php if ( is_front_page() || is_home() ) echo 'class="current_page_item"' ?>><a href="<?php echo esc_url( home_url() ); ?>"><?php _e( 'Home', $themename ); ?></a></li>
+				<li <?php if ( is_front_page() || is_home() ) echo 'class="current_page_item"' ?>><a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Home', $themename ); ?></a></li>
 			<?php };
 
 			echo $page_menu;
@@ -797,11 +915,11 @@ if ( ! function_exists( 'elegant_titles_filter' ) ) {
 			} else if ( is_author() ) {
 				$page_title = get_the_author_meta( 'display_name', get_query_var( 'author' ) );
 			} else if ( is_date() ) {
-				$page_title = __( 'Archives', $themename );
+				$page_title = esc_html__( 'Archives', $themename );
 			} else if ( is_search() ) {
-				$page_title = sprintf( __( 'Search results for "%s"', $themename ), esc_attr( get_search_query() ) );
+				$page_title = sprintf( esc_html__( 'Search results for "%s"', $themename ), esc_attr( get_search_query() ) );
 			} else if ( is_404() ) {
-				$page_title = __( '404 Not Found', $themename );
+				$page_title = esc_html__( '404 Not Found', $themename );
 			}
 			if ( $seo_index_type == 'BlogName | Category name' ) {
 				$custom_title = $sitename . esc_html( $seo_index_separate ) . $page_title;
@@ -871,7 +989,7 @@ if ( ! function_exists( 'elegant_description' ) ) {
 			}
 
 			if ( is_archive() && ! $description_added ) {
-				$description_text = $is_pre_4_4 ? sprintf( __( 'Currently viewing archives from %1$s', $themename ),
+				$description_text = $is_pre_4_4 ? sprintf( esc_html__( 'Currently viewing archives from %1$s', $themename ),
 					wp_title( '', false, '' )
 				) : get_the_archive_title();
 
@@ -884,7 +1002,7 @@ if ( ! function_exists( 'elegant_description' ) ) {
 
 			if ( is_search() && ! $description_added ) {
 				$description_text = $is_pre_4_4 ? wp_title( '', false, '' ) : sprintf(
-					__( 'Search Results for: %s', $themename ),
+					esc_html__( 'Search Results for: %s', $themename ),
 					get_search_query()
 				);
 
@@ -1125,7 +1243,7 @@ if ( ! function_exists( 'et_resize_image' ) ) {
 		if ( file_exists( $checkfilename ) ) return str_replace( $site_dir, trailingslashit( $site_uri ), $checkfilename );
 
 		$size = @getimagesize( $localfile );
-		if ( !$size ) return new WP_Error( 'invalid_image_path', __( 'Image doesn\'t exist' ), $thumb );
+		if ( !$size ) return new WP_Error( 'invalid_image_path', esc_html__( 'Image doesn\'t exist' ), $thumb );
 		list($orig_width, $orig_height, $orig_type) = $size;
 
 		#check if we're resizing the image to smaller dimensions
@@ -1235,60 +1353,6 @@ function et_custom_posts_per_page( $query = false ) {
 	}
 }
 
-add_filter( 'pre_set_site_transient_update_themes', 'et_check_themes_updates' );
-
-function et_check_themes_updates( $update_transient ){
-	global $wp_version;
-
-	if ( !isset( $update_transient->checked ) ) return $update_transient;
-	else $themes = $update_transient->checked;
-
-	$send_to_api = array(
-		'action'           => 'check_theme_updates',
-		'installed_themes' => $themes,
-	);
-
-	$options = array(
-		'timeout'    => ( ( defined( 'DOING_CRON' ) && DOING_CRON ) ? 30 : 3),
-		'body'       => $send_to_api,
-		'user-agent' => 'WordPress/' . $wp_version . '; ' . home_url(),
-	);
-
-	$last_update = new stdClass();
-
-	$theme_request = wp_remote_post( 'http://www.elegantthemes.com/api/api.php', $options );
-	if ( !is_wp_error( $theme_request ) && wp_remote_retrieve_response_code( $theme_request ) == 200 ) {
-		$theme_response = unserialize( wp_remote_retrieve_body( $theme_request ) );
-		if ( !empty( $theme_response ) ) {
-			$update_transient->response = array_merge( !empty( $update_transient->response ) ? $update_transient->response : array(), $theme_response );
-			$last_update->checked = $themes;
-			$last_update->response = $theme_response;
-		}
-	}
-
-	$last_update->last_checked = time();
-	set_site_transient( 'et_update_themes', $last_update );
-
-	return $update_transient;
-}
-
-add_filter( 'site_transient_update_themes', 'et_add_themes_to_update_notification' );
-
-function et_add_themes_to_update_notification( $update_transient ){
-	$et_update_themes = get_site_transient( 'et_update_themes' );
-
-	if ( !is_object( $et_update_themes ) || !isset( $et_update_themes->response ) ) return $update_transient;
-
-	// Fix for warning messages on Dashboard / Updates page
-	if ( ! is_object( $update_transient ) ) {
-		$update_transient = new stdClass();
-	}
-
-	$update_transient->response = array_merge( !empty( $update_transient->response ) ? $update_transient->response : array(), $et_update_themes->response );
-
-	return $update_transient;
-}
-
 add_filter( 'default_hidden_meta_boxes', 'et_show_hidden_metaboxes', 10, 2 );
 
 function et_show_hidden_metaboxes( $hidden, $screen ){
@@ -1319,7 +1383,9 @@ function et_widget_force_title( $title ){
 if( version_compare( phpversion(), '4.4', '>=' ) ) add_filter( 'get_comments_number', 'et_comment_count', 0, 2 );
 
 function et_comment_count( $count, $post_id ) {
-	if ( ! is_admin() ) {
+	$is_doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX ? true : false;
+
+	if ( ! is_admin() || $is_doing_ajax ) {
 		global $id;
 		$post_id = $post_id ? $post_id : $id;
 		$get_comments = get_comments( array('post_id' => $post_id, 'status' => 'approve') );
@@ -1342,28 +1408,10 @@ if ( ! function_exists( 'et_theme_epanel_reminder' ) ) {
 		global $shortname, $themename, $current_screen;
 
 		if ( false === et_get_option( $shortname . '_logo' ) && 'appearance_page_core_functions' != $current_screen->id ) {
-			printf( __( '<div class="updated"><p>This is a fresh installation of %1$s theme. Don\'t forget to go to <a href="%2$s">ePanel</a> to set it up. This message will disappear once you have clicked the Save button within the <a href="%2$s">theme\'s options page</a>.</p></div>', $themename ), wp_get_theme(), admin_url( 'themes.php?page=core_functions.php' ) );
+			printf( et_get_safe_localization( __( '<div class="updated"><p>This is a fresh installation of %1$s theme. Don\'t forget to go to <a href="%2$s">ePanel</a> to set it up. This message will disappear once you have clicked the Save button within the <a href="%2$s">theme\'s options page</a>.</p></div>', $themename ) ), wp_get_theme(), admin_url( 'themes.php?page=core_functions.php' ) );
 		}
 	}
 
-}
-
-add_filter( 'gettext', 'et_admin_update_theme_message', 20, 3 );
-
-function et_admin_update_theme_message( $default_translated_text, $original_text, $domain ) {
-	global $themename;
-	$theme_page_message = 'There is a new version of %1$s available. <a href="%2$s" class="thickbox" title="%1$s">View version %3$s details</a>. <em>Automatic update is unavailable for this theme.</em>';
-	$updates_page_message = 'Update package not available.';
-
-	if ( is_admin() && $original_text === $theme_page_message ) {
-		return __( 'There is a new version of %1$s available. <a href="%2$s" class="thickbox" title="%1$s">View version %3$s details</a>. <em>Before you can update your Elegant Themes, you must first install the <a href="https://www.elegantthemes.com/members-area/documentation.html#updater" target="_blank">Elegant Updater Plugin</a> to authenticate your subscription.</em>', $themename );
-	}
-
-	if ( is_admin() && $original_text === $updates_page_message ) {
-		return __( 'Before you can update your Elegant Themes, you must first install the <a href="https://www.elegantthemes.com/members-area/documentation.html#updater" target="_blank">Elegant Updater Plugin</a> to authenticate your subscription.', $themename );
-	}
-
-	return $default_translated_text;
 }
 
 add_filter( 'body_class', 'et_add_fullwidth_body_class' );
@@ -1412,6 +1460,12 @@ if ( ! function_exists( 'et_load_core_options' ) ) {
  *
  */
 function et_add_custom_css() {
+	// use default wp custom css system starting from WP 4.7
+	// fallback to our legacy custom css system otherwise
+	if ( function_exists( 'wp_get_custom_css_post' ) ) {
+		return;
+	}
+
 	global $shortname;
 
 	$custom_css = et_get_option( "{$shortname}_custom_css" );
@@ -1924,5 +1978,43 @@ if ( ! function_exists( 'et_gf_enqueue_fonts' ) ) :
 			wp_enqueue_style( 'et-gf-' . $et_gf_font_name_slug, esc_url( add_query_arg( $query_args, "$protocol://fonts.googleapis.com/css" ) ), array(), null );
 		}
 	}
+
+endif;
+
+if ( ! function_exists( 'et_pb_get_google_api_key' ) ) :
+function et_pb_get_google_api_key() {
+	$google_api_option = get_option( 'et_google_api_settings' );
+	$google_api_key = isset( $google_api_option['api_key'] ) ? $google_api_option['api_key'] : '';
+
+	return $google_api_key;
+}
+endif;
+
+if ( ! function_exists( 'et_uc_theme_name' ) ) :
+
+/**
+ * Fixes the bug with lowercase theme name, preventing a theme to update correctly,
+ * when an update is being performed via Themes page
+ */
+function et_uc_theme_name( $key, $raw_key ) {
+	if ( ! ( is_admin() && isset( $_REQUEST['action'] ) && 'update-theme' === $_REQUEST['action'] ) ) {
+		return $key;
+	}
+
+	$theme_info = wp_get_theme();
+
+	if ( is_child_theme() ) {
+		$theme_info = wp_get_theme( $theme_info->parent_theme );
+	}
+
+	$theme_name = $theme_info->display( 'Name' );
+
+	if ( $raw_key !== $theme_name ) {
+		return $key;
+	}
+
+	return $theme_name;
+}
+add_filter( 'sanitize_key', 'et_uc_theme_name', 10, 2 );
 
 endif;

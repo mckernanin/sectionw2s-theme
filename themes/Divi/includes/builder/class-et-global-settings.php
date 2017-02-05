@@ -13,6 +13,12 @@ class ET_Global_Settings {
 	}
 
 	private static function set_values() {
+		$font_defaults_h1 = array(
+			'size'           => '30px',
+			'letter_spacing' => '0px',
+			'line_height'    => '1em',
+		);
+
 		$font_defaults = array(
 			'size'           => '14',
 			'color'          => '#666666',
@@ -91,7 +97,6 @@ class ET_Global_Settings {
 			'et_pb_fullwidth_post_title-meta_font_size'       => $font_defaults['size'],
 			'et_pb_fullwidth_post_title-meta_line_height'     => '1em',
 			'et_pb_fullwidth_post_title-meta_letter_spacing'  => $font_defaults['letter_spacing'],
-			'et_pb_fullwidth_post_title-module_bg_color'      => 'rgba(255,255,255,0)',
 			'et_pb_fullwidth_header-scroll_down_icon_size'    => '50px',
 			'et_pb_fullwidth_header-subhead_font_size'        => '18px',
 			'et_pb_fullwidth_header-button_one_font_size'     => '20px',
@@ -104,7 +109,6 @@ class ET_Global_Settings {
 			'et_pb_post_title-meta_font_size'                 => $font_defaults['size'],
 			'et_pb_post_title-meta_line_height'               => '1em',
 			'et_pb_post_title-meta_letter_spacing'            => $font_defaults['letter_spacing'],
-			'et_pb_post_title-module_bg_color'                => 'rgba(255,255,255,0)',
 			'et_pb_cta-header_font_size'                      => '26',
 			'et_pb_cta-header_font_style'                     => '',
 			'et_pb_cta-custom_padding'                        => '40',
@@ -124,6 +128,9 @@ class ET_Global_Settings {
 			'et_pb_blurb-body_letter_spacing'                 => $font_defaults['letter_spacing'],
 			'et_pb_blurb-body_line_height'                    => $font_defaults['line_height'],
 
+			'et_pb_text-header_font_size'                     => $font_defaults_h1['size'],
+			'et_pb_text-header_letter_spacing'                => $font_defaults_h1['letter_spacing'],
+			'et_pb_text-header_line_height'                   => $font_defaults_h1['line_height'],
 			'et_pb_text-text_font_size'                       => $font_defaults['size'],
 			'et_pb_text-text_letter_spacing'                  => $font_defaults['letter_spacing'],
 			'et_pb_text-text_line_height'                     => $font_defaults['line_height'],
@@ -216,6 +223,7 @@ class ET_Global_Settings {
 			'et_pb_circle_counter-title_color'                => '#333333',
 			'et_pb_circle_counter-number_line_height'         => '225px',
 			'et_pb_circle_counter-number_letter_spacing'      => $font_defaults['letter_spacing'],
+			'et_pb_circle_counter-circle_color_alpha'         => '0.1',
 			'et_pb_number_counter-title_font_size'            => '16',
 			'et_pb_number_counter-title_line_height'          => '1em',
 			'et_pb_number_counter-title_letter_spacing'       => $font_defaults['letter_spacing'],
@@ -302,8 +310,8 @@ class ET_Global_Settings {
 			'et_pb_countdown_timer-header_color'              => '#333333',
 			'et_pb_countdown_timer-header_line_height'        => '1em',
 			'et_pb_countdown_timer-header_letter_spacing'     => $font_defaults['letter_spacing'],
-			'et_pb_countdown_timer-numbers_font_size'         => '64px',
-			'et_pb_countdown_timer-numbers_line_height'       => '64px',
+			'et_pb_countdown_timer-numbers_font_size'         => '54px',
+			'et_pb_countdown_timer-numbers_line_height'       => '54px',
 			'et_pb_countdown_timer-numbers_letter_spacing'    => $font_defaults['letter_spacing'],
 			'et_pb_countdown_timer-label_line_height'         => '25px',
 			'et_pb_countdown_timer-label_letter_spacing'      => $font_defaults['letter_spacing'],
@@ -348,9 +356,9 @@ class ET_Global_Settings {
 		);
 
 		if ( ! et_is_builder_plugin_active() ) {
-			$defaults['et_pb_gallery-zoom_icon_color']              = et_get_option( 'accent_color', '#2EA3F2' );
-			$defaults['et_pb_portfolio-zoom_icon_color']            = et_get_option( 'accent_color', '#2EA3F2' );
-			$defaults['et_pb_filterable_portfolio-zoom_icon_color'] = et_get_option( 'accent_color', '#2EA3F2' );
+			$defaults['et_pb_gallery-zoom_icon_color']              = et_get_option( 'accent_color', '#2ea3f2' );
+			$defaults['et_pb_portfolio-zoom_icon_color']            = et_get_option( 'accent_color', '#2ea3f2' );
+			$defaults['et_pb_filterable_portfolio-zoom_icon_color'] = et_get_option( 'accent_color', '#2ea3f2' );
 		}
 
 		// reformat defaults array and add actual values to it

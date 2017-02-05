@@ -1,25 +1,3 @@
-@font-face {
-	font-family: 'etbuilder';
-	src:url('../../includes/builder/fonts/etbuilder_v2_6.eot');
-	src:url('../../includes/builder/fonts/etbuilder_v2_6.eot?#iefix') format('embedded-opentype'),
-		url('../../includes/builder/fonts/etbuilder_v2_6.woff') format('woff'),
-		url('../../includes/builder/fonts/etbuilder_v2_6.ttf') format('truetype'),
-		url('../../includes/builder/fonts/etbuilder_v2_6.svg#etbuilder') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: 'ETModules';
-	src:url('../../includes/builder/fonts/ETmodules_v2_4.eot');
-	src:url('../../includes/builder/fonts/ETmodules_v2_4.eot?#iefix') format('embedded-opentype'),
-		url('../../includes/builder/fonts/ETmodules_v2_4.woff') format('woff'),
-		url('../../includes/builder/fonts/ETmodules_v2_4.ttf') format('truetype'),
-		url('../../includes/builder/fonts/ETmodules_v2_4.svg#etbuilder') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
-
 /**
  * Resets
  */
@@ -115,6 +93,10 @@
 /**
  * Main Wrappers
  */
+#panel-wrap, #custom-lbox {
+	font-family: 'Open Sans', sans-serif;
+}
+
 #wrapper {
 	margin: 35px 50px 30px 30px;
 }
@@ -138,7 +120,7 @@
 }
 
 h1#epanel-title {
-	font-weight: 100;
+	font-weight: 300;
 	font-size: 22px;
 	color: rgb(255, 255, 255);
 	background-color: rgb(108, 46, 185);
@@ -146,11 +128,16 @@ h1#epanel-title {
 	line-height: 18px;
 	margin-bottom: 0px;
 	position: relative;
-	padding-left: 45px;
+	padding-left: 11px;
+}
+
+.rtl h1#epanel-title {
+	padding-left: 0;
+	padding-right: 11px;
 }
 
 #epanel-title:before {
-	font-family: etbuilder;
+	font-family: 'etbuilder';
 	speak: none;
 	font-weight: normal;
 	font-variant: normal;
@@ -158,29 +145,53 @@ h1#epanel-title {
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 	content: "<";
-	display: block;
+	display: none;
 	position: absolute;
 	left: 0;
 	top: -6px;
 	font-size: 32px;
 }
 
+.rtl #epanel-title:before {
+	left: auto;
+	right: 0;
+}
+
+.toplevel_page_et_extra_options h1#epanel-title, .toplevel_page_et_divi_options h1#epanel-title {
+	padding-left: 45px;
+}
+
+.rtl.toplevel_page_et_extra_options h1#epanel-title,
+.rtl.toplevel_page_et_divi_options h1#epanel-title {
+	padding-left: 0;
+	padding-right: 45px;
+}
+
+.toplevel_page_et_extra_options #epanel-title:before, .toplevel_page_et_divi_options #epanel-title:before {
+	display: block;
+}
+
 /**
  * Reset Buttons
  */
 #epanel-header .defaults-button {
-	width: 96px;
+	width: 60px;
 	height: 58px;
 	padding: 0;
 	text-align: center;
 	line-height: 58px;
 	position: absolute;
 	bottom: -58px;
-	right: 0;
+	right: 20px;
 	z-index: 50;
 	color: white;
 	background-color: #7e3bd0;
 	transition: all 0.3s;
+}
+
+.rtl #epanel-header .defaults-button {
+	right: auto;
+	left: 20px;
 }
 
 #epanel-header .defaults-button:hover {
@@ -191,11 +202,10 @@ h1#epanel-title {
 	box-shadow: none;
 }
 
-#epanel-header .defaults-button:before {
+#epanel-header .defaults-button.epanel-reset:before {
 	font-family: 'etbuilder';
 	content: '\4d';
 	font-size: 16px;
-	opacity: 0.9;
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -219,7 +229,11 @@ h1#epanel-title {
 	display: inline-block;
 	font-family: 'Open Sans', sans-serif;
 	font-size: 18px;
-	font-weight: 500;
+	font-weight: 400;
+}
+
+.rtl #epanel-mainmenu li {
+	float: right;
 }
 
 #epanel-mainmenu a:hover,
@@ -266,18 +280,33 @@ h1#epanel-title {
 	float: left;
 }
 
+.rtl #epanel-content ul.idTabs li {
+	float: right;
+}
+
 #epanel-content ul.idTabs a {
 	color: #8E969E;
 	display: block;
 	clear: both;
 	position: relative;
 	padding: 20px;
-	font-size: 14px;
-	font-weight: 700;
+	font-size: 16px;
+	font-weight: 600;
 	transition: all 0.3s;
 	-webkit-transition: all 0.3s;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
+}
+
+#wrap-general ul.idTabs a:first-of-type {
+	padding-right: 25px;
+}
+
+.rtl #wrap-general ul.idTabs a:first-of-type {
+	padding-left: 25px;
+	padding-right: 40px;
+}
+
+#ui-id-9 {
+	padding-right: 27px;
 }
 
 #epanel-content ul.idTabs a:hover {
@@ -359,8 +388,8 @@ h1#epanel-title {
 	top: 11px;
 	right: 0;
 	opacity: 0;
-	width: 17px;
-	height: 17px;
+	width: 18px;
+	height: 18px;
 	color: #32373C;
 	content: '';
 	text-align: center;
@@ -372,9 +401,14 @@ h1#epanel-title {
 	transition-timing-function: ease;
 }
 
+.rtl #epanel .epanel-box .box-description {
+	right: auto;
+	left: 0;
+}
+
 #epanel .epanel-box .box-description:before {
 	content: 't';
-	font-family: 'ETModules';
+	font-family: 'ETmodules';
 	font-size: 16px;
 }
 
@@ -386,8 +420,7 @@ h1#epanel-title {
 	word-wrap: break-word;
 	display: block;
 	font-weight: 600;
-	font-size: 14px;
-	text-transform: uppercase;
+	font-size: 16px;
 }
 
 #epanel-content .epanel-box .box-title {
@@ -414,6 +447,11 @@ h1#epanel-title {
 #epanel-content .epanel-box .box-content .upload_buttons {
 	vertical-align: top;
 	float: left;
+}
+
+.rtl #epanel-content .epanel-box .box-content input,
+.rtl #epanel-content .epanel-box .box-content .upload_buttons{
+	float: right;
 }
 
 .epanel-box select,
@@ -512,9 +550,19 @@ input.checkbox.yes_no_button {
 	left: 5px;
 }
 
+.rtl #epanel .et_pb_yes_no_button.et_pb_off_state span.et_pb_button_slider {
+	left: 50%;
+	margin-left: -5px;
+}
+
 #epanel .et_pb_yes_no_button.et_pb_on_state span.et_pb_button_slider {
 	left: 50%;
 	margin-left: -5px;
+}
+
+.rtl #epanel .et_pb_yes_no_button.et_pb_on_state span.et_pb_button_slider {
+	left: 5px;
+	margin-left: 0;
 }
 
 #epanel .et_pb_yes_no_button.et_pb_on_state span.et_pb_value_text.et_pb_on_value {
@@ -532,7 +580,7 @@ input.checkbox.yes_no_button {
 	float: left;
 	width: 50%;
 	text-align: center;
-	font-weight: bold;
+	font-weight: 600;
 	text-transform: uppercase;
 	-moz-transition: all 0.3s;
 	-webkit-transition: all 0.3s;
@@ -544,6 +592,10 @@ input.checkbox.yes_no_button {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+}
+
+.rtl #epanel .et_pb_yes_no_button span.et_pb_value_text {
+	float: right;
 }
 
 #epanel span.et_pb_value_text.et_pb_off_value {
@@ -603,7 +655,12 @@ input.checkbox.yes_no_button {
 	display: block;
 	position: absolute;
 	text-shadow: none !important;
-	font-weight: 100 !important;
+	font-weight: 300 !important;
+}
+
+.rtl .save-button:before {
+	left: auto;
+	right: 14px;
 }
 
 .save-button {
@@ -619,7 +676,7 @@ input.checkbox.yes_no_button {
 	border: none;
 	padding: 0 20px 0 58px;
 	font-size: 18px;
-	font-weight: 100;
+	font-weight: 300;
 	height: 53px;
 	line-height: 53px;
 	display: inline-block;
@@ -628,6 +685,12 @@ input.checkbox.yes_no_button {
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	position: relative;
+}
+
+.rtl .save-button {
+	padding-right: 58px;
+	padding-left: 20px;
+
 }
 
 .save-button:hover {
@@ -660,7 +723,7 @@ input.checkbox.yes_no_button {
 }
 
 .reset-popup-header {
-	font-weight: 100;
+	font-weight: 300;
 	font-size: 22px;
 	color: rgb(255, 255, 255);
 	background-color: rgb(108, 46, 185);
@@ -680,8 +743,6 @@ input.checkbox.yes_no_button {
 	overflow: auto;
 	min-height: 340px;
 	position: fixed;
-	top: 35% !important;
-	bottom: 35%;
 	left: 50%;
 	width: 400px;
 	background: rgb(255, 255, 255);
@@ -698,6 +759,8 @@ input.checkbox.yes_no_button {
 	border-radius: 4px; -moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	overflow: hidden;
+	font-size: 14px;
+	line-height: 1.5em;
 }
 
 .defaults-hover.active {
@@ -724,12 +787,12 @@ input.checkbox.yes_no_button {
 	bottom: 0;
 	display: block;
 	color: white;
-	font-size: 17px;
+	font-size: 18px;
 	height: 68px;
 	width: 50%;
 	border: none;
 	font-family: 'Open Sans', sans-serif;
-	font-weight: bold;
+	font-weight: 600;
 	box-sizing: border-box;
 	text-align: center;
 	line-height: 68px;
@@ -743,6 +806,11 @@ input.checkbox.yes_no_button {
 	background: #008BDA;
 }
 
+.rtl .no {
+	left: auto;
+	right: 0;
+}
+
 .no:hover {
 	background: #007cc3;
 }
@@ -750,6 +818,11 @@ input.checkbox.yes_no_button {
 #epanel-reset {
 	right: 0;
 	background: #00c3aa;
+}
+
+.rtl #epanel-reset {
+	right: auto;
+	left: 0;
 }
 
 #epanel-reset:hover {
@@ -771,7 +844,7 @@ input.checkbox.yes_no_button {
 }
 
 .box-desc-top {
-	font-weight: 100;
+	font-weight: 300;
 	font-size: 22px;
 	color: rgb(255, 255, 255);
 	background-color: rgb(108, 46, 185);
@@ -793,8 +866,7 @@ input.checkbox.yes_no_button {
 }
 
 .box-desc-content h3 {
-	text-transform: uppercase;
-	font-size: 14px;
+	font-size: 16px;
 	line-height: 25px;
 	margin: 0px 0px 15px;
 	width: 320px;
@@ -803,6 +875,7 @@ input.checkbox.yes_no_button {
 
 .box-desc-content p {
 	margin: 0px;
+	font-size: 14px;
 }
 
 .box-desc-content .lightboxclose {
@@ -823,9 +896,14 @@ input.checkbox.yes_no_button {
 	cursor: pointer;
 }
 
+.rtl .box-desc-content .lightboxclose {
+	right: auto;
+	left: -40px;
+}
+
 .box-desc-content .lightboxclose:before {
 	content: 'M';
-	font: 23px 'ETModules';
+	font: 23px 'ETmodules';
 	line-height: 68px;
 }
 
@@ -852,6 +930,11 @@ input.checkbox.yes_no_button {
 	display: inline-block;
 }
 
+.rtl #epanel-content .epanel-box .uploadfield {
+	margin-right: 0;
+	margin-left: 5%;
+}
+
 #epanel-content .epanel-box .upload_image_button,
 #epanel-content .epanel-box .upload_image_reset,
 #epanel-content .epanel-box .button{
@@ -861,8 +944,10 @@ input.checkbox.yes_no_button {
 	background-color: #32373C;
 	padding: 0 20px;
 	margin: 0;
-	font-size: 14px;
+	font-size: 12px;
 	line-height: 40px;
+	text-transform: uppercase;
+	font-weight: 600;
 	height: 40px;
 	margin-right: 0;
 	margin-left: 7px;
@@ -878,6 +963,14 @@ input.checkbox.yes_no_button {
 	-webkit-transition: background .5s;
 	-moz-transition: background .5s;
 	transition: background .5s;
+}
+
+.rtl #epanel-content .epanel-box .upload_image_button,
+.rtl #epanel-content .epanel-box .upload_image_reset,
+.rtl #epanel-content .epanel-box .button {
+	float: right;
+	margin-left: 0;
+	margin-right: 5%;
 }
 
 #epanel-content .epanel-box .upload_image_button:focus,
@@ -907,9 +1000,17 @@ input.checkbox.yes_no_button {
 	margin: 0;
 }
 
+.rtl #epanel-content .epanel-box .upload_image_reset {
+	margin: 0;
+}
+
 #epanel-content .epanel-box .et_make_connection {
 	margin-left: 0;
 	width: 195px;
+}
+
+.rtl #epanel-content .epanel-box .et_make_connection {
+	margin-right: 0;
 }
 
 /**
@@ -925,6 +1026,11 @@ input.checkbox.yes_no_button {
 	padding: 10px 10px 10px 40px;
 	vertical-align: top;
 	position: relative;
+}
+
+.rtl #epanel p.inputs {
+	padding-right: 40px;
+	padding-left: 10px;
 }
 
 #epanel p.inputs label {
@@ -946,12 +1052,12 @@ input.checkbox.yes_no_button {
 }
 
 
-#epanel p.inputs .jquery-checkbox .mark:before {
-	font: 20px 'ETModules';
+#epanel p.inputs .jquery-checkbox .mark:before, #epanel p.inputs.different .jquery-checkbox-checked .mark:before {
+	font: 20px 'ETmodules';
 	content: 'N';
 }
 
-#epanel p.inputs .jquery-checkbox-checked .mark:before {
+#epanel p.inputs:not(.different) .jquery-checkbox-checked .mark:before, #epanel p.inputs.different .jquery-checkbox:not(.jquery-checkbox-checked) .mark:before {
 	content: 'M';
 	color: #FF5600;
 	font-size: 23px;
@@ -961,6 +1067,12 @@ input.checkbox.yes_no_button {
 	position: absolute;
 	top: 10px;
 	left: 10px;
+	cursor: pointer;
+}
+
+.rtl #epanel p.inputs  span.jquery-checkbox {
+	left: auto;
+	right: 10px;
 }
 
 /**
@@ -974,6 +1086,10 @@ input.checkbox.yes_no_button {
 	cursor: pointer;
 }
 
+.rtl #epanel p.postinfo {
+	float: right;
+}
+
 #epanel p.postinfo .mark:before {
 	font: 16px 'etbuilder';
 	width: 16px;
@@ -983,6 +1099,11 @@ input.checkbox.yes_no_button {
 	vertical-align: middle;
 	color: #008BDB;
 	transition: all 0.3s;
+}
+
+.rtl #epanel p.postinfo .mark:before {
+	margin-right: 0;
+	margin-left: 7px;
 }
 
 #epanel p.postinfo .mark:after {
@@ -1014,13 +1135,13 @@ input.checkbox.yes_no_button {
 }
 
 #epanel p.postinfo-author img {
-    vertical-align: middle;
-    width: 63px;
-    height: 19px;
-    background: transparent url(../images/postinfo-author.gif) no-repeat;
-    margin-right: 5px;
-    margin-top: -1px;
-    margin-left: 0px !important;
+	vertical-align: middle;
+	width: 63px;
+	height: 19px;
+	background: transparent url(../images/postinfo-author.gif) no-repeat;
+	margin-right: 5px;
+	margin-top: -1px;
+	margin-left: 0px !important;
 }
 
 #epanel p.postinfo-date .mark:before {
@@ -1028,12 +1149,12 @@ input.checkbox.yes_no_button {
 }
 
 #epanel p.postinfo-categories img {
-    vertical-align: middle;
-    width: 91px;
-    height: 19px;
-    background: transparent url(../images/postinfo-categories.gif) no-repeat;
-    margin-right: 5px;
-    margin-left: 0px !important;
+	vertical-align: middle;
+	width: 91px;
+	height: 19px;
+	background: transparent url(../images/postinfo-categories.gif) no-repeat;
+	margin-right: 5px;
+	margin-left: 0px !important;
 }
 
 #epanel p.postinfo-categories .mark:before {
@@ -1041,12 +1162,12 @@ input.checkbox.yes_no_button {
 }
 
 #epanel p.postinfo-date img {
-    vertical-align: middle;
-    width: 55px;
-    height: 19px;
-    background: transparent url(../images/postinfo-date.gif) no-repeat;
-    margin-right: 5px;
-    margin-left: 0px !important;
+	vertical-align: middle;
+	width: 55px;
+	height: 19px;
+	background: transparent url(../images/postinfo-date.gif) no-repeat;
+	margin-right: 5px;
+	margin-left: 0px !important;
 }
 
 #epanel p.postinfo-comments .mark:before {
@@ -1064,7 +1185,6 @@ input.checkbox.yes_no_button {
 	background: url(../images/custom_background.png);
 	font-family: Arial, Helvetica, sans-serif;
 	display: none;
-	margin-left: 40px;
 }
 
 .colorpicker_color {
@@ -1253,13 +1373,13 @@ left: 0px;
 .navigationTabs li a.active { background-color: #fff; border: 1px solid #ccc; border-bottom: 0px solid; }
 .tabsContent { border: 1px solid #ccc; border-top: 0px solid; width: 698px; overflow: hidden; }
 .tab { padding: 16px; display: none; }
-.tab h2 { font-weight: bold; font-size: 16px; }
-.tab h3 {	font-weight: bold; font-size: 14px; margin-top: 20px; }
+.tab h2 { font-weight: 600; font-size: 16px; }
+.tab h3 {	font-weight: 600; font-size: 14px; margin-top: 20px; }
 .tab p { margin-top: 16px; clear: both; }
 .tab ul { margin-top: 16px; list-style: disc; }
 .tab li { margin: 10px 0 0 35px; }
 .tab a { color: #8FB0CF; }
-.tab strong { font-weight: bold; }
+.tab strong { font-weight: 600; }
 .tab pre { font-size: 11px; margin-top: 20px; width: 668px; overflow: auto; clear: both; }
 .tab table { width: 100%; }
 .tab table td { padding: 6px 10px 6px 0; vertical-align: top; }
@@ -1282,7 +1402,28 @@ left: 0px;
 #colorpickerHolder2 .colorpicker_submit { background-image: url(../images/custom_submit.png); }
 #colorpickerHolder2 .colorpicker input { color: #778398; }
 
+/* wp color picker option */
+.box-content .et_pb_colorpalette_overview { display: block; margin-bottom: 10px; }
+.box-content .colorpalette-item { display: inline-block; width: 32px; height: 32px; -moz-box-shadow: inset 0 0 5px 0 rgba(0, 0, 0, 0.2); -webkit-box-shadow: inset 0 0 5px 0 rgba(0, 0, 0, 0.2); box-shadow: inset 0 0 5px 0 rgba(0, 0, 0, 0.2); margin-right: 8px; content: ''; -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; cursor: pointer; }
+.box-content .wp-color-result { display: none; }
+.box-content .iris-picker { display: block !important; }
+.box-content .colorpalette-item:last-child { margin-right: 0; }
+.box-content .colorpalette-colorpicker { display: none; }
+.box-content .colorpalette-colorpicker.active { display: block; }
+.box-content .wp-picker-holder { margin-top: 50px; }
+.box-content input.input-colorpalette-colorpicker.wp-color-picker { display: block !important; width: 316px !important; }
+
 .clearfix { clear: both; }
+
+/* Portability Integration */
+#epanel-header .epanel-portability {
+	right: 80px;
+}
+
+.rtl #epanel-header .epanel-portability {
+	right: auto;
+	left: 80px;
+}
 
 /**
  * Saving Animation
@@ -1316,7 +1457,7 @@ left: 0px;
 
 #epanel-ajax-saving.success-animation:before {
 	background: none;
-	font-family: etbuilder;
+	font-family: 'etbuilder';
 	speak: none;
 	font-weight: normal;
 	font-variant: normal;
@@ -1476,12 +1617,6 @@ Copyright (c) 2015 Daniel Eden
 
 	#epanel-content .epanel-box .upload_image_button {
 		margin-right: 0;
-	}
-}
-
-@media only screen and ( max-width: 1045px ) {
-	#epanel-header .defaults-button {
-		width: 58px;
 	}
 }
 

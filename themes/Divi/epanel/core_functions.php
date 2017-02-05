@@ -14,11 +14,19 @@ if ( ! function_exists( 'et_epanel_admin_js' ) ) {
 
 		$epanel_jsfolder = get_template_directory_uri() . '/epanel/js';
 
+		et_core_load_main_fonts();
+
 		wp_register_script( 'epanel_colorpicker', $epanel_jsfolder . '/colorpicker.js', array(), et_get_theme_version() );
 		wp_register_script( 'epanel_eye', $epanel_jsfolder . '/eye.js', array(), et_get_theme_version() );
 		wp_register_script( 'epanel_checkbox', $epanel_jsfolder . '/checkbox.js', array(), et_get_theme_version() );
+		wp_enqueue_script( 'wp-color-picker' );
+		wp_enqueue_style( 'wp-color-picker' );
 
-		wp_enqueue_script( 'epanel_functions_init', $epanel_jsfolder . '/functions-init.js', array( 'jquery', 'jquery-ui-tabs', 'jquery-form', 'epanel_colorpicker', 'epanel_eye', 'epanel_checkbox' ), et_get_theme_version() );
+		$wp_color_picker_alpha_uri = defined( 'ET_BUILDER_URI' ) ? ET_BUILDER_URI . '/scripts/ext/wp-color-picker-alpha.min.js' : $epanel_jsfolder . '/wp-color-picker-alpha.min.js';
+
+		wp_enqueue_script( 'wp-color-picker-alpha', $wp_color_picker_alpha_uri, array( 'jquery', 'wp-color-picker' ), et_get_theme_version(), true );
+
+		wp_enqueue_script( 'epanel_functions_init', $epanel_jsfolder . '/functions-init.js', array( 'jquery', 'jquery-ui-tabs', 'jquery-form', 'epanel_colorpicker', 'epanel_eye', 'epanel_checkbox', 'wp-color-picker-alpha' ), et_get_theme_version() );
 		wp_localize_script( 'epanel_functions_init', 'ePanelSettings', array(
 			'clearpath'    => get_template_directory_uri() . '/epanel/images/empty.png',
 			'epanel_nonce' => wp_create_nonce( 'epanel_nonce' ),
@@ -69,6 +77,10 @@ if ( ! function_exists( 'et_epanel_admin_scripts' ) ) {
 		$current_screen = get_current_screen();
 		$is_divi        = ( 'toplevel_page_et_divi_options' === $current_screen->id );
 
+		if ( ! wp_style_is( 'et-core-admin', 'enqueued' ) ) {
+			wp_enqueue_style( 'et-core-admin-epanel', get_template_directory_uri() . '/core/admin/css/core.css', array(), et_get_theme_version() );
+		}
+
 		wp_enqueue_style( 'epanel-style', get_template_directory_uri() . '/epanel/css/panel.css', array(), et_get_theme_version() );
 
 		// ePanel on theme others than Divi might want to add specific styling
@@ -94,7 +106,16 @@ function et_add_epanel() {
 	$epanel = basename( __FILE__ );
 
 	if ( isset( $_GET['page'] ) && $_GET['page'] == $epanel && isset( $_POST['action'] ) ) {
-		epanel_save_data( 'js_disabled' ); //saves data when javascript is disabled
+		if (
+			( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'epanel_nonce' ) )
+			||
+			( 'reset' === $_POST['action'] && isset( $_POST['_wpnonce_reset'] ) && wp_verify_nonce( $_POST['_wpnonce_reset'], 'et-nojs-reset_epanel' ) )
+		) {
+			if ( ! isset( $GLOBALS['et_core_updates'] ) ) {
+				et_register_updates_component();
+			}
+			epanel_save_data( 'js_disabled' ); //saves data when javascript is disabled
+		}
 	}
 
 	$core_page = add_theme_page( $themename . ' ' . esc_html__( 'Options', $themename ), $themename . ' ' . esc_html__( 'Theme Options', $themename ), 'switch_themes', basename( __FILE__ ), 'et_build_epanel' );
@@ -128,7 +149,7 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 
 
 			<div id="epanel-top">
-				<button class="save-button" id="epanel-save-top"><?php _e( 'Save Changes', $themename ); ?></button>
+				<button class="save-button" id="epanel-save-top"><?php esc_html_e( 'Save Changes', $themename ); ?></button>
 			</div>
 
 			<form method="post" id="main_options_form" enctype="multipart/form-data">
@@ -144,7 +165,8 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 										$epanelMainTabs = apply_filters( 'epanel_page_maintabs', $epanelMainTabs );
 									?>
 
-									<a href="#" class="defaults-button" title="<?php esc_attr_e( 'Reset to Defaults', $themename ); ?>"><span class="label"><?php esc_html_e( 'Reset to Defaults', $themename ); ?></span></a>
+									<a href="#" class="defaults-button epanel-reset" title="<?php esc_attr_e( 'Reset to Defaults', $themename ); ?>"><span class="label"><?php esc_html_e( 'Reset to Defaults', $themename ); ?></span></a>
+									<?php echo et_core_portability_link( 'epanel', array( 'class' => 'defaults-button epanel-portability' ) ); ?>
 								</div>
 								<ul id="epanel-mainmenu">
 									<?php if ( in_array( 'general', $epanelMainTabs ) ) { ?>
@@ -168,12 +190,36 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 									<?php if ( in_array( 'integration', $epanelMainTabs ) ) { ?>
 										<li><a href="#wrap-integration"><?php esc_html_e( 'Integration', $themename ); ?></a></li>
 									<?php } ?>
+									<?php if ( in_array( 'support', $epanelMainTabs ) ) { ?>
+										<li><a href="#wrap-support"><?php esc_html_e( 'Support', $themename ); ?></a></li>
+									<?php } ?>
+									<?php if ( in_array( 'updates', $epanelMainTabs ) ) { ?>
+										<li><a href="#wrap-updates"><?php esc_html_e( 'Updates', $themename ); ?></a></li>
+									<?php } ?>
 									<?php do_action( 'epanel_render_maintabs', $epanelMainTabs ); ?>
 								</ul><!-- end epanel mainmenu -->
 
 								<?php
 								foreach ($options as $value) {
-									if ( in_array( $value['type'], array( 'text', 'textlimit', 'textarea', 'select', 'checkboxes', 'different_checkboxes', 'colorpicker', 'textcolorpopup', 'upload', 'callback_function' ) ) ) { ?>
+									if ( ! empty( $value[ 'depends_on' ] ) ) {
+										// function defined in 'depends on' key returns false, if a setting shouldn't be displayed
+										if ( ! call_user_func( $value[ 'depends_on' ] ) ) {
+											continue;
+										}
+									}
+
+									if ( ! empty( $value['id'] ) ) {
+										$is_new_global_setting    = false;
+										$global_setting_main_name = $global_setting_sub_name = '';
+
+										if ( isset( $value['is_global'] ) && $value['is_global'] ) {
+											$is_new_global_setting    = true;
+											$global_setting_main_name = isset( $value['main_setting_name'] ) ? sanitize_text_field( $value['main_setting_name'] ) : '';
+											$global_setting_sub_name  = isset( $value['sub_setting_name'] ) ? sanitize_text_field( $value['sub_setting_name'] ) : '';
+										}
+									}
+
+									if ( in_array( $value['type'], array( 'text', 'textlimit', 'textarea', 'select', 'checkboxes', 'different_checkboxes', 'colorpicker', 'textcolorpopup', 'upload', 'callback_function', 'et_color_palette', 'password' ) ) ) { ?>
 											<div class="epanel-box">
 												<div class="box-title">
 													<h3><?php echo esc_html( $value['name'] ); ?></h3>
@@ -194,11 +240,11 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 
 												<div class="box-content">
 
-													<?php if ( 'text' == $value['type'] ) { ?>
+													<?php if ( in_array( $value['type'], array( 'text', 'password' ) ) ) { ?>
 
 														<?php
 															$et_input_value = '';
-															$et_input_value = ( '' != et_get_option( $value['id'] ) ) ? et_get_option( $value['id'] ) : $value['std'];
+															$et_input_value = ( '' != et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) ) ? et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) : $value['std'];
 															$et_input_value = stripslashes( $et_input_value );
 														?>
 
@@ -208,7 +254,7 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 
 														<?php
 															$et_input_value = '';
-															$et_input_value = ( '' != et_get_option( $value['id'] ) ) ? et_get_option( $value['id'] ) : $value['std'];
+															$et_input_value = ( '' != et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) ) ? et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) : $value['std'];
 															$et_input_value = stripslashes( $et_input_value );
 														?>
 
@@ -222,7 +268,7 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 
 														<?php
 															$et_input_value = '';
-															$et_input_value = ( '' != et_get_option( $value['id'] ) ) ? et_get_option( $value['id'] ) : $value['std'];
+															$et_input_value = ( '' != et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) ) ? et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) : $value['std'];
 														?>
 
 														<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" class="colorpopup" type="text" value="<?php echo esc_attr( $et_input_value ); ?>" />
@@ -230,9 +276,15 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 													<?php } elseif ( 'textarea' == $value['type'] ) { ?>
 
 														<?php
-															$et_textarea_value = '';
-															$et_textarea_value = ( '' != et_get_option( $value['id'] ) ) ? et_get_option( $value['id'] ) : $value['std'];
-															$et_textarea_value = stripslashes( $et_textarea_value );
+															// get the custom css value from WP custom CSS option if supported
+															if ( ( $shortname . '_custom_css' ) === $value['id'] && function_exists( 'wp_get_custom_css') ) {
+																$et_textarea_value = wp_get_custom_css();
+																$et_textarea_value = strip_tags( $et_textarea_value );
+															} else {
+																$et_textarea_value = '';
+																$et_textarea_value = ( '' != et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) ) ? et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) : $value['std'];
+																$et_textarea_value = stripslashes( $et_textarea_value );
+															}
 														?>
 
 														<textarea name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_textarea( $et_textarea_value ); ?></textarea>
@@ -243,7 +295,7 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 														$et_upload_button_data = isset( $value['button_text'] ) ? sprintf( ' data-button_text="%1$s"', esc_attr( $value['button_text'] ) ) : '';
 													?>
 
-														<input id="<?php echo esc_attr( $value['id'] ); ?>" class="uploadfield" type="text" size="90" name="<?php echo esc_attr( $value['id'] ); ?>" value="<?php echo esc_url( et_get_option( $value['id'] ) ); ?>" />
+														<input id="<?php echo esc_attr( $value['id'] ); ?>" class="uploadfield" type="text" size="90" name="<?php echo esc_attr( $value['id'] ); ?>" value="<?php echo esc_url( et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) ); ?>" />
 														<div class="upload_buttons">
 															<span class="upload_image_reset"><?php esc_html_e( 'Reset', $themename ); ?></span>
 															<input class="upload_image_button" type="button"<?php echo $et_upload_button_data; ?> value="<?php esc_attr_e( 'Upload', $themename ); ?>" />
@@ -337,6 +389,26 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 
 														call_user_func( $value['function_name'] ); ?>
 
+													<?php } elseif ( 'et_color_palette' == $value['type'] ) {
+															$items_amount = isset( $value['items_amount'] ) ? $value['items_amount'] : 1;
+															$et_input_value = '' !== str_replace( '|', '', et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) ) ? et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) : $value['std'];
+														?>
+															<div class="et_pb_colorpalette_overview">
+														<?php
+															for ( $colorpalette_index = 1; $colorpalette_index <= $items_amount; $colorpalette_index++ ) { ?>
+																<span class="colorpalette-item colorpalette-item-<?php echo esc_attr( $colorpalette_index ); ?>" data-index="<?php echo esc_attr( $colorpalette_index ); ?>"></span>
+														<?php } ?>
+
+															</div>
+
+														<?php for ( $colorpicker_index = 1; $colorpicker_index <= $items_amount; $colorpicker_index++ ) { ?>
+																<div class="colorpalette-colorpicker" data-index="<?php echo esc_attr( $colorpicker_index ); ?>">
+																	<input data-index="<?php echo esc_attr( $colorpicker_index ); ?>" type="text" class="input-colorpalette-colorpicker" data-alpha="true" />
+																</div>
+														<?php } ?>
+
+														<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" class="et_color_palette_main_input" type="hidden" value="<?php echo esc_attr( $et_input_value ); ?>" />
+
 													<?php } ?>
 
 												</div> <!-- end box-content div -->
@@ -364,7 +436,11 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 											<div class="box-content">
 												<?php
 													$checked = '';
-												if ( '' != et_get_option( $value['id'] ) ) {
+												if ( $is_new_global_setting && isset( $value['main_setting_name'] ) && isset( $value['sub_setting_name'] ) ) {
+													$saved_checkbox = et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name );
+													$checked = ( 'on' === $saved_checkbox || (!$saved_checkbox && 'on' === $value['std']) ) ?
+														'checked="checked"' : '';
+												} else if ( '' != et_get_option( $value['id'] ) ) {
 													if ( 'on' == et_get_option( $value['id'] ) ) {
 														$checked = 'checked="checked"';
 													} else {
@@ -423,7 +499,7 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 
 				<div id="epanel-bottom">
 					<?php wp_nonce_field( 'epanel_nonce' ); ?>
-					<button class="save-button" name="save" id="epanel-save"><?php _e( 'Save Changes', $themename ); ?></button>
+					<button class="save-button" name="save" id="epanel-save"><?php esc_html_e( 'Save Changes', $themename ); ?></button>
 
 					<input type="hidden" name="action" value="save_epanel" />
 				</div><!-- end epanel-bottom div -->
@@ -432,8 +508,8 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 
 			<div class="reset-popup-overlay">
 				<div class="defaults-hover">
-					<div class="reset-popup-header"><?php _e( 'Reset', $themename ); ?></div>
-					<?php _e( 'This will return all of the settings throughout the options page to their default values. <strong>Are you sure you want to do this?</strong>', $themename ); ?>
+					<div class="reset-popup-header"><?php esc_html_e( 'Reset', $themename ); ?></div>
+					<?php _e( et_get_safe_localization( 'This will return all of the settings throughout the options page to their default values. <strong>Are you sure you want to do this?</strong>' ), $themename ); ?>
 					<div class="clearfix"></div>
 					<form method="post">
 						<?php wp_nonce_field( 'et-nojs-reset_epanel', '_wpnonce_reset' ); ?>
@@ -448,7 +524,7 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 		</div> <!-- end wrapper div -->
 
 		<div id="epanel-ajax-saving">
-			<img src="<?php echo esc_url( get_template_directory_uri() . '/includes/builder/images/ajax-loader.gif' ); ?>" alt="loading" id="loading" />
+			<img src="<?php echo esc_url( get_template_directory_uri() . '/core/admin/images/ajax-loader.gif' ); ?>" alt="loading" id="loading" />
 		</div>
 
 		<script type="text/template" id="epanel-yes-no-button-template">
@@ -516,58 +592,65 @@ if ( ! function_exists( 'epanel_save_data' ) ) {
 				if ( 'ajax' != $source ) check_admin_referer( 'epanel_nonce' );
 
 				foreach ( $options as $value ) {
+					$et_option_name = $et_option_new_value = false;
+
 					if ( isset( $value['id'] ) ) {
+						$et_option_name = $value['id'];
+
 						if ( isset( $_POST[ $value['id'] ] ) ) {
-							if ( in_array( $value['type'], array( 'text', 'textlimit' ) ) ) {
+							if ( in_array( $value['type'], array( 'text', 'textlimit', 'password' ) ) ) {
 
 								if ( isset( $value['validation_type'] ) ) {
 									// saves the value as integer
-									if ( 'number' == $value['validation_type'] )
-										et_update_option( $value['id'], intval( stripslashes( $_POST[$value['id']] ) ) );
+									if ( 'number' == $value['validation_type'] ) {
+										$et_option_new_value = intval( stripslashes( $_POST[$value['id']] ) );
+									}
 
 									// makes sure the option is a url
-									if ( 'url' == $value['validation_type'] )
-										et_update_option( $value['id'], esc_url_raw( stripslashes( $_POST[$value['id']] ) ) );
+									if ( 'url' == $value['validation_type'] ) {
+										$et_option_new_value = esc_url_raw( stripslashes( $_POST[ $value['id'] ] ) );
+									}
 
 									// option is a date format
-									if ( 'date_format' == $value['validation_type'] )
-										et_update_option( $value['id'], sanitize_option( 'date_format', $_POST[$value['id']] ) );
+									if ( 'date_format' == $value['validation_type'] ) {
+										$et_option_new_value = sanitize_option( 'date_format', $_POST[ $value['id'] ] );
+									}
 
 									/*
 									 * html is not allowed
 									 * wp_strip_all_tags can't be used here, because it returns trimmed text, some options need spaces ( e.g 'character to separate BlogName and Post title' option )
 									 */
 									if ( 'nohtml' == $value['validation_type'] ) {
-										et_update_option( $value['id'], stripslashes( wp_filter_nohtml_kses( $_POST[$value['id']] ) ) );
+										$et_option_new_value = stripslashes( wp_filter_nohtml_kses( $_POST[$value['id']] ) );
 									}
 								} else {
 									// use html allowed for posts if the validation type isn't provided
-									et_update_option( $value['id'], wp_kses_post( stripslashes( $_POST[$value['id']] ) ) );
+									$et_option_new_value = wp_kses_post( stripslashes( $_POST[ $value['id'] ] ) );
 								}
 
 							} elseif ( 'select' == $value['type'] ) {
 
 								// select boxes that list pages / categories should save page/category ID ( as integer )
 								if ( isset( $value['et_array_for'] ) && in_array( $value['et_array_for'], array( 'pages', 'categories' ) ) ) {
-									et_update_option( $value['id'], intval( stripslashes( $_POST[$value['id']] ) ) );
+									$et_option_new_value = intval( stripslashes( $_POST[$value['id']] ) );
 								} else { // html is not allowed in select boxes
-									et_update_option( $value['id'], sanitize_text_field( stripslashes( $_POST[$value['id']] ) ) );
+									$et_option_new_value = sanitize_text_field( stripslashes( $_POST[$value['id']] ) );
 								}
 
 							} elseif ( in_array( $value['type'], array( 'checkbox', 'checkbox2' ) ) ) {
 
 								// saves 'on' value to the database, if the option is enabled
-								et_update_option( $value['id'], 'on' );
+								$et_option_new_value = 'on';
 
 							} elseif ( 'upload' == $value['type'] ) {
 
 								// makes sure the option is a url
-								et_update_option( $value['id'], esc_url_raw( stripslashes( $_POST[$value['id']] ) ) );
+								$et_option_new_value = esc_url_raw( stripslashes( $_POST[ $value['id'] ] ) );
 
-							} elseif ( 'textcolorpopup' == $value['type'] ) {
+							} elseif ( in_array( $value['type'], array( 'textcolorpopup', 'et_color_palette' ) ) ) {
 
 								// the color value
-								et_update_option( $value['id'], sanitize_text_field( stripslashes( $_POST[$value['id']] ) ) );
+								$et_option_new_value = sanitize_text_field( stripslashes( $_POST[$value['id']] ) );
 
 							} elseif ( 'textarea' == $value['type'] ) {
 
@@ -575,17 +658,25 @@ if ( ! function_exists( 'epanel_save_data' ) ) {
 									// html is not allowed
 									if ( 'nohtml' == $value['validation_type'] ) {
 										if ( $value['id'] === ( $shortname . '_custom_css' ) ) {
-											// don't strip slashes from custom css, it should be possible to use \ for icon fonts
-											et_update_option( $value['id'], wp_strip_all_tags( $_POST[$value['id']] ) );
+											// save custom css into wp custom css option if supported
+											// fallback to legacy system otherwise
+											if ( function_exists( 'wp_update_custom_css_post' ) ) {
+												// Data sent via AJAX is automatically escaped by browser, thus it needs
+												// to be unslashed befor being saved into custom CSS post
+												wp_update_custom_css_post( wp_unslash( wp_strip_all_tags( $_POST[ $value['id'] ] ) ) );
+											} else {
+												// don't strip slashes from custom css, it should be possible to use \ for icon fonts
+												$et_option_new_value = wp_strip_all_tags( $_POST[ $value['id'] ] );
+											}
 										} else {
-											et_update_option( $value['id'], wp_strip_all_tags( stripslashes( $_POST[$value['id']] ) ) );
+											$et_option_new_value = wp_strip_all_tags( stripslashes( $_POST[ $value['id'] ] ) );
 										}
 									}
 								} else {
 									if ( current_user_can( 'unfiltered_html' ) ) {
-										et_update_option( $value['id'], stripslashes( $_POST[$value['id']] ) );
+										$et_option_new_value = stripslashes( $_POST[ $value['id'] ] );
 									} else {
-										et_update_option( $value['id'], stripslashes( wp_filter_post_kses( addslashes( $_POST[$value['id']] ) ) ) ); // wp_filter_post_kses() expects slashed
+										$et_option_new_value = stripslashes( wp_filter_post_kses( addslashes( $_POST[ $value['id'] ] ) ) ); // wp_filter_post_kses() expects slashed value
 									}
 								}
 
@@ -593,26 +684,39 @@ if ( ! function_exists( 'epanel_save_data' ) ) {
 
 								if ( 'sanitize_text_field' == $value['value_sanitize_function'] ) {
 									// strings
-									et_update_option( $value['id'], array_map( 'sanitize_text_field', stripslashes_deep( $_POST[ $value['id'] ] ) ) );
+									$et_option_new_value = array_map( 'sanitize_text_field', stripslashes_deep( $_POST[ $value['id'] ] ) );
 								} else {
-									// saves categories / pages IDs,
-									et_update_option( $value['id'], array_map( 'intval', stripslashes_deep( $_POST[ $value['id'] ] ) ) );
+									// saves categories / pages IDs
+									$et_option_new_value = array_map( 'intval', stripslashes_deep( $_POST[ $value['id'] ] ) );
 								}
 
 							} elseif ( 'different_checkboxes' == $value['type'] ) {
 
 								// saves 'author/date/categories/comments' options
-								et_update_option( $value['id'], array_map( 'wp_strip_all_tags', stripslashes_deep( $_POST[$value['id']] ) ) );
+								$et_option_new_value = array_map( 'sanitize_text_field', array_map( 'wp_strip_all_tags', stripslashes_deep( $_POST[$value['id']] ) ) );
 
 							}
 						} else {
 							if ( in_array( $value['type'], array( 'checkbox', 'checkbox2' ) ) ) {
-								et_update_option( $value['id'], 'false' );
+								$et_option_new_value = 'false';
 							} else if ( 'different_checkboxes' == $value['type'] ) {
-								et_update_option( $value['id'], array() );
+								$et_option_new_value = array();
 							} else {
 								et_delete_option( $value['id'] );
 							}
+						}
+
+						if ( false !== $et_option_name && false !== $et_option_new_value ) {
+							$is_new_global_setting    = false;
+							$global_setting_main_name = $global_setting_sub_name = '';
+
+							if ( isset( $value['is_global'] ) && $value['is_global'] ) {
+								$is_new_global_setting    = true;
+								$global_setting_main_name = isset( $value['main_setting_name'] ) ? sanitize_text_field( $value['main_setting_name'] ) : '';
+								$global_setting_sub_name  = isset( $value['sub_setting_name'] ) ? sanitize_text_field( $value['sub_setting_name'] ) : '';
+							}
+
+							et_update_option( $et_option_name, $et_option_new_value, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name );
 						}
 					}
 				}
@@ -652,7 +756,7 @@ function et_epanel_media_upload_scripts() {
 	wp_enqueue_script( 'et_epanel_uploader', get_template_directory_uri().'/epanel/js/custom_uploader.js', array('jquery', 'media-upload', 'thickbox'), et_get_theme_version() );
 	wp_enqueue_media();
 	wp_localize_script( 'et_epanel_uploader', 'epanel_uploader', array(
-		'media_window_title' => __( 'Choose an Image', $themename ),
+		'media_window_title' => esc_html__( 'Choose an Image', $themename ),
 	) );
 }
 
@@ -665,3 +769,42 @@ if ( 'themes.php' == $pagenow && isset( $_GET['page'] ) && ( $_GET['page'] == ba
 	add_action( 'admin_print_scripts', 'et_epanel_media_upload_scripts' );
 	add_action( 'admin_print_styles', 'et_epanel_media_upload_styles' );
 }
+
+/**
+ * Register ePanel portability.
+ *
+ * @since To define
+ *
+ * @return bool Always return true.
+ */
+function et_epanel_register_portability() {
+	global $shortname, $themename, $options;
+
+	// Make sure the Portability is loaded.
+	et_core_load_component( 'portability' );
+
+	// Load ePanel options.
+	et_load_core_options();
+
+	// Include only ePanel options.
+	$include = array();
+
+	foreach ( $options as $option ) {
+		if ( isset( $option['id'] ) ) {
+			$include[ $option['id'] ] = true;
+		}
+	}
+
+	// Register the portability.
+	et_core_portability_register( 'epanel', array(
+		'name'    => sprintf(
+			esc_html__( '%s Theme Options', $themename ),
+			$themename
+		),
+		'type'    => 'options',
+		'target'  => "et_{$shortname}",
+		'include' => $include,
+		'view'    => ( isset( $_GET['page'] ) && $_GET['page'] == "et_{$shortname}_options" ),
+	) );
+}
+add_action( 'admin_init', 'et_epanel_register_portability' );
