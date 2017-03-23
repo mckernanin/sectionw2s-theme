@@ -99,23 +99,23 @@ function w2s_registration_table( $atts ) {
 					$$registration_discount_id = $registration['order_item_id'] + 1;
 					$registration_discount_amount = $registrations[ $registration_discount_id ]['discount_amount'];
 					$registration_final_cost = '$' . $registration_discount_amount;
-					echo '<tr class="row-' . $registration['order_item_id'].'">';
-					echo '<td class="name">' . $registration['Name'].'</td>';
-					echo '<td class="email">' . $registration['Email'].'</td>';
-					echo '<td class="email">' . $registration['Would you like to receive email updates from Section W2S?'].'</td>';
-					echo '<td class="phone">' . $registration['Phone'].'</td>';
-					echo '<td class="lodge">' . $registration['Lodge'].'</td>';
-					echo '<td class="membership-level">' . $registration['Membership Level'].'</td>';
-					echo '<td class="age-group">' .w2s_age_from_date( $registration['Birth Date'] ).'</td>';
+					echo '<tr class="row-' . $registration['order_item_id'] . '">';
+					echo '<td class="name">' . $registration['Name'] . '</td>';
+					echo '<td class="email">' . $registration['Email'] . '</td>';
+					echo '<td class="email">' . $registration['Would you like to receive email updates from Section W2S?'] . '</td>';
+					echo '<td class="phone">' . $registration['Phone'] . '</td>';
+					echo '<td class="lodge">' . $registration['Lodge'] . '</td>';
+					echo '<td class="membership-level">' . $registration['Membership Level'] . '</td>';
+					echo '<td class="age-group">' . w2s_age_from_date( $registration['Birth Date'] ) . '</td>';
 					if ( true == $show_dietary ) {
-						echo '<td class="dietary">' . $registration['Dietary Restrictions'].'</td>';
+						echo '<td class="dietary">' . $registration['Dietary Restrictions'] . '</td>';
 					}
-					echo '<td class="sunday-breakfast">' . $registration['Are you staying for breakfast on Sunday?'].'</td>';
-					echo '<td class="amount-paid">' . $registration_final_cost.'</td>';
+					echo '<td class="sunday-breakfast">' . $registration['Are you staying for breakfast on Sunday?'] . '</td>';
+					echo '<td class="amount-paid">' . $registration_final_cost . '</td>';
 					echo '</tr>';
 				}
 			}
-		} else if ( ( 'All' === $lodge_data_access ) || ( true == $show_dietary ) ) {
+		} elseif ( ( 'All' === $lodge_data_access ) || ( true == $show_dietary ) ) {
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
 				if ( 1096 == $item_id ) {
@@ -126,19 +126,19 @@ function w2s_registration_table( $atts ) {
 					$registration_discount_id = $registration['order_item_id'] + 1;
 					$registration_discount_amount = $registrations[ $registration_discount_id ]['discount_amount'];
 					$registration_final_cost = '$' . $registration_discount_amount;
-					echo '<tr class="row-' . $registration['order_item_id'].'">';
-					echo '<td class="name">' . $registration['Name'].'</td>';
-					echo '<td class="email">' . $registration['Email'].'</td>';
-					echo '<td class="email">' . $registration['Would you like to receive email updates from Section W2S?'].'</td>';
-					echo '<td class="phone">' . $registration['Phone'].'</td>';
-					echo '<td class="lodge">' . $registration['Lodge'].'</td>';
-					echo '<td class="membership-level">' . $registration['Membership Level'].'</td>';
-					echo '<td class="age-group">' .w2s_age_from_date( $registration['Birth Date'] ).'</td>';
+					echo '<tr class="row-' . $registration['order_item_id'] . '">';
+					echo '<td class="name">' . $registration['Name'] . '</td>';
+					echo '<td class="email">' . $registration['Email'] . '</td>';
+					echo '<td class="email">' . $registration['Would you like to receive email updates from Section W2S?'] . '</td>';
+					echo '<td class="phone">' . $registration['Phone'] . '</td>';
+					echo '<td class="lodge">' . $registration['Lodge'] . '</td>';
+					echo '<td class="membership-level">' . $registration['Membership Level'] . '</td>';
+					echo '<td class="age-group">' . w2s_age_from_date( $registration['Birth Date'] ) . '</td>';
 					if ( true == $show_dietary ) {
-						echo '<td class="dietary">' . $registration['Dietary Restrictions'].'</td>';
+						echo '<td class="dietary">' . $registration['Dietary Restrictions'] . '</td>';
 					}
-					echo '<td class="sunday-breakfast">' . $registration['Are you staying for breakfast on Sunday?'].'</td>';
-					echo '<td class="amount-paid">' . $registration_final_cost.'</td>';
+					echo '<td class="sunday-breakfast">' . $registration['Are you staying for breakfast on Sunday?'] . '</td>';
+					echo '<td class="amount-paid">' . $registration_final_cost . '</td>';
 					echo '</tr>';
 				}
 			}
@@ -149,15 +149,15 @@ function w2s_registration_table( $atts ) {
 				if ( ( $item_id = 1096) && ( $lodge == $lodge_data_access) ) {
 					$registration_count++;
 					echo '<tr>';
-					echo '<td class="name">' . $registration['Name'].'</td>';
-					echo '<td class="email">' . $registration['Email'].'</td>';
-					echo '<td class="phone">' . $registration['Phone'].'</td>';
-					echo '<td class="membership-level">' . $registration['Membership Level'].'</td>';
-					echo '<td class="age-group">' .w2s_age_from_date( $registration['Birth Date'] ).'</td>';
+					echo '<td class="name">' . $registration['Name'] . '</td>';
+					echo '<td class="email">' . $registration['Email'] . '</td>';
+					echo '<td class="phone">' . $registration['Phone'] . '</td>';
+					echo '<td class="membership-level">' . $registration['Membership Level'] . '</td>';
+					echo '<td class="age-group">' . w2s_age_from_date( $registration['Birth Date'] ) . '</td>';
 					echo '</tr>';
 				}
 			}
-		}
+		}// End if().
 
 		?>
 	</tbody>
@@ -167,9 +167,9 @@ function w2s_registration_table( $atts ) {
 
 <?php
 	$myvariable = ob_get_clean();
-	if ( $lodge_data_access ) {
-		return $myvariable;
-	} else {
-		return 'You are not authorized to view this page.';
-	}
+if ( $lodge_data_access ) {
+	return $myvariable;
+} else {
+	return 'You are not authorized to view this page.';
+}
 }

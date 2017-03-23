@@ -6,19 +6,19 @@ if ( ! is_page_template( 'page-template-blank.php' ) ) : ?>
 
 
 		<?php
-			if ( has_nav_menu( 'footer-menu' ) ) : ?>
+		if ( has_nav_menu( 'footer-menu' ) ) : ?>
 
 				<div id="et-footer-nav">
 					<div class="container">
 						<?php
-							wp_nav_menu( array(
-								'theme_location' => 'footer-menu',
-								'depth'          => '1',
-								'menu_class'     => 'bottom-nav',
-								'container'      => '',
-								'fallback_cb'    => '',
-							) );
-						?>
+						wp_nav_menu( array(
+							'theme_location' => 'footer-menu',
+							'depth'          => '1',
+							'menu_class'     => 'bottom-nav',
+							'container'      => '',
+							'fallback_cb'    => '',
+						) );
+					?>
 					</div>
 				</div> <!-- #et-footer-nav -->
 
@@ -27,13 +27,13 @@ if ( ! is_page_template( 'page-template-blank.php' ) ) : ?>
 				<div id="footer-bottom">
 					<div class="container clearfix">
 				<?php
-					if ( false !== et_get_option( 'show_footer_social_icons', true ) ) {
-						get_template_part( 'includes/social_icons', 'footer' );
-					}
+				if ( false !== et_get_option( 'show_footer_social_icons', true ) ) {
+					get_template_part( 'includes/social_icons', 'footer' );
+				}
 				?>
 
 						<p id="footer-info">
-							&copy; <?php echo date('Y'); ?> Section W2S | Need anything? <a href="mailto:help@sectionw2s.org">Send us an Email</a>
+							&copy; <?php echo date( 'Y' ); ?> Section W2S | Need anything? <a href="mailto:help@sectionw2s.org">Send us an Email</a>
 						</p>
 					</div>	<!-- .container -->
 				</div>

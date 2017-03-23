@@ -25,7 +25,7 @@ $is_page_builder_used = et_pb_is_pagebuilder_used( get_the_ID() ); ?>
 					'order' => 'ASC',
 				) );
 
-				if ( $team_posts ):
+				if ( $team_posts ) :
 				?>
 				<div class="intro">
 					<h2><?php the_title(); ?></h2>
@@ -48,43 +48,42 @@ $is_page_builder_used = et_pb_is_pagebuilder_used( get_the_ID() ); ?>
 					</div>
 				</div>			
 				<section class="row profiles">
-					<?php 
-					foreach ( $team_posts as $post ): 
-					setup_postdata($post);
+					<?php
+					foreach ( $team_posts as $post ) :
+						setup_postdata( $post );
 
-					$person = get_field('person')[0];
-					
-					// Resize and CDNize thumbnails using Automattic Photon service
-					$thumb_src = null;
-					if ( has_post_thumbnail($person) ) {
-						$src = wp_get_attachment_image_src( get_post_thumbnail_id( $person ), 'medium' );
-						$thumb_src = $src[0];
-					}
+						$person = get_field( 'person' )[0];
 
-					else $thumb_src = get_field('placeholder', 'option');
+						// Resize and CDNize thumbnails using Automattic Photon service
+						$thumb_src = null;
+						if ( has_post_thumbnail( $person ) ) {
+							$src = wp_get_attachment_image_src( get_post_thumbnail_id( $person ), 'medium' );
+							$thumb_src = $src[0];
+						} else { $thumb_src = get_field( 'placeholder', 'option' );
+						}
 
-					$first_name = get_field('first_name', $person);
-					$last_name = get_field('last_name', $person);
-					$youth_or_adviser = get_field('youth_or_adviser', $person);
-					$lodge = get_field('lodge', $person);
-					$membership_level = get_field('membership_level', $person);
-					$phone_number = get_field('phone_number', $person[0]);
-					$last_initial_only = get_field('last_initial_only', $person);
+						$first_name = get_field( 'first_name', $person );
+						$last_name = get_field( 'last_name', $person );
+						$youth_or_adviser = get_field( 'youth_or_adviser', $person );
+						$lodge = get_field( 'lodge', $person );
+						$membership_level = get_field( 'membership_level', $person );
+						$phone_number = get_field( 'phone_number', $person[0] );
+						$last_initial_only = get_field( 'last_initial_only', $person );
 
-					if (get_field('is_position_available') == true) {
-						$available = 'open';
-					} else {
-						$available = '';
-					};
+						if ( get_field( 'is_position_available' ) == true ) {
+							$available = 'open';
+						} else {
+							$available = '';
+						};
 
-					if ( $last_initial_only == true ) {
-						$lname_final = substr($last_name, 0, 1);
-					} else {
-						$lname_final = $last_name;
-					};
-					
+						if ( $last_initial_only == true ) {
+							$lname_final = substr( $last_name, 0, 1 );
+						} else {
+							$lname_final = $last_name;
+						};
+
 					?>
-					<article class="col-sm-6 profile <?php echo ' lodge-' . strtolower($lodge); ?> <?php echo $available; ?>" data-lname="<?php echo $lname_final; ?>">
+					<article class="col-sm-6 profile <?php echo ' lodge-' . strtolower( $lodge ); ?> <?php echo $available; ?>" data-lname="<?php echo $lname_final; ?>">
 
 						<div class="profile-header">
 							<img src="<?php echo $thumb_src; ?>" alt="Headshot" class="img-circle">
@@ -93,24 +92,24 @@ $is_page_builder_used = et_pb_is_pagebuilder_used( get_the_ID() ); ?>
 						<div class="profile-content">
 							<p class="lead position"><?php the_title(); ?></p>
 							<h3>
-							<?php if ($available == 'true') {
-								echo "Position Available";
-							} else {
-								echo $first_name.' '.$lname_final;
-							}
+							<?php if ( $available == 'true' ) {
+								echo 'Position Available';
+} else {
+	echo $first_name . ' ' . $lname_final;
+}
 							?>
 							</h3>
-							<?php if (!empty($lodge)) : ?><p class="levelandchapter"><?php echo $membership_level; ?> Member of <?php echo $lodge; ?></p><?php endif; ?>	
+							<?php if ( ! empty( $lodge ) ) : ?><p class="levelandchapter"><?php echo $membership_level; ?> Member of <?php echo $lodge; ?></p><?php endif; ?>	
 							<?php if ( is_user_logged_in() ) : ?>	
-								<?php if (!empty($phone_number)) : ?>
-	    							<p class="phonenumber"><span class="icon_phone"></span><?php echo get_field('phone_number'); ?></p>
+								<?php if ( ! empty( $phone_number ) ) : ?>
+	    							<p class="phonenumber"><span class="icon_phone"></span><?php echo get_field( 'phone_number' ); ?></p>
 								<?php endif; ?>
 							<?php endif; ?>	
 						</div>
 						
 						<div class="profile-footer">
-							<a href="mailto:<?php echo antispambot( get_field('team_email', $person) ); ?>"><span class="dashicons dashicons-email"></span></a>
-							<?php if (current_user_can('edit_posts')) { ?><a href="<?php echo get_edit_post_link(); ?>" target="_blank"><div class="dashicons dashicons-edit"></div></a><?php } ?>
+							<a href="mailto:<?php echo antispambot( get_field( 'team_email', $person ) ); ?>"><span class="dashicons dashicons-email"></span></a>
+							<?php if ( current_user_can( 'edit_posts' ) ) { ?><a href="<?php echo get_edit_post_link(); ?>" target="_blank"><div class="dashicons dashicons-edit"></div></a><?php } ?>
 						</div>
 					</article>
 					<?php endforeach; ?>

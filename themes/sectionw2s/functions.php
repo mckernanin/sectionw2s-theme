@@ -10,18 +10,6 @@ function add_slug_body_class( $classes ) {
 }
 add_filter( 'body_class', 'add_slug_body_class' );
 
-// Use this action and function to remove / replace functions of Divi
-add_action( 'after_setup_theme', 'remove_parent_theme_features', 10 );
-
-function remove_parent_theme_features() {
-	// Replace a shortcode by first removing it, like this:
-	// remove_shortcode( 'et_pb_filterable_portfolio' );
-	//
-	// Then replace the shortcode with our own custom function, but using the original shortcode name:
-	// add_shortcode( 'et_pb_filterable_portfolio', 'sublime_child_filterable_portfolio' );
-	include_once 'inc/elegant-theme-update.php';
-}
-
 // For simplicity's sake, create a file for each shortcode, and place it in the /inc directory.
 // Then include it here, like this: require_once('inc/sublime_child_filterable_portfolio.php');
 require_once 'inc/w2s_post_types.php';

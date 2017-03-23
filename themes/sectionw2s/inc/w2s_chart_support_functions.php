@@ -1,32 +1,32 @@
 <?php
-function w2s_percent($num_amount, $num_total) {
+function w2s_percent( $num_amount, $num_total ) {
 	$count1 = $num_amount / $num_total;
 	$count2 = $count1 * 100;
-	$count = number_format($count2, 2);
-	echo $count.'%';
+	$count = number_format( $count2, 2 );
+	echo $count . '%';
 }
 
-function w2s_itemmeta_query_counts($value) {
+function w2s_itemmeta_query_counts( $value ) {
 	global $wpdb;
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
 	// Live Data
-	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id > 1327 AND meta_key IN ('".$value."')";
+	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id > 1327 AND meta_key IN ('" . $value . "')";
 
 	// Test Data
 	// $sql = "SELECT meta_value FROM wp_kevin_test_data WHERE meta_key IN ('".$value."')";
 
 	// Run the query via $wpdb
-	$query = $wpdb->get_results($sql, ARRAY_N);
+	$query = $wpdb->get_results( $sql, ARRAY_N );
 
 	// Create empty array $counter, which will contain the count of meta values. This will help build the graph data.
 	$counter = array();
 
 	// Check each query result for a new value, and add them to $counter
-	foreach ($query as $row) {
-		$meta_value =  $row[0];
-		if (!in_array($row, $counter)) {
-			$counter[$meta_value] = 0;
+	foreach ( $query as $row ) {
+		$meta_value = $row[0];
+		if ( ! in_array( $row, $counter ) ) {
+			$counter[ $meta_value ] = 0;
 		}
 	}
 
@@ -54,10 +54,10 @@ function w2s_itemmeta_query_counts($value) {
 	These nested foreach loops will run through $query, looking for matches between the $row and $key
 	*/
 
-	foreach ($counter as $key => $value) {
-		foreach ($query as $row) {
-			if (in_array($key, $row)) {
-				$counter[$key]++;
+	foreach ( $counter as $key => $value ) {
+		foreach ( $query as $row ) {
+			if ( in_array( $key, $row ) ) {
+				$counter[ $key ]++;
 			}
 		}
 	}
@@ -83,62 +83,65 @@ function w2s_itemmeta_age() {
 	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id > 1327 AND meta_key IN ('birthdate')";
 
 	// Run the query via $wpdb
-	$query = $wpdb->get_results($sql, ARRAY_N);
+	$query = $wpdb->get_results( $sql, ARRAY_N );
 	// print_r($query);
 
 	// Create empty array $counter, which will contain the count of meta values. This will help build the graph data.
-	$counter = array('Youth' => 0, 'Youth+' => 0, 'Adult' => 0);
+	$counter = array(
+		'Youth' => 0,
+		'Youth+' => 0,
+		'Adult' => 0,
+	);
 
 	/*
 	These nested foreach loops will run through $query, looking for matches between the $row and $key
 	*/
 
-	foreach ($query as $row) {
+	foreach ( $query as $row ) {
 		//date in mm/dd/yyyy format; or it can be in other formats as well
 		$birthDate = $row['0'];
 		//explode the date to get month, day and year
-		$birthDate = explode("/", $birthDate);
+		$birthDate = explode( '/', $birthDate );
 		//get age from date or birthdate
-		$age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-		? ((date("Y") - $birthDate[2]) - 1)
-		: (date("Y") - $birthDate[2]));
-		if ($age < '18') {
+		$age = (date( 'md', date( 'U', mktime( 0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2] ) ) ) > date( 'md' )
+		? ((date( 'Y' ) - $birthDate[2]) - 1)
+		: (date( 'Y' ) - $birthDate[2]));
+		if ( $age < '18' ) {
 			$counter['Youth']++;
-		} elseif ( ($age < '21') && ($age > '18')) {
+		} elseif ( ($age < '21') && ($age > '18') ) {
 			$counter['Youth+']++;
-		} elseif ($age > '20') {
+		} elseif ( $age > '20' ) {
 			$counter['Adult']++;
 		}
-
 	}
 
 	return $counter;
 
 }
 
-function w2s_age_from_date($birthDate) {
-		$birthDate = explode("/", $birthDate);
+function w2s_age_from_date( $birthDate ) {
+		$birthDate = explode( '/', $birthDate );
 		$birthDate[0] = abs( $birthDate[0] );
 		$birthDate[1] = abs( $birthDate[1] );
 		$birthDate[2] = abs( $birthDate[2] );
-		$age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-		? ((date("Y") - $birthDate[2]) - 1)
-		: (date("Y") - $birthDate[2]));
-		if ($age < '18') {
-			$age_group = 'Youth';
-		} elseif ( ($age < '21') && ($age > '18')) {
-			$age_group = 'Youth+';
-		} elseif ($age > '20') {
-			$age_group = 'Adult';
-		}
+		$age = (date( 'md', date( 'U', mktime( 0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2] ) ) ) > date( 'md' )
+		? ((date( 'Y' ) - $birthDate[2]) - 1)
+		: (date( 'Y' ) - $birthDate[2]));
+	if ( $age < '18' ) {
+		$age_group = 'Youth';
+	} elseif ( ($age < '21') && ($age > '18') ) {
+		$age_group = 'Youth+';
+	} elseif ( $age > '20' ) {
+		$age_group = 'Adult';
+	}
 
 		return $age_group;
 }
 
-function w2s_counter_value_return($key, $counter) {
+function w2s_counter_value_return( $key, $counter ) {
 	$value = 0;
-	if($counter[$key]) {
-		$value = $counter[$key];
+	if ( $counter[ $key ] ) {
+		$value = $counter[ $key ];
 	}
 
 	return $value;
@@ -161,20 +164,20 @@ function w2s_rand_color() {
 		'CF5C36',
 		'FFF9A5',
 		'7BDFF2',
-		'D3E298'
+		'D3E298',
 	);
-    $color = '#'.$rand[rand(0,15)];
-    return $color;
+	$color = '#' . $rand[ rand( 0,15 ) ];
+	return $color;
 }
 
-function w2s_donut_data($source) {
+function w2s_donut_data( $source ) {
 	$final_json = array();
-	foreach ($source as $key => $value) {
+	foreach ( $source as $key => $value ) {
 		$json = array();
 		$json['value'] = $value;
 		$json['color'] = w2s_rand_color();
 		$json['label'] = $key;
 		$final_json[] = $json;
 	}
-	echo json_encode($final_json);
+	echo json_encode( $final_json );
 }
