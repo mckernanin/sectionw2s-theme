@@ -11,7 +11,7 @@ function w2s_itemmeta_query_counts($value) {
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
 	// Live Data
-	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id > 351 AND meta_key IN ('".$value."')";
+	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id > 1327 AND meta_key IN ('".$value."')";
 
 	// Test Data
 	// $sql = "SELECT meta_value FROM wp_kevin_test_data WHERE meta_key IN ('".$value."')";
@@ -80,7 +80,7 @@ function w2s_itemmeta_age() {
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
 	// Live Data
-	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id > 351 AND meta_key IN ('birthdate')";
+	$sql = "SELECT meta_value FROM wp_woocommerce_order_itemmeta WHERE order_item_id > 1327 AND meta_key IN ('birthdate')";
 
 	// Run the query via $wpdb
 	$query = $wpdb->get_results($sql, ARRAY_N);

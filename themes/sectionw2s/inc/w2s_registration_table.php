@@ -4,7 +4,7 @@ function w2s_itemmeta_query_order_items() {
 	// Query string to check wp_woocommerce_order_itemmeta for a specified meta_key
 
 	// Live Data
-	$sql = "SELECT order_item_id FROM wp_woocommerce_order_items WHERE order_item_name IN ('Conclave 2016')";
+	$sql = "SELECT order_item_id FROM wp_woocommerce_order_items WHERE order_item_name IN ('Conclave 2017')";
 
 	// Run the query via $wpdb
 	$query = $wpdb->get_results( $sql );
