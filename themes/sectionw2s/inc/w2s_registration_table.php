@@ -91,7 +91,7 @@ function w2s_registration_table( $atts ) {
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
 				$tahosa_party = $registration['Tahosa Lodge Party Pack'];
-				if ( 1096 == $item_id && 'Yes ($5.00)' === $tahosa_party ) {
+				if ( 1327 == $item_id && 'Yes ($5.00)' === $tahosa_party ) {
 					$registration_count++;
 					if ( 'My lodge is not listed ($36.00)' == $registration['lodge'] ) {
 						$registration['lodge'] = $registration['lodge_other'];
@@ -118,7 +118,7 @@ function w2s_registration_table( $atts ) {
 		} elseif ( ( 'All' === $lodge_data_access ) || ( true == $show_dietary ) ) {
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
-				if ( 1096 == $item_id ) {
+				if ( 1327 == $item_id ) {
 					$registration_count++;
 					if ( 'My lodge is not listed ($35.00)' == $registration['lodge'] ) {
 						$registration['lodge'] = $registration['lodge_other'];
@@ -146,7 +146,7 @@ function w2s_registration_table( $atts ) {
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
 				$lodge = $registration['lodge'];
-				if ( ( $item_id = 1096) && ( $lodge == $lodge_data_access) ) {
+				if ( ( $item_id = 1327) && ( $lodge == $lodge_data_access) ) {
 					$registration_count++;
 					echo '<tr>';
 					echo '<td class="name">' . $registration['Name'] . '</td>';
