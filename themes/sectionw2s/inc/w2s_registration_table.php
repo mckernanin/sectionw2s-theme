@@ -146,7 +146,7 @@ function w2s_registration_table( $atts ) {
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
 				$lodge = $registration['lodge'];
-				if ( ( $item_id = 1327) && ( $lodge == $lodge_data_access) ) {
+				if ( ( $item_id = 1327) && ( false !== strpos( $lodge_data_access, $lodge ) ) {
 					$registration_count++;
 					echo '<tr>';
 					echo '<td class="name">' . $registration['Name'] . '</td>';
