@@ -86,7 +86,7 @@ function w2s_registration_table( $atts ) {
 		<?php
 		$registrations = w2s_itemmeta_query_order_item_data( w2s_itemmeta_query_order_items() );
 		$registration_count = 0;
-		if ( 'true' == $tahosa_party_var ) {
+		if ( isset( $_GET['tahosa_party'] ) ) {
 			echo 'These guys like to party!';
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
