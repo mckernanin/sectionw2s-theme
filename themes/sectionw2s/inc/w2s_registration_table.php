@@ -91,9 +91,9 @@ function w2s_registration_table( $atts ) {
 			foreach ( $registrations as $registration ) {
 				$item_id = $registration['_product_id'];
 				$tahosa_party = $registration['Tahosa Lodge Party Pack'];
-				if ( 1327 == $item_id && 'Yes ($5.00)' === $tahosa_party ) {
+				if ( 1327 == $item_id && 'Yes' === $tahosa_party ) {
 					$registration_count++;
-					if ( 'My lodge is not listed ($36.00)' == $registration['lodge'] ) {
+					if ( 'My lodge is not listed' == $registration['lodge'] ) {
 						$registration['lodge'] = $registration['lodge_other'];
 					}
 					$$registration_discount_id = $registration['order_item_id'] + 1;
