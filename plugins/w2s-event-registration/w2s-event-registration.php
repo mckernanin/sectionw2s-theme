@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Tahosa Lodge Registration
+ * Plugin Name: Section W2S Registration
  * Plugin URI:  https://mckernan.in
- * Description: Tahosa Lodge registration functionality.
+ * Description: Section W2S registration functionality.
  * Version:     1.0.0
  * Author:      Kevin McKernan
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once( 'classes/class-tahosa-event-registration.php' );
+require_once( 'classes/class-w2s-event-registration.php' );
 
 /**
  * Helper function to get/return the W2S_Registration object
