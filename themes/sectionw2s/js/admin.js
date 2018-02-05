@@ -1,3 +1,3 @@
 jQuery(document).ready(function() {
-	jQuery('.updated:contains("WooThemes")').hide();
+  jQuery('.updated:contains("WooThemes")').hide();
 });
