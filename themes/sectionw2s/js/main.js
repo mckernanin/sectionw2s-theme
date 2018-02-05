@@ -33,18 +33,6 @@ jQuery(function($) {
     }
   });
 
-  if ($('body').hasClass('page-id-376')) {
-    $('.main_title').after(
-      '<a href="/trading-post/" class="button continue-shopping">Continue Shopping</a>'
-    );
-  }
-
-  if ($('body').hasClass('single-product')) {
-    $('.woocommerce-breadcrumb').before(
-      '<a href="/trading-post/" class="button continue-shopping">< Return to Trading Post</a>'
-    );
-  }
-
   if ($('body').hasClass('post-type-archive-product')) {
     window.location.href = 'https://sectionw2s.org/trading-post/';
   }
