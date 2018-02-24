@@ -81,6 +81,18 @@ class WC_Box_Office_Cart {
 			return $cart_item_meta;
 		}
 
+		if ( empty( $_POST['ticket_fields'] ) && ! empty( $_GET['force-ticket-creation'] ) ) {
+			$ticket_fields = array();
+
+			$fields = get_post_meta( $product_id, '_ticket_fields', true );
+
+			foreach ( $fields as $hash => $field_data ) {
+				$ticket_fields[0][ $field_data['type'] ] = '';
+			}
+
+			$_POST['ticket_fields'] = apply_filters( 'woocommerce_cart_item_data_ticket_fields', $ticket_fields, $fields );
+		}
+
 		if( empty( $_POST ) ){
 
 			return $cart_item_meta;

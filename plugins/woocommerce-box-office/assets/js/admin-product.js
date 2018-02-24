@@ -3,6 +3,7 @@
 
 	var self = $.extend(
 		{
+			productTypeSelector: '#product-type',
 			ticketTogglerSelector: 'input#_ticket',
 			ticketPanels: '.show_if_ticket',
 			ticketFieldsSelector: '.ticket_fields',
@@ -30,6 +31,7 @@
 	};
 
 	self.bindEvents = function() {
+		$( self.productTypeSelector ).on( 'change', self.maybeUncheckTicket ).trigger( 'change' );
 		$( self.ticketTogglerSelector ).on( 'change', self.toggleTicketPanels ).trigger( 'change' );
 		$( self.productDataMetaBoxSelector ).on( 'click', self.ticketFieldsSelector + ' ' + self.insertFieldSelector, self.insertField );
 		$( self.productDataMetaBoxSelector ).on( 'click', self.ticketFieldsSelector + ' ' + self.deleteFieldSelector, self.deleteField );
@@ -43,6 +45,34 @@
 		$( self.ticketTokenVarSelector ).on( 'click', 'a', self.insertLabelToEditor );
 		$( self.ticketPostVarsSelector ).on( 'click', 'a', self.insertLabelToEditor );
 	};
+
+	/**
+	 * Maybe uncheck the ticket checkbox if selected product type doesn't display
+	 * the ticket checkbox.
+	 */
+	self.maybeUncheckTicket = function( e ) {
+		var $ticketToggler = $( self.ticketTogglerSelector );
+		if ( ! $ticketToggler.length ) {
+			return;
+		}
+
+		var classes = $ticketToggler
+			.closest( 'label' )
+			.attr( 'class' )
+			.trim()
+			.split( ' ' );
+
+		var hideTickets = classes.filter( function( className ) {
+			return className.startsWith( 'hide_if_' );
+		} ).map( function( className ) {
+			return className.substring( 'hide_if_'.length );
+		} );
+
+		var type = $( e.target ).val();
+		if ( $.inArray( type, hideTickets ) >= 0 ) {
+			$ticketToggler.removeAttr( 'checked' ).trigger( 'change' );
+		}
+	}
 
 	self.toggleTicketPanels = function( e ) {
 		var checked = $( e.target ).is( ':checked' );

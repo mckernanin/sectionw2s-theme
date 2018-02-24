@@ -1,5 +1,9 @@
 *** WooCommerce Box Office Changelog ***
 
+2018-02-21 - version 1.1.8
+* Fix - Issue where ticket checkbox still checked if product type is changed to unsupported ticket product (e.g. subscriptions).
+* Add - Possibility to force ticket creation (e.g. when adding products from 'add-to-cart' query string).
+
 2017-11-27 - version 1.1.7
 * Fix - Ticket information link in email and order confirmation page doesn't work.
 * Fix - Emails to ticket individuals who've booked tickets are not sent.

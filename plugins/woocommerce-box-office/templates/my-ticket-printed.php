@@ -2,7 +2,7 @@
 /**
  * The template for printed ticket.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/my-ticket-printed.php.
+ * This template can be overridden by copying it to yourtheme/my-ticket-printed.php.
  *
  * HOWEVER, on occasion WooCommerce Box Office will need to update template files and you (the theme developer).
  * will need to copy the new files to your theme to maintain compatibility. We try to do this.

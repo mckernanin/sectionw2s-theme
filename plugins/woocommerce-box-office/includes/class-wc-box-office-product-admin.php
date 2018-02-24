@@ -26,7 +26,7 @@ class WC_Box_Office_Product_Admin {
 	public function ticket_type_option( $options = array() ) {
 		$options['ticket'] = array(
 			'id'            => '_ticket',
-			'wrapper_class' => 'show_if_simple show_if_variable hide_if_deposit hide_if_subscription hide_if_variable-subscription',
+			'wrapper_class' => 'show_if_simple show_if_variable hide_if_deposit hide_if_subscription hide_if_variable-subscription hide_if_grouped hide_if_external',
 			'label'         => __( 'Ticket', 'woocommerce-box-office' ),
 			'description'   => __( 'Each ticket purchased will have attendee details added to it.', 'woocommerce-box-office' ),
 			'default'       => 'no',
