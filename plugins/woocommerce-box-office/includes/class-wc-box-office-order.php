@@ -50,6 +50,9 @@ class WC_Box_Office_Order {
 		// Barcodes in checkout for purchased tickets.
 		add_action( 'woocommerce_after_order_notes', array( $this, 'maybe_create_barcode_fields' ) );
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'maybe_process_barcode_fields' ) );
+
+		// Logic to not strip HTML tags in the order item meta so that ticket HTML is properly shown
+		add_filter( 'woocommerce_order_item_display_meta_value', array( $this, 'process_ticket_display_meta' ), 10, 3 );
 	}
 
 	/**
@@ -581,5 +584,29 @@ class WC_Box_Office_Order {
 				update_post_meta( $ticket_id, '_barcode_image', $barcode['image'] );
 			}
 		}
+	}
+
+	/**
+	 * Make sure display value contains correct HTML contents for tickets.
+	 * We need to do this after https://github.com/woocommerce/woocommerce/pull/17821.
+	 *
+	 * @param string        $display_value
+	 * @param WC_Meta_Data  $meta
+	 * @param WC_Order_Item $order_item
+	 *
+	 * @return string
+	 */
+	public function process_ticket_display_meta( $display_value, $meta, $order_item ) {
+		if ( ! is_callable( array( $order_item, 'get_product' ) ) ) {
+			return $display_value;
+		}
+
+		$product = $order_item->get_product();
+
+		if ( ! wc_box_office_is_product_ticket( $product ) ) {
+			return $display_value;
+		}
+
+		return $meta->value;
 	}
 }

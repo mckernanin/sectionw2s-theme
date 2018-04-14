@@ -290,15 +290,17 @@ class WC_Box_Office_Cart {
 	 * The ticket product will always generate different cart item key (because
 	 * of ticket field hash) with the same ticket product.
 	 *
+	 * One of each variation can be added to the cart when sold individually is enabled.
+	 *
 	 * @see https://github.com/woocommerce/woocommerce-box-office/issues/208
 	 *
 	 * @since 1.1.6
-	 * @version 1.1.6
+	 * @version 1.1.9
 	 *
 	 * @param bool   $found_in_cart  Whether an item found in the cart.
-	 * @param int    $product_id     Product ID.
-	 * @param int    $variation_id   Variation ID.
-	 * @param array  $cart_item_data Cart item data.
+	 * @param int    $product_id     The ID of the product being added to the cart.
+	 * @param int    $variation_id   The variation ID of the product being added to the cart.
+	 * @param array  $cart_item_data Extra cart item data being passed into the item.
 	 * @param string $cart_id        Cart ID being evaluated.
 	 *
 	 * @return bool Whether an iten found in the cart.
@@ -312,7 +314,9 @@ class WC_Box_Office_Cart {
 			if ( $cart_id === $cart_item_key ) {
 				continue;
 			}
-			if ( wc_box_office_is_product_ticket( $cart_item['data'] ) && $cart_item['quantity'] > 0 ) {
+
+			$current_product_id = $variation_id ? $variation_id : $product_id;
+			if ( wc_box_office_is_product_ticket( $cart_item['data'] ) && $current_product_id === $cart_item['data']->get_ID() && $cart_item['quantity'] > 0 ) {
 				$found_in_cart = true;
 				break;
 			}

@@ -1,5 +1,9 @@
 *** WooCommerce Box Office Changelog ***
 
+2018-03-12 - version 1.1.9
+* Fix - Email (order item meta) formatting no longer pretty.
+* Fix - Unable to add two different products to the cart if Sold individually option is checked for both.
+
 2018-02-21 - version 1.1.8
 * Fix - Issue where ticket checkbox still checked if product type is changed to unsupported ticket product (e.g. subscriptions).
 * Add - Possibility to force ticket creation (e.g. when adding products from 'add-to-cart' query string).

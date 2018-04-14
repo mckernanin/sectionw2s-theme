@@ -14,6 +14,8 @@ function wc_box_office_get_ticket( $ticket ) {
 /**
  * Is a given product with ticketing enabled.
  *
+ * @version 1.1.9
+ *
  * @param mixed $product Product object or ID.
  *
  * @return bool Returns true if product is ticket product.
@@ -24,7 +26,9 @@ function wc_box_office_is_product_ticket( $product ) {
 		return false;
 	}
 
-	return 'yes' === get_post_meta( $product->get_id(), '_ticket', true );
+	$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_ID();
+
+	return 'yes' === get_post_meta( $product_id, '_ticket', true );
 }
 
 /**
